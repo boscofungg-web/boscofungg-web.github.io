@@ -163,7 +163,7 @@ ownerKey: "owner",   →   ownerKey: "只有你知嘅字",
 | 藍 | `uni` | 港大課堂 | `brandink` |
 | 綠 | `work` | 新東方教學 | `brandmain` |
 | 橙（實色） | `amber` | 其他 / 私人 | `brandaccent` |
-| 橙（半透明虛線） | `open` | 可排課空檔 | 同自動計嗰啲空檔一模一樣 |
+| 橙（半透明虛線） | `open` | 可排課 | 同自動計嗰啲空檔一模一樣 |
 | 灰 | `slate` | （而家冇用） | `restcol` |
 
 `slate` 灰色仍然用得，只係預設冇分類揀佢。想要就把某個分類嘅 `colour` 改成 `"slate"`。
@@ -175,7 +175,7 @@ categories: [
   { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true  },
   { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
   { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
-  { key: "open",  label: "可排課空檔",  colour: "open",  travel: false }
+  { key: "open",  label: "可排課",      colour: "open",  travel: false, fixedTitle: "可排課" }
 ]
 ```
 
@@ -184,10 +184,15 @@ categories: [
 - **`colour`** 只可以係 `uni` / `work` / `amber` / `open` / `slate` 五個之一。
 - **`travel: true`** 代表呢類課堂前後要預留交通時間（本來 `gen_weekly.py` 只有港大課堂要）。
   揀掣上會有個「＋交通」小標記。想新開嘅分類都預留，就設 `travel: true`。
+- **`fixedTitle`** 會鎖死個名。揀咗「可排課」之後，課堂名稱會自動填成「可排課」
+  兼且變咗唯讀（灰橙色底），任何人都改唔到，咁手動同自動嘅空檔就完全一樣。
+  換返第二個顏色，之前打過嗰個名會自動還返。
+  唔想鎖就把 `fixedTitle` 整行刪走。
+- **`locked: true`** 代表要密碼先改得，見第七節。
 
 圖例、頁尾時數統計、`.ics` 匯出嘅分類名都係跟住呢個清單自動更新，唔使另外改。
 
-### 「可排課空檔」呢個分類同自動計嗰啲有咩分別
+### 「可排課」呢個分類同自動計嗰啲有咩分別
 
 樣係一模一樣，但行為唔同，值得搞清楚：
 
@@ -248,6 +253,7 @@ lockedWindows: {
 封鎖之後會發生三件事：
 
 1. 格線上打斜紋，中間有個「唔開放預約」標籤 —— **睇得見嘅鎖先係有用嘅鎖**
+   （星期標題已經冇咗「可安排新課／不開放新課」嗰行字，開放狀態一律睇格線）
 2. 自動空檔唔會踩入去
 3. 有人想喺嗰度預約會俾彈返轉頭，出提示叫佢揀第二個時間
 
@@ -303,6 +309,7 @@ categoryPassword: "CHANGE-ME",
 | 改一堂／換色 | 㩒嗰個課堂格 |
 | 刪重複課堂 | 㩒刪除 → 會問你「只刪這一次」定「刪除整個系列」 |
 | 轉檢視 | 月曆／週表掣，或者㩒 `M`、`W` |
+| 睇邊日開放 | 睇格線 —— 橙色虛線格 = 可排課，斜紋 = 唔開放預約 |
 | 前後移動 | 方向鍵左右，`T` 返今日，`N` 新增 |
 | 匯出 | 下載 `.ics`，把未來 16 週展開，可匯入 Google／Apple 日曆 |
 

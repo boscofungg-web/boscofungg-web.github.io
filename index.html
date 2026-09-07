@@ -406,6 +406,10 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 }
 .field input:focus, .field textarea:focus, .field select:focus{outline:none; border-color:var(--work); background:var(--paper)}
 #fTitle{font-size:15.5px; font-weight:500}
+#fTitle:read-only{
+  background:var(--open-soft); border-color:var(--open-line); color:var(--open-ink);
+  font-weight:700; cursor:default;
+}
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:9px; align-items:end}
 input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .durline{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
@@ -532,11 +536,12 @@ window.CALENDAR_CONFIG = {
   //   label  : 彈出視窗同圖例顯示嘅名
   //   colour : uni(藍) / work(綠) / amber(橙) / open(橙色半透明) / slate(灰)
   //   travel : true = 呢類課堂前後要預留交通時間（本來只有港大課堂先要）
+  //   fixedTitle : 有呢個就會鎖死個名，用家改唔到（可排課就係咁）
   categories: [
     { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true, locked: true },
     { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
     { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
-    { key: "open",  label: "可排課空檔",  colour: "open",  travel: false }
+    { key: "open",  label: "可排課",      colour: "open",  travel: false, fixedTitle: "可排課" }
   ],
 
   // 學生預約時預設用邊個分類
@@ -1091,16 +1096,13 @@ function renderWeek() {
     const d = addDays(ws, i), key = ymd(d);
     const holi = holidayOn(key), wins = windowsFor(i);
     const closed = !isOpenDay(i) && !wins.length;
-    let tag, cls = "tag";
-    if (holi) { tag = holi; cls = "tag holiday"; }
-    else if (isOpenDay(i)) tag = "可安排新課";
-    else if (wins.length) tag = "只開放 " + wins.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join("、");
-    else tag = "不開放新課";
+    // 開放狀態唔喺標題度講 —— 格線上嘅斜紋同橙色空檔已經睇得出。
+    // 淨係假期先出一行字，因為嗰個係資料，唔係狀態。
     head += `
       <div class="dhead ${closed ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-goday="${key}">
         <span class="dw">${DOW_ZH[i]}<em>${DOW_EN[i]}</em></span>
         <span class="dd">${d.getDate()}</span>
-        <span class="${cls}">${esc(tag)}</span>
+        ${holi ? `<span class="tag holiday">${esc(holi)}</span>` : ""}
       </div>`;
   }
   whead.innerHTML = head;
@@ -1133,7 +1135,9 @@ function renderWeek() {
                 title="${esc(catOf(e.kind).label)}：${esc(e.title)} ${fmtRange(e.start, e.end)}${e.note ? " ・ " + esc(e.note) : ""}"
                 style="top:${pct(vs)}%; height:${((ve - vs) / WIN) * 100}%; left:calc(${col * w}% + 2px); width:calc(${w}% - 4px); z-index:2;">
           <b>${esc(e.title)}</b><time>${fmtRange(e.start, e.end)}</time>
-          ${e.note && !short ? `<span class="rm">${esc(e.note)}</span>` : ""}
+          ${catOf(e.kind).fixedTitle
+              ? (short ? "" : `<span class="rm">（${hrs(ve - vs)} 小時）</span>`)
+              : (e.note && !short ? `<span class="rm">${esc(e.note)}</span>` : "")}
         </button>`;
     }
 
@@ -1297,6 +1301,20 @@ fStart.max = fEnd.max = CFG.dayEnd;
 
 let editing = null, editingOn = null;
 
+/* ---- 鎖死名嘅分類（可排課）---- */
+let userTitle = "";                       // 記住用家自己打嗰個名，換返色就還返畀佢
+function syncTitleLock() {
+  const cat = catOf(getKind());
+  if (cat.fixedTitle) {
+    if (!fTitle.readOnly) userTitle = fTitle.value;
+    fTitle.value = cat.fixedTitle;
+    fTitle.readOnly = true;
+  } else {
+    if (fTitle.readOnly) fTitle.value = userTitle;
+    fTitle.readOnly = false;
+  }
+}
+
 /* ---- 受保護分類 ---- */
 const fPw = document.getElementById("fPw");
 const PW_KEY = "timetable.catpw.v1";
@@ -1357,7 +1375,7 @@ function syncRepeat() {
     on ? "每個星期同一時間都會出現" : "只有這一日，之後不會重複";
 }
 fRepeat.addEventListener("change", () => { syncRepeat(); checkClash(); });
-document.getElementById("kindPicker").addEventListener("change", syncPw);
+document.getElementById("kindPicker").addEventListener("change", () => { syncTitleLock(); syncPw(); });
 
 function openSheet() {
   sheet.classList.add("on"); backdrop.classList.add("on");
@@ -1393,11 +1411,12 @@ function openNew(date, a, b) {
   document.getElementById("sheetTitle").textContent = IS_OWNER ? "新增課堂" : "預約時段";
   form.reset();
   fRepeat.checked = true; syncRepeat();
+  userTitle = ""; fTitle.readOnly = false;
   fDow.value = String(dowOf(date));
   fDate.value = ymd(date);
   fStart.value = toHHMM(Math.max(WIN_A, Math.min(WIN_B - 15, a)));
   fEnd.value = toHHMM(Math.min(WIN_B, b));
-  setKind(DEFAULT_CAT);
+  setKind(DEFAULT_CAT); syncTitleLock();
   btnDelete.hidden = true; delChoice.hidden = true;
   document.getElementById("roNote").hidden = true;
   setEnabled(true); syncPw(); checkClash(); updateDur();
@@ -1411,12 +1430,13 @@ function openEvent(id, onKey) {
   const editable = canEdit(ev);
   document.getElementById("sheetTitle").textContent = editable ? "編輯課堂" : "課堂詳情";
   fTitle.value = ev.title || "";
+  userTitle = fTitle.value; fTitle.readOnly = false;
   fWho.value = ev.who || "";
   fRepeat.checked = !!ev.repeat; syncRepeat();
   fDow.value = String(ev.repeat ? ev.dow : dowOf(parseYmd(ev.date)));
   fDate.value = ev.repeat ? (onKey || "") : ev.date;
   fStart.value = toHHMM(ev.start); fEnd.value = toHHMM(ev.end);
-  setKind(ev.kind);
+  setKind(ev.kind); syncTitleLock();
   if (IS_OWNER) fNote.value = ev.note || "";
   const ro = document.getElementById("roNote");
   ro.hidden = editable;
@@ -1495,7 +1515,7 @@ form.addEventListener("submit", async e => {
 
   const rep = fRepeat.checked;
   const rec = {
-    title: fTitle.value.trim() || "課堂",
+    title: catOf(getKind()).fixedTitle || fTitle.value.trim() || "課堂",
     who: IS_OWNER ? (editing ? editing.who || "" : "") : fWho.value.trim(),
     kind: getKind(),
     note: IS_OWNER ? fNote.value.trim() : (editing ? editing.note || "" : ""),
