@@ -18,10 +18,14 @@
   --rule:#c8ccd2;
   --rule-2:#e4e7eb;
 
-  --uni:#1f497d;            /* 港大課堂 */
+  --uni:#1f497d;            /* 藍 — brandink */
   --uni-fill:#22508a;
-  --work:#006a3c;           /* 新東方教學 */
+  --work:#006a3c;           /* 綠 — brandmain */
   --work-fill:#007542;
+  --amber:#b0560a;          /* 橙 — brandaccent（實色版，白字先睇得清） */
+  --amber-fill:#b0560a;
+  --slate:#666f7c;          /* 灰 — restcol */
+  --slate-fill:#666f7c;
 
   --open:#d66c14;           /* 可排課空檔 */
   --open-soft:#fbf0e4;
@@ -59,6 +63,10 @@
     --uni-fill:#2a5b96;
     --work:#4fb083;
     --work-fill:#0a7a4c;
+    --amber:#d99050;
+    --amber-fill:#9c4d08;
+    --slate:#98a1ad;
+    --slate-fill:#4d5661;
 
     --open:#e59650;
     --open-soft:#2c1f12;
@@ -87,6 +95,10 @@
   --uni-fill:#2a5b96;
   --work:#4fb083;
   --work-fill:#0a7a4c;
+  --amber:#d99050;
+  --amber-fill:#9c4d08;
+  --slate:#98a1ad;
+  --slate-fill:#4d5661;
 
   --open:#e59650;
   --open-soft:#2c1f12;
@@ -173,8 +185,10 @@ button,input,select,textarea{font:inherit; color:inherit}
 .legend{display:flex; gap:13px; align-items:center; margin-left:auto; flex-wrap:wrap}
 .key{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--ink-2)}
 .sw{width:11px; height:11px; border-radius:2px; flex:0 0 auto}
-.sw.u{background:var(--uni-fill)}
-.sw.w{background:var(--work-fill)}
+.sw.c-uni{background:var(--uni-fill)}
+.sw.c-work{background:var(--work-fill)}
+.sw.c-amber{background:var(--amber-fill)}
+.sw.c-slate{background:var(--slate-fill)}
 .sw.o{background:var(--open-soft); border:1.5px dashed var(--open)}
 .sw.r{background:var(--rest)}
 
@@ -216,7 +230,10 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
   font-size:11.5px; padding:2px 5px; border-radius:3px; cursor:pointer; text-align:left;
   background:var(--work-fill); color:#fff;
 }
-.chip.uni{background:var(--uni-fill)}
+.chip.c-uni{background:var(--uni-fill)}
+.chip.c-work{background:var(--work-fill)}
+.chip.c-amber{background:var(--amber-fill)}
+.chip.c-slate{background:var(--slate-fill)}
 .chip.tentative{background:var(--open-soft); color:var(--open-ink); border:1px dashed var(--open)}
 .chip:hover{filter:brightness(1.14)}
 .chip time{font-family:var(--mono); font-size:10px; opacity:.85; flex:0 0 auto; font-variant-numeric:tabular-nums}
@@ -289,7 +306,11 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
   display:flex; flex-direction:column; justify-content:center; align-items:center; gap:1px;
   background:var(--work-fill); color:#fff; border:1px solid rgba(0,0,0,.16);
 }
-.ev.uni{background:var(--uni-fill)}
+.ev.c-uni{background:var(--uni-fill)}
+.ev.c-work{background:var(--work-fill)}
+.ev.c-amber{background:var(--amber-fill)}
+.ev.c-slate{background:var(--slate-fill)}
+.ev.pending{border:2px dashed rgba(255,255,255,.7)}
 .ev b{font-weight:700; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .ev time{font-family:var(--mono); font-size:9.5px; opacity:.88; font-variant-numeric:tabular-nums}
 .ev .rm{font-size:9.5px; opacity:.82; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
@@ -380,16 +401,26 @@ input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .repeat b{font-size:13px; font-weight:700}
 .repeat small{font-size:11px; color:var(--ink-2); line-height:1.4}
 
-.kinds{display:flex; gap:8px}
+.kinds{display:grid; grid-template-columns:1fr 1fr; gap:7px}
 .kinds label{
-  flex:1; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;
-  border:1px solid var(--rule); border-radius:var(--radius); padding:8px 6px; font-size:12.5px; font-weight:500;
+  position:relative;
+  display:flex; align-items:center; gap:7px; cursor:pointer; min-width:0;
+  border:1px solid var(--rule); border-radius:var(--radius); padding:8px 9px; font-size:12.5px; font-weight:500;
 }
-.kinds label:has(input[value="uni"]:checked){border-color:var(--uni); background:color-mix(in srgb, var(--uni) 13%, transparent); color:var(--uni); font-weight:700}
-.kinds label:has(input[value="work"]:checked){border-color:var(--work); background:color-mix(in srgb, var(--work) 13%, transparent); color:var(--work); font-weight:700}
-.kinds input{position:absolute; opacity:0; pointer-events:none}
-.dot{width:10px; height:10px; border-radius:2px; flex:0 0 auto}
-.dot.u{background:var(--uni-fill)} .dot.w{background:var(--work-fill)}
+.kinds label span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.kinds input{position:absolute; inset:0; width:100%; height:100%; opacity:0; margin:0; cursor:pointer}
+.kinds label:has(input:checked){font-weight:700}
+.kinds label.c-uni:has(input:checked){border-color:var(--uni); background:color-mix(in srgb, var(--uni) 13%, transparent); color:var(--uni)}
+.kinds label.c-work:has(input:checked){border-color:var(--work); background:color-mix(in srgb, var(--work) 13%, transparent); color:var(--work)}
+.kinds label.c-amber:has(input:checked){border-color:var(--amber); background:color-mix(in srgb, var(--amber) 13%, transparent); color:var(--amber)}
+.kinds label.c-slate:has(input:checked){border-color:var(--slate); background:color-mix(in srgb, var(--slate) 15%, transparent); color:var(--slate)}
+.kinds label:has(input:focus-visible){outline:2px solid var(--open); outline-offset:2px}
+.dot{width:12px; height:12px; border-radius:3px; flex:0 0 auto}
+.dot.c-uni{background:var(--uni-fill)}
+.dot.c-work{background:var(--work-fill)}
+.dot.c-amber{background:var(--amber-fill)}
+.dot.c-slate{background:var(--slate-fill)}
+.trav{font-size:9.5px; font-style:normal; color:var(--ink-3); font-weight:400; margin-left:auto; flex:0 0 auto; border:1px solid var(--rule); border-radius:9px; padding:0 5px; line-height:1.55}
 
 .quick{display:flex; gap:5px; flex-wrap:wrap; align-items:center}
 .quick button{
@@ -468,7 +499,22 @@ window.CALENDAR_CONFIG = {
   dayStart: "08:00",
   dayEnd:   "23:00",
 
-  // 交通緩衝：緊接港大課堂的空檔要扣幾多分鐘（0 = 不扣）
+  // 顏色分類 —— 加減／改名／換色都喺呢度。
+  //   key    : 存落資料庫嘅代號，改咗舊資料就對唔上，最好唔好郁
+  //   label  : 彈出視窗同圖例顯示嘅名
+  //   colour : 只可以係 uni(藍) / work(綠) / amber(橙) / slate(灰)
+  //   travel : true = 呢類課堂前後要預留交通時間（本來只有港大課堂先要）
+  categories: [
+    { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true  },
+    { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
+    { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
+    { key: "admin", label: "備課 / 行政", colour: "slate", travel: false }
+  ],
+
+  // 學生預約時預設用邊個分類
+  defaultCategory: "work",
+
+  // 交通緩衝：travel:true 嘅課堂前後要扣幾多分鐘（0 = 不扣）
   travelBuffer: 30,
   // 短過幾多分鐘就不當作可排課
   minSlot: 60,
@@ -532,12 +578,7 @@ window.CALENDAR_CONFIG = {
 
 <div class="periodbar">
   <h2 id="periodLabel">—</h2>
-  <div class="legend">
-    <span class="key"><i class="sw u"></i>港大課堂</span>
-    <span class="key"><i class="sw w"></i>新東方教學</span>
-    <span class="key"><i class="sw o"></i>可排課空檔</span>
-    <span class="key"><i class="sw r"></i>不開放</span>
-  </div>
+  <div class="legend" id="legend"></div>
 </div>
 
 <main>
@@ -622,11 +663,8 @@ window.CALENDAR_CONFIG = {
     </div>
 
     <div class="field" id="kindField" hidden>
-      <label>類別</label>
-      <div class="kinds">
-        <label><input type="radio" name="kind" value="uni"><i class="dot u"></i>港大課堂</label>
-        <label><input type="radio" name="kind" value="work" checked><i class="dot w"></i>新東方教學</label>
-      </div>
+      <label>顏色分類</label>
+      <div class="kinds" id="kindPicker"></div>
     </div>
 
     <div class="field" id="noteField" hidden>
@@ -663,6 +701,11 @@ window.CALENDAR_CONFIG = {
 const CFG = Object.assign({
   title: "每週固定時間表", subtitle: "", footNote: "", copyright: "",
   ownerKey: "owner", dayStart: "08:00", dayEnd: "23:00",
+  categories: [
+    { key: "uni",  label: "港大課堂",   colour: "uni",  travel: true  },
+    { key: "work", label: "新東方教學", colour: "work", travel: false }
+  ],
+  defaultCategory: "work",
   travelBuffer: 30, minSlot: 60,
   openDays: [true, true, true, true, true, false, false],
   extraWindows: {}, holidays: {}, firebase: null
@@ -697,6 +740,14 @@ const WIN   = WIN_B - WIN_A;
 const HOURS = Math.round(WIN / 60);
 const pct = m => ((m - WIN_A) / WIN) * 100;
 const inWindow = m => m >= WIN_A && m <= WIN_B;
+
+/* ---- 顏色分類 ---- */
+const CATS = (CFG.categories || []).filter(c => c && c.key);
+const CAT_BY = Object.fromEntries(CATS.map(c => [c.key, c]));
+const DEFAULT_CAT = CAT_BY[CFG.defaultCategory] ? CFG.defaultCategory : (CATS[0] || {}).key;
+/* 舊資料或者已刪走嘅分類 → 落返預設，唔好變透明格 */
+const catOf = k => CAT_BY[k] || CAT_BY[DEFAULT_CAT] || { key: "", label: "", colour: "work", travel: false };
+const colourOf = k => "c-" + catOf(k).colour;
 
 const isOpenDay = dow => !!CFG.openDays[dow];
 const windowsFor = dow => (CFG.extraWindows[dow] || []).map(w => [toMin(w[0]), toMin(w[1])]);
@@ -856,8 +907,8 @@ function freeSlots(date) {
 
   let out = [];
   for (const [g0, g1, prev, next] of gaps) {
-    const a = up(g0 + (prev === "uni" ? BUF : 0));
-    const b = down(g1 - (next === "uni" ? BUF : 0));
+    const a = up(g0 + (prev && catOf(prev).travel ? BUF : 0));
+    const b = down(g1 - (next && catOf(next).travel ? BUF : 0));
     if (b - a >= MIN) out.push([a, b]);
   }
   if (wins.length) {
@@ -901,8 +952,9 @@ function renderMonth() {
     const evs = lessonsOn(d);
     const free = freeSlots(d);
     const chips = evs.slice(0, 3).map(e => `
-      <button class="chip ${e.kind === "uni" ? "uni" : ""} ${e.status === "tentative" ? "tentative" : ""}"
-              data-ev="${e.id}" data-on="${key}" type="button">
+      <button class="chip ${colourOf(e.kind)} ${e.status === "tentative" ? "tentative" : ""}"
+              data-ev="${e.id}" data-on="${key}" type="button"
+              title="${esc(catOf(e.kind).label)}：${esc(e.title)}">
         <time>${fmt(e.start)}</time><span>${esc(e.title)}</span>
       </button>`).join("");
     const more = evs.length > 3 ? `<button class="more" data-goweek="${key}" type="button">還有 ${evs.length - 3} 堂</button>` : "";
@@ -1004,9 +1056,9 @@ function renderWeek() {
       if (ve <= vs) continue;
       const w = 100 / n, short = (ve - vs) <= 40;
       inner += `
-        <button class="ev ${e.kind === "uni" ? "uni" : ""} ${short ? "short" : ""} ${e.repeat ? "" : "once"}"
+        <button class="ev ${colourOf(e.kind)} ${short ? "short" : ""} ${e.repeat ? "" : "once"} ${e.status === "tentative" ? "pending" : ""}"
                 type="button" data-ev="${e.id}" data-on="${key}"
-                title="${esc(e.title)} ${fmtRange(e.start, e.end)}${e.note ? " ・ " + esc(e.note) : ""}"
+                title="${esc(catOf(e.kind).label)}：${esc(e.title)} ${fmtRange(e.start, e.end)}${e.note ? " ・ " + esc(e.note) : ""}"
                 style="top:${pct(vs)}%; height:${((ve - vs) / WIN) * 100}%; left:calc(${col * w}% + 2px); width:calc(${w}% - 4px); z-index:2;">
           <b>${esc(e.title)}</b><time>${fmtRange(e.start, e.end)}</time>
           ${e.note && !short ? `<span class="rm">${esc(e.note)}</span>` : ""}
@@ -1058,14 +1110,16 @@ function render() {
 
 function updateFooter() {
   const ws = startOfWeek(state.cursor);
-  let free = 0, uni = 0, work = 0;
+  const totals = Object.fromEntries(CATS.map(c => [c.key, 0]));
+  let free = 0;
   for (let i = 0; i < 7; i++) {
     const d = addDays(ws, i);
     for (const [a, b] of freeSlots(d)) free += b - a;
-    for (const e of lessonsOn(d)) (e.kind === "uni" ? (uni += e.end - e.start) : (work += e.end - e.start));
+    for (const e of lessonsOn(d)) totals[catOf(e.kind).key] += e.end - e.start;
   }
-  document.getElementById("fLeft").textContent =
-    `本週：港大課堂 ${hrs(uni)} 小時 ・ 新東方教學 ${hrs(work)} 小時 ・ 可排課 ${hrs(free)} 小時`;
+  const parts = CATS.filter(c => totals[c.key] > 0).map(c => `${c.label} ${hrs(totals[c.key])} 小時`);
+  parts.push(`可排課 ${hrs(free)} 小時`);
+  document.getElementById("fLeft").textContent = "本週：" + parts.join(" ・ ");
   document.getElementById("fMid").textContent = CFG.copyright;
 }
 
@@ -1161,6 +1215,19 @@ fStart.max = fEnd.max = CFG.dayEnd;
 
 let editing = null, editingOn = null;
 
+/* 圖例 + 顏色分類揀掣，兩邊都由 CFG.categories 生成 */
+document.getElementById("legend").innerHTML =
+  CATS.map(c => `<span class="key"><i class="sw c-${c.colour}"></i>${esc(c.label)}</span>`).join("") +
+  `<span class="key"><i class="sw o"></i>可排課空檔</span>` +
+  `<span class="key"><i class="sw r"></i>不開放</span>`;
+
+document.getElementById("kindPicker").innerHTML = CATS.map(c => `
+  <label class="c-${c.colour}">
+    <input type="radio" name="kind" value="${esc(c.key)}"${c.key === DEFAULT_CAT ? " checked" : ""}>
+    <i class="dot c-${c.colour}"></i><span>${esc(c.label)}</span>
+    ${c.travel ? `<em class="trav" title="呢類課堂前後會自動預留 ${CFG.travelBuffer} 分鐘交通時間">＋交通</em>` : ""}
+  </label>`).join("");
+
 if (IS_OWNER) {
   document.getElementById("ownerTag").hidden = false;
   document.getElementById("kindField").hidden = false;
@@ -1193,6 +1260,17 @@ function closeSheet() {
   sheet.setAttribute("aria-hidden", "true");
   editing = null; editingOn = null; delChoice.hidden = true;
 }
+/* form.kind 係 RadioNodeList；分類得一個嘅時候會變成單一 input，所以統一用呢兩個 */
+function setKind(key) {
+  const k = CAT_BY[key] ? key : DEFAULT_CAT;
+  const el = form.querySelector(`input[name="kind"][value="${CSS.escape(k)}"]`);
+  if (el) el.checked = true;
+}
+function getKind() {
+  const el = form.querySelector('input[name="kind"]:checked');
+  return el ? el.value : DEFAULT_CAT;
+}
+
 function setEnabled(on) {
   [...form.elements].forEach(el => el.disabled = !on);
   document.getElementById("btnSave").hidden = !on;
@@ -1208,7 +1286,7 @@ function openNew(date, a, b) {
   fDate.value = ymd(date);
   fStart.value = toHHMM(Math.max(WIN_A, Math.min(WIN_B - 15, a)));
   fEnd.value = toHHMM(Math.min(WIN_B, b));
-  if (IS_OWNER) form.kind.value = "work";
+  if (IS_OWNER) setKind(DEFAULT_CAT);
   btnDelete.hidden = true; delChoice.hidden = true;
   document.getElementById("roNote").hidden = true;
   setEnabled(true); checkClash(); updateDur();
@@ -1227,7 +1305,7 @@ function openEvent(id, onKey) {
   fDow.value = String(ev.repeat ? ev.dow : dowOf(parseYmd(ev.date)));
   fDate.value = ev.repeat ? (onKey || "") : ev.date;
   fStart.value = toHHMM(ev.start); fEnd.value = toHHMM(ev.end);
-  if (IS_OWNER) { form.kind.value = ev.kind || "work"; fNote.value = ev.note || ""; }
+  if (IS_OWNER) { setKind(ev.kind); fNote.value = ev.note || ""; }
   const ro = document.getElementById("roNote");
   ro.hidden = editable;
   if (!editable) ro.textContent = "這個時段係其他人預約嘅，所以只可以查看。要改動或取消，請聯絡時間表擁有人。";
@@ -1291,7 +1369,7 @@ form.addEventListener("submit", async e => {
   const rec = {
     title: fTitle.value.trim() || "課堂",
     who: IS_OWNER ? (editing ? editing.who || "" : "") : fWho.value.trim(),
-    kind: IS_OWNER ? form.kind.value : (editing ? editing.kind || "work" : "work"),
+    kind: IS_OWNER ? getKind() : (editing ? editing.kind || DEFAULT_CAT : DEFAULT_CAT),
     note: IS_OWNER ? fNote.value.trim() : (editing ? editing.note || "" : ""),
     start: s, end: en,
     repeat: rep,
@@ -1361,7 +1439,7 @@ document.getElementById("btnIcs").onclick = () => {
         `DTSTART:${stamp(at(d, e.start))}`,
         `DTEND:${stamp(at(d, e.end))}`,
         `SUMMARY:${q(e.title)}`,
-        `CATEGORIES:${e.kind === "uni" ? "港大課堂" : "新東方教學"}`,
+        `CATEGORIES:${q(catOf(e.kind).label)}`,
         e.note ? `LOCATION:${q(e.note)}` : "",
         `STATUS:${e.status === "tentative" ? "TENTATIVE" : "CONFIRMED"}`,
         "END:VEVENT");

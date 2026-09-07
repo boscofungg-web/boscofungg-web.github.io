@@ -135,6 +135,8 @@ ownerKey: "owner",   →   ownerKey: "只有你知嘅字",
 | `title` / `subtitle` | 大標題、細標題 |
 | `footNote` / `copyright` | 頁尾左右兩邊嘅字 |
 | `ownerKey` | 管理模式密語 |
+| `categories` | 顏色分類。見下面第五節 |
+| `defaultCategory` | 學生預約時預設用邊個分類 |
 | `dayStart` / `dayEnd` | 週表顯示同可排課嘅時間範圍。**而家係 `08:00`–`23:00`**；你原本 `gen_weekly.py` 係 `09:00`–`21:00`，想一模一樣就改返 |
 | `travelBuffer` | 緊接港大課堂嘅空檔要扣幾多分鐘（預設 30，等於原本 `BUF = 0.5`） |
 | `minSlot` | 短過幾多分鐘唔當可排課（預設 60，等於原本 `MINSLOT = 1.0`） |
@@ -149,12 +151,50 @@ ownerKey: "owner",   →   ownerKey: "只有你知嘅字",
 
 ---
 
-## 五、點用
+## 五、顏色分類
+
+彈出視窗嘅「顏色分類」用嘅係 `calendar.tex` 原本嗰四隻色，冇加新色：
+
+| 顏色 | `colour` 值 | 預設名 | LaTeX 對應 |
+|---|---|---|---|
+| 藍 | `uni` | 港大課堂 | `brandink` |
+| 綠 | `work` | 新東方教學 | `brandmain` |
+| 橙 | `amber` | 其他 / 私人 | `brandaccent` |
+| 灰 | `slate` | 備課 / 行政 | `restcol` |
+
+改名、加減分類都喺 `index.html` 嘅 `categories`：
+
+```js
+categories: [
+  { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true  },
+  { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
+  { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
+  { key: "admin", label: "備課 / 行政", colour: "slate", travel: false }
+]
+```
+
+- **`key`** 係存落資料庫嘅代號。**改咗就對唔返舊資料**（舊課堂會跌返做預設分類），
+  所以想改名就淨係改 `label`，唔好郁 `key`。
+- **`colour`** 只可以係 `uni` / `work` / `amber` / `slate` 四個之一。
+- **`travel: true`** 代表呢類課堂前後要預留交通時間（本來 `gen_weekly.py` 只有港大課堂要）。
+  揀掣上會有個「＋交通」小標記。想新開嘅分類都預留，就設 `travel: true`。
+
+圖例、頁尾時數統計、`.ics` 匯出嘅分類名都係跟住呢個清單自動更新，唔使另外改。
+
+分類揀掣**只喺管理模式出現**。學生預約嗰陣一律用 `defaultCategory`（而家係新東方教學），
+唔會畀佢哋自己揀色 —— 唔想學生把自己嘅堂標成「港大課堂」。
+
+> ⚠️ 加咗新分類之後，`firestore.rules` 都要一齊更新，否則 Firebase 會拒絕寫入。
+> 搵 `d.kind in [...]` 嗰行，把新 `key` 加埋落去，再喺 Firebase 重新發布規則。
+
+---
+
+## 六、點用
 
 | | |
 |---|---|
 | 預約／新增 | 㩒橙色「可排課」格，或者喺格線度拖，或者㩒「+ 新增課堂」 |
-| 改一堂 | 㩒嗰個課堂格 |
+| 改一堂／換色 | 㩒嗰個課堂格 |
 | 刪重複課堂 | 㩒刪除 → 會問你「只刪這一次」定「刪除整個系列」 |
 | 轉檢視 | 月曆／週表掣，或者㩒 `M`、`W` |
 | 前後移動 | 方向鍵左右，`T` 返今日，`N` 新增 |
