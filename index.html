@@ -189,6 +189,7 @@ button,input,select,textarea{font:inherit; color:inherit}
 .sw.c-work{background:var(--work-fill)}
 .sw.c-amber{background:var(--amber-fill)}
 .sw.c-slate{background:var(--slate-fill)}
+.sw.c-open{background:var(--open-soft); border:1.5px dashed var(--open)}
 .sw.o{background:var(--open-soft); border:1.5px dashed var(--open)}
 .sw.r{background:var(--rest)}
 
@@ -234,6 +235,7 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 .chip.c-work{background:var(--work-fill)}
 .chip.c-amber{background:var(--amber-fill)}
 .chip.c-slate{background:var(--slate-fill)}
+.chip.c-open{background:var(--open-soft); color:var(--open-ink); border:1px dashed var(--open)}
 .chip.tentative{background:var(--open-soft); color:var(--open-ink); border:1px dashed var(--open)}
 .chip:hover{filter:brightness(1.14)}
 .chip time{font-family:var(--mono); font-size:10px; opacity:.85; flex:0 0 auto; font-variant-numeric:tabular-nums}
@@ -299,6 +301,19 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 }
 .dcol:last-child{border-right:0}
 .dcol.closed{background-color:var(--soft)}
+.locked{
+  position:absolute; left:0; right:0; z-index:1; cursor:not-allowed;
+  background:repeating-linear-gradient(45deg,
+    transparent 0, transparent 5px,
+    color-mix(in srgb, var(--rest) 26%, transparent) 5px,
+    color-mix(in srgb, var(--rest) 26%, transparent) 10px);
+  border-top:1px solid var(--rule);
+  display:flex; align-items:flex-start; justify-content:center; padding-top:5px;
+}
+.locked span{
+  font-size:9.5px; color:var(--ink-3); background:var(--paper);
+  padding:1px 6px; border-radius:9px; border:1px solid var(--rule); white-space:nowrap;
+}
 
 .ev{
   position:absolute; border-radius:4px; padding:3px 5px; overflow:hidden;
@@ -310,6 +325,10 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 .ev.c-work{background:var(--work-fill)}
 .ev.c-amber{background:var(--amber-fill)}
 .ev.c-slate{background:var(--slate-fill)}
+.ev.c-open{
+  background:var(--open-soft); color:var(--open-ink);
+  border:1.5px dashed var(--open);
+}
 .ev.pending{border:2px dashed rgba(255,255,255,.7)}
 .ev b{font-weight:700; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .ev time{font-family:var(--mono); font-size:9.5px; opacity:.88; font-variant-numeric:tabular-nums}
@@ -337,6 +356,7 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 .restday{
   position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
   justify-content:center; gap:3px; color:var(--rest); pointer-events:none; text-align:center;
+  z-index:2;
 }
 .restday b{font-size:13px; font-weight:700}
 .restday span{font-size:10.5px}
@@ -414,12 +434,14 @@ input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .kinds label.c-work:has(input:checked){border-color:var(--work); background:color-mix(in srgb, var(--work) 13%, transparent); color:var(--work)}
 .kinds label.c-amber:has(input:checked){border-color:var(--amber); background:color-mix(in srgb, var(--amber) 13%, transparent); color:var(--amber)}
 .kinds label.c-slate:has(input:checked){border-color:var(--slate); background:color-mix(in srgb, var(--slate) 15%, transparent); color:var(--slate)}
+.kinds label.c-open:has(input:checked){border-color:var(--open); background:var(--open-soft); color:var(--open-ink)}
 .kinds label:has(input:focus-visible){outline:2px solid var(--open); outline-offset:2px}
 .dot{width:12px; height:12px; border-radius:3px; flex:0 0 auto}
 .dot.c-uni{background:var(--uni-fill)}
 .dot.c-work{background:var(--work-fill)}
 .dot.c-amber{background:var(--amber-fill)}
 .dot.c-slate{background:var(--slate-fill)}
+.dot.c-open{background:var(--open-soft); border:1.5px dashed var(--open)}
 .trav{font-size:9.5px; font-style:normal; color:var(--ink-3); font-weight:400; margin-left:auto; flex:0 0 auto; border:1px solid var(--rule); border-radius:9px; padding:0 5px; line-height:1.55}
 
 .quick{display:flex; gap:5px; flex-wrap:wrap; align-items:center}
@@ -495,24 +517,39 @@ window.CALENDAR_CONFIG = {
   // 分享網址之前務必改成只有你知道的字。
   ownerKey: "owner",
 
-  // 週表顯示的時間範圍，同時也是可以排課的範圍
+  // 週表格線顯示嘅時間範圍
   dayStart: "08:00",
   dayEnd:   "23:00",
+
+  // 自動計「可排課空檔」嘅範圍。格線照樣由 dayStart 畫到 dayEnd，
+  // 但空檔只會喺呢個範圍內出現 —— 即係唔會叫人朝早 8 點或者夜晚 9 點後上堂。
+  // （同你 gen_weekly.py 嘅 T0, T1 = 9, 21 一樣）
+  bookableFrom: "09:00",
+  bookableTo:   "21:00",
 
   // 顏色分類 —— 加減／改名／換色都喺呢度。
   //   key    : 存落資料庫嘅代號，改咗舊資料就對唔上，最好唔好郁
   //   label  : 彈出視窗同圖例顯示嘅名
-  //   colour : 只可以係 uni(藍) / work(綠) / amber(橙) / slate(灰)
+  //   colour : uni(藍) / work(綠) / amber(橙) / open(橙色半透明) / slate(灰)
   //   travel : true = 呢類課堂前後要預留交通時間（本來只有港大課堂先要）
   categories: [
-    { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true  },
+    { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true, locked: true },
     { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
     { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
-    { key: "admin", label: "備課 / 行政", colour: "slate", travel: false }
+    { key: "open",  label: "可排課空檔",  colour: "open",  travel: false }
   ],
 
   // 學生預約時預設用邊個分類
   defaultCategory: "work",
+
+  // 有 locked: true 嘅分類，要打呢個密碼先改／刪得到。管理模式免問。
+  //
+  // ⚠️⚠️ 呢個字會原封不動咁出現喺公開 GitHub repo 嘅 index.html 入面，
+  //      任何人 View Source 都睇得到。所以：
+  //        1. 一定要揀一個你**冇喺其他地方用過**嘅字
+  //        2. 千祈唔好用你 GitHub、電郵、銀行嗰啲密碼
+  //      佢嘅作用係「防手誤」，唔係「防人」。
+  categoryPassword: "CHANGE-ME",
 
   // 交通緩衝：travel:true 嘅課堂前後要扣幾多分鐘（0 = 不扣）
   travelBuffer: 30,
@@ -524,6 +561,14 @@ window.CALENDAR_CONFIG = {
 
   // 某日只開放部分時段（只有 openDays 標 false 的日子先需要用）
   extraWindows: { 2: [["09:30", "11:30"]] },
+
+  // 封鎖時段：呢啲時間任何人都預約唔到，格線上會打斜紋。
+  // 索引 0=星期一 … 6=星期日。管理模式唔受限制（自己張表自己話事）。
+  lockedWindows: {
+    2: [["17:00", "23:00"]],   // 星期三 夜晚唔開放
+    5: [["18:00", "23:00"]],   // 星期六 夜晚唔開放
+    6: [["08:00", "23:00"]]    // 星期日 全日唔開放
+  },
 
   // 假期／特別日子：格仔會標示，當日不計可排課
   holidays: {
@@ -667,6 +712,11 @@ window.CALENDAR_CONFIG = {
       <div class="kinds" id="kindPicker"></div>
     </div>
 
+    <div class="field" id="pwField" hidden>
+      <label for="fPw">密碼 <span style="font-weight:400;color:var(--ink-3)">（呢個分類受保護）</span></label>
+      <input id="fPw" type="password" autocomplete="off" placeholder="改港大課堂要輸入密碼">
+    </div>
+
     <div class="field" id="noteField" hidden>
       <label for="fNote">備註 <span style="font-weight:400;color:var(--ink-3)">（課室／科目代碼，選填）</span></label>
       <input id="fNote" maxlength="40" placeholder="例：KKLG110">
@@ -701,6 +751,7 @@ window.CALENDAR_CONFIG = {
 const CFG = Object.assign({
   title: "每週固定時間表", subtitle: "", footNote: "", copyright: "",
   ownerKey: "owner", dayStart: "08:00", dayEnd: "23:00",
+  bookableFrom: null, bookableTo: null,
   categories: [
     { key: "uni",  label: "港大課堂",   colour: "uni",  travel: true  },
     { key: "work", label: "新東方教學", colour: "work", travel: false }
@@ -708,7 +759,7 @@ const CFG = Object.assign({
   defaultCategory: "work",
   travelBuffer: 30, minSlot: 60,
   openDays: [true, true, true, true, true, false, false],
-  extraWindows: {}, holidays: {}, firebase: null
+  extraWindows: {}, lockedWindows: {}, holidays: {}, firebase: null
 }, window.CALENDAR_CONFIG || {});
 
 const IS_OWNER = location.hash.replace(/^#/, "") === CFG.ownerKey;
@@ -741,6 +792,10 @@ const HOURS = Math.round(WIN / 60);
 const pct = m => ((m - WIN_A) / WIN) * 100;
 const inWindow = m => m >= WIN_A && m <= WIN_B;
 
+/* 自動空檔嘅範圍，冇設定就跟返格線範圍 */
+const BOOK_A = Math.max(WIN_A, CFG.bookableFrom ? toMin(CFG.bookableFrom) : WIN_A);
+const BOOK_B = Math.min(WIN_B, CFG.bookableTo   ? toMin(CFG.bookableTo)   : WIN_B);
+
 /* ---- 顏色分類 ---- */
 const CATS = (CFG.categories || []).filter(c => c && c.key);
 const CAT_BY = Object.fromEntries(CATS.map(c => [c.key, c]));
@@ -752,6 +807,9 @@ const colourOf = k => "c-" + catOf(k).colour;
 const isOpenDay = dow => !!CFG.openDays[dow];
 const windowsFor = dow => (CFG.extraWindows[dow] || []).map(w => [toMin(w[0]), toMin(w[1])]);
 const holidayOn = key => CFG.holidays[key] || null;
+const lockedFor = dow => (CFG.lockedWindows[dow] || []).map(w => [toMin(w[0]), toMin(w[1])]);
+/* 由 a 到 b 有冇撞到封鎖時段？撞到就回傳嗰一格，冇就 null */
+const lockHit = (dow, a, b) => lockedFor(dow).find(([x, y]) => x < b && a < y) || null;
 
 /* ---------------------------------------------------------------
    預設課堂表 — 直接由 gen_weekly.py 的 E 字典搬過嚟
@@ -911,6 +969,20 @@ function freeSlots(date) {
     const b = down(g1 - (next && catOf(next).travel ? BUF : 0));
     if (b - a >= MIN) out.push([a, b]);
   }
+  // 剪到可排課範圍之內（例如朝早 8-9 點、夜晚 9-11 點唔出空檔）
+  out = out.map(([a, b]) => [Math.max(a, BOOK_A), Math.min(b, BOOK_B)])
+           .filter(([a, b]) => b - a >= MIN);
+
+  // 剪走封鎖時段
+  for (const [x, y] of lockedFor(dow)) {
+    const kept = [];
+    for (const [a, b] of out) {
+      if (b <= x || a >= y) { kept.push([a, b]); continue; }   // 冇重疊
+      if (a < x && x - a >= MIN) kept.push([a, x]);            // 封鎖之前仲有位
+      if (y < b && b - y >= MIN) kept.push([y, b]);            // 封鎖之後仲有位
+    }
+    out = kept;
+  }
   if (wins.length) {
     const clipped = [];
     for (const [a, b] of out) for (const [w0, w1] of wins) {
@@ -1065,6 +1137,12 @@ function renderWeek() {
         </button>`;
     }
 
+    for (const [a, bb] of lockedFor(i)) {
+      const vs = Math.max(a, WIN_A), ve = Math.min(bb, WIN_B);
+      if (ve <= vs) continue;
+      inner += `<div class="locked" style="top:${pct(vs)}%; height:${((ve - vs) / WIN) * 100}%"
+                     title="${fmtRange(vs, ve)} 唔開放預約"><span>唔開放預約</span></div>`;
+    }
     if (closed && !evs.length) inner += `<div class="restday"><b>休息日</b><span>溫習 ・ 備課</span></div>`;
     if (sameDay(d, today)) {
       const m = today.getHours() * 60 + today.getMinutes();
@@ -1117,8 +1195,12 @@ function updateFooter() {
     for (const [a, b] of freeSlots(d)) free += b - a;
     for (const e of lessonsOn(d)) totals[catOf(e.kind).key] += e.end - e.start;
   }
-  const parts = CATS.filter(c => totals[c.key] > 0).map(c => `${c.label} ${hrs(totals[c.key])} 小時`);
-  parts.push(`可排課 ${hrs(free)} 小時`);
+  // 用橙色半透明嗰隻色嘅分類 = 手動開嘅可排課空檔，同自動計嗰啲加埋一齊數
+  const manualOpen = CATS.filter(c => c.colour === "open")
+                         .reduce((sum, c) => sum + totals[c.key], 0);
+  const parts = CATS.filter(c => c.colour !== "open" && totals[c.key] > 0)
+                    .map(c => `${c.label} ${hrs(totals[c.key])} 小時`);
+  parts.push(`可排課 ${hrs(free + manualOpen)} 小時`);
   document.getElementById("fLeft").textContent = "本週：" + parts.join(" ・ ");
   document.getElementById("fMid").textContent = CFG.copyright;
 }
@@ -1168,7 +1250,7 @@ function minutesAt(col, y) {
   return Math.max(WIN_A, Math.min(WIN_B, Math.round(raw / SNAP) * SNAP));
 }
 wgrid.addEventListener("pointerdown", e => {
-  if (e.button !== 0 || e.target.closest(".ev,.slot")) return;
+  if (e.button !== 0 || e.target.closest(".ev,.slot,.locked")) return;
   const col = e.target.closest(".dcol"); if (!col) return;
   const m = minutesAt(col, e.clientY);
   const ghost = document.createElement("div"); ghost.className = "ghost-sel";
@@ -1215,10 +1297,37 @@ fStart.max = fEnd.max = CFG.dayEnd;
 
 let editing = null, editingOn = null;
 
+/* ---- 受保護分類 ---- */
+const fPw = document.getElementById("fPw");
+const PW_KEY = "timetable.catpw.v1";
+let catUnlocked = false;
+try { catUnlocked = sessionStorage.getItem(PW_KEY) === "1"; } catch {}
+
+/* 而家呢一步使唔使密碼？管理模式、或者今次已經解鎖過就唔使 */
+function needsPw(kindNow) {
+  if (IS_OWNER || catUnlocked) return false;
+  if (catOf(kindNow).locked) return true;                 // 想改成受保護分類
+  if (editing && catOf(editing.kind).locked) return true;  // 本身就係受保護分類
+  return false;
+}
+function syncPw() {
+  const need = needsPw(getKind());
+  document.getElementById("pwField").hidden = !need;
+  if (!need) fPw.value = "";
+}
+/* 打啱一次，之後呢個分頁都唔使再問 */
+function checkPw() {
+  if (fPw.value !== String(CFG.categoryPassword)) return false;
+  catUnlocked = true;
+  try { sessionStorage.setItem(PW_KEY, "1"); } catch {}
+  return true;
+}
+
 /* 圖例 + 顏色分類揀掣，兩邊都由 CFG.categories 生成 */
 document.getElementById("legend").innerHTML =
   CATS.map(c => `<span class="key"><i class="sw c-${c.colour}"></i>${esc(c.label)}</span>`).join("") +
-  `<span class="key"><i class="sw o"></i>可排課空檔</span>` +
+  // 已經有分類用緊橙色半透明就唔使再列一次「可排課空檔」
+  (CATS.some(c => c.colour === "open") ? "" : `<span class="key"><i class="sw o"></i>可排課空檔</span>`) +
   `<span class="key"><i class="sw r"></i>不開放</span>`;
 
 document.getElementById("kindPicker").innerHTML = CATS.map(c => `
@@ -1248,6 +1357,7 @@ function syncRepeat() {
     on ? "每個星期同一時間都會出現" : "只有這一日，之後不會重複";
 }
 fRepeat.addEventListener("change", () => { syncRepeat(); checkClash(); });
+document.getElementById("kindPicker").addEventListener("change", syncPw);
 
 function openSheet() {
   sheet.classList.add("on"); backdrop.classList.add("on");
@@ -1277,6 +1387,8 @@ function setEnabled(on) {
 }
 
 function openNew(date, a, b) {
+  const hit = lockHit(dowOf(date), a, b);
+  if (hit && !IS_OWNER) { toast(`${DOW_ZH[dowOf(date)]} ${fmt(hit[0])} 之後唔開放預約。`); return; }
   editing = null; editingOn = ymd(date);
   document.getElementById("sheetTitle").textContent = IS_OWNER ? "新增課堂" : "預約時段";
   form.reset();
@@ -1288,7 +1400,7 @@ function openNew(date, a, b) {
   setKind(DEFAULT_CAT);
   btnDelete.hidden = true; delChoice.hidden = true;
   document.getElementById("roNote").hidden = true;
-  setEnabled(true); checkClash(); updateDur();
+  setEnabled(true); syncPw(); checkClash(); updateDur();
   openSheet();
 }
 
@@ -1311,7 +1423,7 @@ function openEvent(id, onKey) {
   if (!editable) ro.textContent = "這個時段係其他人預約嘅，所以只可以查看。要改動或取消，請聯絡時間表擁有人。";
   setEnabled(editable);
   btnDelete.hidden = !editable; delChoice.hidden = true;
-  checkClash(); updateDur();
+  syncPw(); checkClash(); updateDur();
   openSheet();
 }
 
@@ -1351,10 +1463,13 @@ function checkClash() {
   if (fRepeat.checked) probe = addDays(startOfWeek(state.cursor), Number(fDow.value));
   else if (fDate.value) probe = parseYmd(fDate.value);
   else { box.hidden = true; return; }
+  const msgs = [];
+  const locked = lockHit(dowOf(probe), s, e);
+  if (locked) msgs.push(`呢個時間喺封鎖時段（${fmt(locked[0])}–${fmt(locked[1])}）入面，一般訪客預約唔到。`);
   const hits = lessonsOn(probe).filter(x => (!editing || x.id !== editing.id) && x.start < e && s < x.end);
-  if (!hits.length) { box.hidden = true; return; }
-  document.getElementById("clashText").textContent =
-    `同 ${hits.map(h => `「${h.title}」（${fmtRange(h.start, h.end)}）`).join("、")} 撞時間。照樣儲存都可以，但當日會重疊。`;
+  if (hits.length) msgs.push(`同 ${hits.map(h => `「${h.title}」（${fmtRange(h.start, h.end)}）`).join("、")} 撞時間。照樣儲存都可以，但當日會重疊。`);
+  if (!msgs.length) { box.hidden = true; return; }
+  document.getElementById("clashText").textContent = msgs.join(" ");
   box.hidden = false;
 }
 
@@ -1364,6 +1479,19 @@ form.addEventListener("submit", async e => {
   if (en <= s) { toast("結束時間要遲過開始時間。"); fEnd.focus(); return; }
   if (s < WIN_A || en > WIN_B) { toast(`只可以排 ${fmt(WIN_A)} 至 ${fmt(WIN_B)} 之間。`); return; }
   if (!fRepeat.checked && !fDate.value) { toast("請揀日期。"); fDate.focus(); return; }
+
+  const dowSel = fRepeat.checked ? Number(fDow.value) : dowOf(parseYmd(fDate.value));
+  const locked = lockHit(dowSel, s, en);
+  if (locked && !IS_OWNER) {
+    toast(`${DOW_ZH[dowSel]} ${fmt(locked[0])}–${fmt(locked[1])} 唔開放預約，請揀第二個時間。`);
+    return;
+  }
+
+  if (needsPw(getKind()) && !checkPw()) {
+    toast("密碼唔啱，改唔到港大課堂。");
+    fPw.focus(); fPw.select();
+    return;
+  }
 
   const rep = fRepeat.checked;
   const rec = {
@@ -1407,6 +1535,13 @@ document.getElementById("delAll").onclick = () => doDelete("all");
 
 async function doDelete(scope) {
   if (!editing) return;
+  if (needsPw(editing.kind) && !checkPw()) {
+    delChoice.hidden = true; btnDelete.hidden = false;
+    document.getElementById("pwField").hidden = false;
+    toast("要先輸入密碼先刪得。");
+    fPw.focus();
+    return;
+  }
   const target = editing, on = editingOn;
   try {
     if (scope === "one" && target.repeat && on) {

@@ -137,7 +137,10 @@ ownerKey: "owner",   →   ownerKey: "只有你知嘅字",
 | `ownerKey` | 管理模式密語 |
 | `categories` | 顏色分類。見下面第五節 |
 | `defaultCategory` | 學生預約時預設用邊個分類 |
-| `dayStart` / `dayEnd` | 週表顯示同可排課嘅時間範圍。**而家係 `08:00`–`23:00`**；你原本 `gen_weekly.py` 係 `09:00`–`21:00`，想一模一樣就改返 |
+| `dayStart` / `dayEnd` | 週表格線顯示嘅範圍。而家係 `08:00`–`23:00` |
+| `bookableFrom` / `bookableTo` | 自動計「可排課空檔」嘅範圍。而家係 `09:00`–`21:00`，即係朝早 8–9 點同夜晚 9–11 點唔會出空檔（同你 `gen_weekly.py` 嘅 `T0, T1 = 9, 21` 一樣）|
+| `lockedWindows` | 封鎖時段，見下面第六節 |
+| `categoryPassword` | 受保護分類嘅密碼，見下面第七節 |
 | `travelBuffer` | 緊接港大課堂嘅空檔要扣幾多分鐘（預設 30，等於原本 `BUF = 0.5`） |
 | `minSlot` | 短過幾多分鐘唔當可排課（預設 60，等於原本 `MINSLOT = 1.0`） |
 | `openDays` | 邊幾日收新課，`[一,二,三,四,五,六,日]`。而家係 `[true,true,false,true,true,false,false]` |
@@ -159,8 +162,11 @@ ownerKey: "owner",   →   ownerKey: "只有你知嘅字",
 |---|---|---|---|
 | 藍 | `uni` | 港大課堂 | `brandink` |
 | 綠 | `work` | 新東方教學 | `brandmain` |
-| 橙 | `amber` | 其他 / 私人 | `brandaccent` |
-| 灰 | `slate` | 備課 / 行政 | `restcol` |
+| 橙（實色） | `amber` | 其他 / 私人 | `brandaccent` |
+| 橙（半透明虛線） | `open` | 可排課空檔 | 同自動計嗰啲空檔一模一樣 |
+| 灰 | `slate` | （而家冇用） | `restcol` |
+
+`slate` 灰色仍然用得，只係預設冇分類揀佢。想要就把某個分類嘅 `colour` 改成 `"slate"`。
 
 改名、加減分類都喺 `index.html` 嘅 `categories`：
 
@@ -169,17 +175,36 @@ categories: [
   { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true  },
   { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
   { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
-  { key: "admin", label: "備課 / 行政", colour: "slate", travel: false }
+  { key: "open",  label: "可排課空檔",  colour: "open",  travel: false }
 ]
 ```
 
 - **`key`** 係存落資料庫嘅代號。**改咗就對唔返舊資料**（舊課堂會跌返做預設分類），
   所以想改名就淨係改 `label`，唔好郁 `key`。
-- **`colour`** 只可以係 `uni` / `work` / `amber` / `slate` 四個之一。
+- **`colour`** 只可以係 `uni` / `work` / `amber` / `open` / `slate` 五個之一。
 - **`travel: true`** 代表呢類課堂前後要預留交通時間（本來 `gen_weekly.py` 只有港大課堂要）。
   揀掣上會有個「＋交通」小標記。想新開嘅分類都預留，就設 `travel: true`。
 
 圖例、頁尾時數統計、`.ics` 匯出嘅分類名都係跟住呢個清單自動更新，唔使另外改。
+
+### 「可排課空檔」呢個分類同自動計嗰啲有咩分別
+
+樣係一模一樣，但行為唔同，值得搞清楚：
+
+- **自動嗰啲**由 `free_slots()` 計出嚟，係「執完所有課之後剩返嘅空位」。
+  你加多一堂，佢即刻自動縮細。開放日先會出現。
+- **手動嗰個分類**係你自己擺落去嘅一格，同一堂課冇分別 —— 
+  即係話**佢會佔住嗰段時間**，自動計嗰陣會當佢係「有嘢做」，
+  所以嗰個位唔會再另外出一格自動空檔。
+
+用途：**喺唔開放嘅日子手動開一格**。例如星期六本來 `openDays` 係 `false`，
+自動計唔會出任何空檔，但你想開個補堂時段 —— 手動擺一格「可排課空檔」就得。
+
+頁尾嘅「可排課 X 小時」會把自動同手動兩邊加埋一齊數，唔會數兩次。
+
+> 學生㩒手動嗰格會開到「課堂詳情」（唯讀），唔係預約表格 ——
+> 因為喺程式眼中佢係一堂課，唔係一個空位。
+> 想學生㩒得落去直接預約就同我講，改得。
 
 **所有人都揀得色**，唔使管理模式。預設會揀住 `defaultCategory`（而家係新東方教學），
 學生想改就改。
@@ -203,10 +228,74 @@ categories: [
 
 > ⚠️ 加咗新分類之後，`firestore.rules` 都要一齊更新，否則 Firebase 會拒絕寫入。
 > 搵 `d.kind in [...]` 嗰行，把新 `key` 加埋落去，再喺 Firebase 重新發布規則。
+> 而家嗰行係：`d.kind in ['uni', 'work', 'other', 'open', 'admin']`
+>（`admin` 留住係為咗舊資料，冇用過就當佢唔存在。）
 
 ---
 
-## 六、點用
+## 六、封鎖時段 `lockedWindows`
+
+```js
+lockedWindows: {
+  2: [["17:00", "23:00"]],   // 星期三 夜晚唔開放
+  5: [["18:00", "23:00"]],   // 星期六 夜晚唔開放
+  6: [["08:00", "23:00"]]    // 星期日 全日唔開放
+},
+```
+
+索引同 `openDays` 一樣：`0`=一 … `6`=日。一日可以封幾段。
+
+封鎖之後會發生三件事：
+
+1. 格線上打斜紋，中間有個「唔開放預約」標籤 —— **睇得見嘅鎖先係有用嘅鎖**
+2. 自動空檔唔會踩入去
+3. 有人想喺嗰度預約會俾彈返轉頭，出提示叫佢揀第二個時間
+
+拖曳都拖唔到落封鎖區。**管理模式唔受限制** —— 自己張表自己話事，
+不過表格會出黃色提示話你知呢個時間一般訪客預約唔到。
+
+> `lockedWindows` 同 `openDays` 唔同：
+> `openDays` 管「自動空檔出唔出」，`lockedWindows` 管「畀唔畀人預約」。
+> 星期三本來就唔係開放日，但冇 `lockedWindows` 之前，
+> 學生一樣可以喺格線度拖個時間出嚟預約 —— 而家先真係鎖死。
+
+---
+
+## 七、受保護分類（改港大課堂要密碼）
+
+`categories` 入面加 `locked: true`，嗰個分類就要密碼先改／刪得到：
+
+```js
+{ key: "uni", label: "港大課堂", colour: "uni", travel: true, locked: true },
+```
+
+```js
+categoryPassword: "CHANGE-ME",
+```
+
+規則：
+
+- 學生想改一堂港大課堂、或者想把自己嗰堂標成港大課堂 → 要打密碼
+- 打啱一次，同一個分頁之後都唔使再打（`sessionStorage`，閂咗個 tab 就重設）
+- **管理模式免問** —— 你已經有 `ownerKey`，唔使打兩個密碼
+
+### ⚠️ 揀密碼之前要知
+
+`categoryPassword` 會**原封不動咁出現喺公開 GitHub repo 嘅 `index.html` 入面**。
+任何人 View Source 都睇得到，搜尋器都索引得到。
+
+所以：
+
+1. **一定要揀一個你冇喺其他地方用過嘅字。**
+2. **千祈唔好用你 GitHub、電郵、銀行、學校嗰啲密碼。**
+3. 佢嘅作用係「防手誤」—— 阻止學生手快撳錯改咗你堂大學課，
+   唔係「防人」。同 `ownerKey` 一樣，係門鎖唔係夾萬。
+
+同一道理都適用於 `ownerKey`。兩個都揀啲隨手嘅字就得，例如 `wed-lock-2026`。
+
+---
+
+## 八、點用
 
 | | |
 |---|---|
