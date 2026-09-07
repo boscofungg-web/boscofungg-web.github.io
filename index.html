@@ -326,6 +326,7 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
   background:var(--open-soft); color:var(--open-ink);
   border:1.5px dashed var(--open);
 }
+.ev.c-open:hover{background:var(--open); color:#fff; border-style:solid; filter:none}
 .ev.pending{border:2px dashed rgba(255,255,255,.7)}
 .ev b{font-weight:700; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .ev time{font-family:var(--mono); font-size:9.5px; opacity:.88; font-variant-numeric:tabular-nums}
@@ -1005,6 +1006,13 @@ function freeSlots(date) {
    狀態
    --------------------------------------------------------------- */
 const state = { view: "week", cursor: new Date() };
+
+/* 用 open 色嘅分類係「空位標記」，唔係一堂課 */
+const isOpenMarker = kind => catOf(kind).colour === "open";
+/* 嗰段時間有冇一格明擺出嚟嘅「可排課」？有就當開放，封鎖時段唔算數 */
+function inOpenMarker(date, a, b) {
+  return lessonsOn(date).some(e => isOpenMarker(e.kind) && e.start <= a && b <= e.end);
+}
 const canEdit = ev => IS_OWNER || !ev.id || Store.isMine(ev.id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
@@ -1131,7 +1139,9 @@ function renderWeek() {
       inner += `
         <button class="ev ${colourOf(e.kind)} ${short ? "short" : ""} ${e.repeat ? "" : "once"} ${e.status === "tentative" ? "pending" : ""}"
                 type="button" data-ev="${e.id}" data-on="${key}"
-                title="${esc(catOf(e.kind).label)}：${esc(e.title)} ${fmtRange(e.start, e.end)}${e.note ? " ・ " + esc(e.note) : ""}"
+                title="${isOpenMarker(e.kind) && !IS_OWNER
+                          ? `可排課 ${fmtRange(e.start, e.end)} —— 撳一下預約`
+                          : `${esc(catOf(e.kind).label)}：${esc(e.title)} ${fmtRange(e.start, e.end)}${e.note ? " ・ " + esc(e.note) : ""}`}"
                 style="top:${pct(vs)}%; height:${((ve - vs) / WIN) * 100}%; left:calc(${col * w}% + 2px); width:calc(${w}% - 4px); z-index:2;">
           <b>${esc(e.title)}</b><time>${fmtRange(e.start, e.end)}</time>
           ${catOf(e.kind).fixedTitle
@@ -1224,7 +1234,7 @@ document.getElementById("btnWeek").onclick = () => { state.view = "week"; render
    --------------------------------------------------------------- */
 mgrid.addEventListener("click", e => {
   const chip = e.target.closest("[data-ev]");
-  if (chip) return openEvent(chip.dataset.ev, chip.dataset.on);
+  if (chip) return openBlock(chip.dataset.ev, chip.dataset.on);
   const jump = e.target.closest("[data-goweek]");
   if (jump) { state.view = "week"; state.cursor = parseYmd(jump.dataset.goweek); render(); return; }
   const cell = e.target.closest("[data-day]");
@@ -1236,7 +1246,7 @@ whead.addEventListener("click", e => {
 });
 wgrid.addEventListener("click", e => {
   const ev = e.target.closest("[data-ev]");
-  if (ev) return openEvent(ev.dataset.ev, ev.dataset.on);
+  if (ev) return openBlock(ev.dataset.ev, ev.dataset.on);
   const sl = e.target.closest("[data-slot]");
   if (sl) {
     const [key, a, b] = sl.dataset.slot.split("|");
@@ -1413,7 +1423,9 @@ function setEnabled(on) {
 
 function openNew(date, a, b) {
   const hit = lockHit(dowOf(date), a, b);
-  if (hit && !IS_OWNER) { toast(`${DOW_ZH[dowOf(date)]} ${fmt(hit[0])} 之後唔開放預約。`); return; }
+  if (hit && !IS_OWNER && !inOpenMarker(date, a, b)) {
+    toast(`${DOW_ZH[dowOf(date)]} ${fmt(hit[0])} 之後唔開放預約。`); return;
+  }
   editing = null; editingOn = ymd(date);
   document.getElementById("sheetTitle").textContent = IS_OWNER ? "新增課堂" : "預約時段";
   form.reset();
@@ -1429,6 +1441,15 @@ function openNew(date, a, b) {
   document.getElementById("roNote").hidden = true;
   setEnabled(true); syncPw(); checkClash(); updateDur();
   openSheet();
+}
+
+/* 撳一格課堂。「可排課」格對訪客嚟講即係撳個空位 —— 開預約表格，唔係唯讀詳情 */
+function openBlock(id, onKey) {
+  const ev = Store.all().find(e => e.id === id);
+  if (ev && isOpenMarker(ev.kind) && !IS_OWNER) {
+    return openNew(parseYmd(onKey || ymd(state.cursor)), ev.start, Math.min(ev.end, ev.start + 120));
+  }
+  return openEvent(id, onKey);
 }
 
 function openEvent(id, onKey) {
@@ -1514,8 +1535,11 @@ form.addEventListener("submit", async e => {
   if (!fRepeat.checked && !fDate.value) { toast("請揀日期。"); fDate.focus(); return; }
 
   const dowSel = fRepeat.checked ? Number(fDow.value) : dowOf(parseYmd(fDate.value));
+  const probeDay = fRepeat.checked
+    ? addDays(startOfWeek(editingOn ? parseYmd(editingOn) : state.cursor), dowSel)
+    : parseYmd(fDate.value);
   const locked = lockHit(dowSel, s, en);
-  if (locked && !IS_OWNER) {
+  if (locked && !IS_OWNER && !inOpenMarker(probeDay, s, en)) {
     toast(`${DOW_ZH[dowSel]} ${fmt(locked[0])}–${fmt(locked[1])} 唔開放預約，請揀第二個時間。`);
     return;
   }
