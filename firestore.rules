@@ -43,7 +43,7 @@ service cloud.firestore {
                 : (d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
 
           // 顏色分類。加新分類記得把個 key 加埋落呢度，否則 Firebase 會拒收
-          && (!('kind' in d.keys()) || d.kind in ['uni', 'work', 'other', 'admin'])
+          && (!('kind' in d.keys()) || d.kind in ['uni', 'work', 'other', 'open', 'admin'])
 
           && (!('who'  in d.keys()) || (d.who  is string && d.who.size()  <= 30))
           && (!('note' in d.keys()) || (d.note is string && d.note.size() <= 40))
