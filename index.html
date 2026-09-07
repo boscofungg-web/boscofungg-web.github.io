@@ -533,10 +533,11 @@ window.CALENDAR_CONFIG = {
   //   key    : 存落資料庫嘅代號，改咗舊資料就對唔上，最好唔好郁
   //   label  : 彈出視窗同圖例顯示嘅名
   //   colour : uni(藍) / work(綠) / amber(橙) / open(橙色半透明) / slate(灰)
+  //   locked : true = 只有管理模式先刪得（訪客照樣改得）
   //   travel : true = 呢類課堂前後要預留交通時間（本來只有港大課堂先要）
   //   fixedTitle : 有呢個就會鎖死個名，用家改唔到（可排課就係咁）
   categories: [
-    { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true, locked: true },
+    { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true, locked: true },  // locked = 只有管理模式先刪得
     { key: "work",  label: "新東方教學",  colour: "work",  travel: false },
     { key: "other", label: "其他 / 私人", colour: "amber", travel: false },
     { key: "open",  label: "可排課",      colour: "open",  travel: false, fixedTitle: "可排課" }
@@ -545,14 +546,6 @@ window.CALENDAR_CONFIG = {
   // 學生預約時預設用邊個分類
   defaultCategory: "work",
 
-  // 有 locked: true 嘅分類，要打呢個密碼先改／刪得到。管理模式免問。
-  //
-  // ⚠️⚠️ 呢個字會原封不動咁出現喺公開 GitHub repo 嘅 index.html 入面，
-  //      任何人 View Source 都睇得到。所以：
-  //        1. 一定要揀一個你**冇喺其他地方用過**嘅字
-  //        2. 千祈唔好用你 GitHub、電郵、銀行嗰啲密碼
-  //      佢嘅作用係「防手誤」，唔係「防人」。
-  categoryPassword: "CHANGE-ME",
 
   // 交通緩衝：travel:true 嘅課堂前後要扣幾多分鐘（0 = 不扣）
   travelBuffer: 30,
@@ -713,11 +706,6 @@ window.CALENDAR_CONFIG = {
     <div class="field" id="kindField">
       <label>顏色分類</label>
       <div class="kinds" id="kindPicker"></div>
-    </div>
-
-    <div class="field" id="pwField" hidden>
-      <label for="fPw">密碼 <span style="font-weight:400;color:var(--ink-3)">（呢個分類受保護）</span></label>
-      <input id="fPw" type="password" autocomplete="off" placeholder="改港大課堂要輸入密碼">
     </div>
 
     <div class="field" id="noteField" hidden>
@@ -1013,7 +1001,8 @@ const isOpenMarker = kind => catOf(kind).colour === "open";
 function inOpenMarker(date, a, b) {
   return lessonsOn(date).some(e => isOpenMarker(e.kind) && e.start <= a && b <= e.end);
 }
-const canEdit = ev => IS_OWNER || !ev.id || Store.isMine(ev.id);
+/* 人人都改得任何一堂。唯一限制係刪港大課堂 —— 見 canDelete() */
+const canEdit = () => true;
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
 /* ---------------------------------------------------------------
@@ -1324,31 +1313,10 @@ function syncTitleLock() {
   }
 }
 
-/* ---- 受保護分類 ---- */
-const fPw = document.getElementById("fPw");
-const PW_KEY = "timetable.catpw.v1";
-let catUnlocked = false;
-try { catUnlocked = sessionStorage.getItem(PW_KEY) === "1"; } catch {}
-
-/* 而家呢一步使唔使密碼？管理模式、或者今次已經解鎖過就唔使 */
-function needsPw(kindNow) {
-  if (IS_OWNER || catUnlocked) return false;
-  if (catOf(kindNow).locked) return true;                 // 想改成受保護分類
-  if (editing && catOf(editing.kind).locked) return true;  // 本身就係受保護分類
-  return false;
-}
-function syncPw() {
-  const need = needsPw(getKind());
-  document.getElementById("pwField").hidden = !need;
-  if (!need) fPw.value = "";
-}
-/* 打啱一次，之後呢個分頁都唔使再問 */
-function checkPw() {
-  if (fPw.value !== String(CFG.categoryPassword)) return false;
-  catUnlocked = true;
-  try { sessionStorage.setItem(PW_KEY, "1"); } catch {}
-  return true;
-}
+/* ---- 邊個刪得 ----
+   locked: true 嘅分類（港大課堂）只有管理模式先刪得。
+   訪客改得時間、名、顏色，但個刪除掣根本唔會出現。 */
+const canDelete = ev => IS_OWNER || !catOf(ev && ev.kind).locked;
 
 /* 圖例 + 顏色分類揀掣，兩邊都由 CFG.categories 生成 */
 document.getElementById("legend").innerHTML =
@@ -1386,7 +1354,7 @@ function syncRepeat() {
     : "只有這一日，之後不會重複";
 }
 fRepeat.addEventListener("change", () => { syncRepeat(); checkClash(); });
-document.getElementById("kindPicker").addEventListener("change", () => { syncTitleLock(); syncPw(); });
+document.getElementById("kindPicker").addEventListener("change", syncTitleLock);
 
 function openSheet() {
   sheet.classList.add("on"); backdrop.classList.add("on");
@@ -1439,7 +1407,7 @@ function openNew(date, a, b) {
   setKind(DEFAULT_CAT); syncTitleLock();
   btnDelete.hidden = true; delChoice.hidden = true;
   document.getElementById("roNote").hidden = true;
-  setEnabled(true); syncPw(); checkClash(); updateDur();
+  setEnabled(true); checkClash(); updateDur();
   openSheet();
 }
 
@@ -1456,8 +1424,8 @@ function openEvent(id, onKey) {
   const ev = Store.all().find(e => e.id === id);
   if (!ev) return;
   editing = ev; editingOn = onKey || null;
-  const editable = canEdit(ev);
-  document.getElementById("sheetTitle").textContent = editable ? "編輯課堂" : "課堂詳情";
+  const deletable = canDelete(ev);
+  document.getElementById("sheetTitle").textContent = "編輯課堂";
   fTitle.value = ev.title || "";
   userTitle = fTitle.value; fTitle.readOnly = false;
   fWho.value = ev.who || "";
@@ -1473,11 +1441,12 @@ function openEvent(id, onKey) {
   setKind(ev.kind); syncTitleLock();
   if (IS_OWNER) fNote.value = ev.note || "";
   const ro = document.getElementById("roNote");
-  ro.hidden = editable;
-  if (!editable) ro.textContent = "這個時段係其他人預約嘅，所以只可以查看。要改動或取消，請聯絡時間表擁有人。";
-  setEnabled(editable);
-  btnDelete.hidden = !editable; delChoice.hidden = true;
-  syncPw(); checkClash(); updateDur();
+  ro.hidden = deletable;
+  if (!deletable) ro.textContent =
+    "港大課堂只有時間表擁有人先刪得。你可以改時間、改名、改顏色，但刪唔到 —— 有需要請直接搵 Bosco。";
+  setEnabled(true);
+  btnDelete.hidden = !deletable; delChoice.hidden = true;
+  checkClash(); updateDur();
   openSheet();
 }
 
@@ -1544,12 +1513,6 @@ form.addEventListener("submit", async e => {
     return;
   }
 
-  if (needsPw(getKind()) && !checkPw()) {
-    toast("密碼唔啱，改唔到港大課堂。");
-    fPw.focus(); fPw.select();
-    return;
-  }
-
   const rep = fRepeat.checked;
   const rec = {
     title: catOf(getKind()).fixedTitle || fTitle.value.trim() || "課堂",
@@ -1585,7 +1548,7 @@ form.addEventListener("submit", async e => {
 
 /* 刪除：重複課堂要問清楚 */
 btnDelete.onclick = () => {
-  if (!editing) return;
+  if (!editing || !canDelete(editing)) return;
   if (editing.repeat && editingOn) { btnDelete.hidden = true; delChoice.hidden = false; }
   else doDelete("all");
 };
@@ -1595,13 +1558,7 @@ document.getElementById("delAll").onclick = () => doDelete("later");
 
 async function doDelete(scope) {
   if (!editing) return;
-  if (needsPw(editing.kind) && !checkPw()) {
-    delChoice.hidden = true; btnDelete.hidden = false;
-    document.getElementById("pwField").hidden = false;
-    toast("要先輸入密碼先刪得。");
-    fPw.focus();
-    return;
-  }
+  if (!canDelete(editing)) { toast("港大課堂只有時間表擁有人先刪得。"); return; }
   const target = editing, on = editingOn;
   try {
     if (scope === "one" && target.repeat && on) {
