@@ -109,7 +109,7 @@ https://boscofungg-web.github.io/#owner
 進入之後標題旁會出現「管理模式」標籤，而且：
 
 - 改得、刪得任何一堂
-- 彈出視窗多咗「類別」（港大課堂／新東方教學）同「備註」（課室代碼）
+- 彈出視窗多咗「備註」（課室／科目代碼）
 - 新增嘅課堂直接算「已確認」，唔係「待確認」
 
 **分享出去之前記得改密語**，喺 `index.html`：
@@ -181,8 +181,25 @@ categories: [
 
 圖例、頁尾時數統計、`.ics` 匯出嘅分類名都係跟住呢個清單自動更新，唔使另外改。
 
-分類揀掣**只喺管理模式出現**。學生預約嗰陣一律用 `defaultCategory`（而家係新東方教學），
-唔會畀佢哋自己揀色 —— 唔想學生把自己嘅堂標成「港大課堂」。
+**所有人都揀得色**，唔使管理模式。預設會揀住 `defaultCategory`（而家係新東方教學），
+學生想改就改。
+
+> 值得諗一諗：呢個係方便，唔係管制。冇任何嘢阻止學生把自己嘅堂標成「港大課堂」藍色。
+> 對住你識嘅一班學生冇所謂，亂咗你自己㩒返轉頭就得。
+> 如果將來覺得煩，想改返「只有管理模式先揀得色」，喺 `index.html` 搵：
+>
+> ```html
+> <div class="field" id="kindField">
+> ```
+>
+> 加返個 `hidden`：
+>
+> ```html
+> <div class="field" id="kindField" hidden>
+> ```
+>
+> 再喺下面 `if (IS_OWNER) {` 嗰段加返一行
+> `document.getElementById("kindField").hidden = false;` 就得。
 
 > ⚠️ 加咗新分類之後，`firestore.rules` 都要一齊更新，否則 Firebase 會拒絕寫入。
 > 搵 `d.kind in [...]` 嗰行，把新 `key` 加埋落去，再喺 Firebase 重新發布規則。

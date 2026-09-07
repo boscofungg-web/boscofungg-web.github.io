@@ -662,7 +662,7 @@ window.CALENDAR_CONFIG = {
       <input id="fWho" maxlength="30" placeholder="選填">
     </div>
 
-    <div class="field" id="kindField" hidden>
+    <div class="field" id="kindField">
       <label>顏色分類</label>
       <div class="kinds" id="kindPicker"></div>
     </div>
@@ -1230,7 +1230,6 @@ document.getElementById("kindPicker").innerHTML = CATS.map(c => `
 
 if (IS_OWNER) {
   document.getElementById("ownerTag").hidden = false;
-  document.getElementById("kindField").hidden = false;
   document.getElementById("noteField").hidden = false;
   document.getElementById("whoField").hidden = true;
 }
@@ -1286,7 +1285,7 @@ function openNew(date, a, b) {
   fDate.value = ymd(date);
   fStart.value = toHHMM(Math.max(WIN_A, Math.min(WIN_B - 15, a)));
   fEnd.value = toHHMM(Math.min(WIN_B, b));
-  if (IS_OWNER) setKind(DEFAULT_CAT);
+  setKind(DEFAULT_CAT);
   btnDelete.hidden = true; delChoice.hidden = true;
   document.getElementById("roNote").hidden = true;
   setEnabled(true); checkClash(); updateDur();
@@ -1305,7 +1304,8 @@ function openEvent(id, onKey) {
   fDow.value = String(ev.repeat ? ev.dow : dowOf(parseYmd(ev.date)));
   fDate.value = ev.repeat ? (onKey || "") : ev.date;
   fStart.value = toHHMM(ev.start); fEnd.value = toHHMM(ev.end);
-  if (IS_OWNER) { setKind(ev.kind); fNote.value = ev.note || ""; }
+  setKind(ev.kind);
+  if (IS_OWNER) fNote.value = ev.note || "";
   const ro = document.getElementById("roNote");
   ro.hidden = editable;
   if (!editable) ro.textContent = "這個時段係其他人預約嘅，所以只可以查看。要改動或取消，請聯絡時間表擁有人。";
@@ -1369,7 +1369,7 @@ form.addEventListener("submit", async e => {
   const rec = {
     title: fTitle.value.trim() || "課堂",
     who: IS_OWNER ? (editing ? editing.who || "" : "") : fWho.value.trim(),
-    kind: IS_OWNER ? getKind() : (editing ? editing.kind || DEFAULT_CAT : DEFAULT_CAT),
+    kind: getKind(),
     note: IS_OWNER ? fNote.value.trim() : (editing ? editing.note || "" : ""),
     start: s, end: en,
     repeat: rep,
