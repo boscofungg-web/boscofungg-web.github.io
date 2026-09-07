@@ -1,505 +1,542 @@
-<title>Open Slots</title>
+<title>每週固定時間表</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
 
 <style>
-/* ============================================================
-   Open Slots — booking calendar
-   Palette: ledger green + brass on a green-biased neutral
-   ============================================================ */
+/* ==========================================================
+   每週固定時間表 — 網頁版
+   配色取自 calendar.tex / gen_weekly.py 的品牌色
+   ========================================================== */
 :root{
   --paper:#ffffff;
-  --ground:#eff2ef;
-  --sunken:#e6eae6;
-  --weekend:#f6f8f6;
-  --ink:#14181a;
-  --ink-2:#4a5450;
-  --ink-3:#7d8783;
-  --rule:#d7ddd8;
-  --rule-2:#e6ebe7;
+  --ground:#eef0f3;
+  --soft:#f3f4f6;
+  --ink:#1a1d21;
+  --ink-2:#4d555f;
+  --ink-3:#828a96;
+  --rule:#c8ccd2;
+  --rule-2:#e4e7eb;
 
-  --accent:#1f5e4a;
-  --accent-soft:#e2efe9;
-  --accent-line:#bcd8cb;
-  --accent-ink:#14402f;
+  --uni:#1f497d;            /* 港大課堂 */
+  --uni-fill:#22508a;
+  --work:#006a3c;           /* 新東方教學 */
+  --work-fill:#007542;
 
-  --brass:#96690f;
-  --brass-soft:#f7edd8;
-  --brass-line:#e4cf9f;
-  --brass-ink:#6d4b06;
+  --open:#d66c14;           /* 可排課空檔 */
+  --open-soft:#fbf0e4;
+  --open-line:#e2a76e;
+  --open-ink:#96490a;
 
-  --clay:#9e3a2b;
-  --clay-soft:#f8e6e2;
+  --rest:#828a96;
+  --warn-soft:#fdf3e3;
+  --danger:#a3342a;
 
-  --now:#c2410c;
+  --shadow:0 1px 2px rgba(26,29,33,.06), 0 10px 28px -14px rgba(26,29,33,.28);
 
-  --shadow: 0 1px 2px rgba(20,24,26,.06), 0 8px 24px -12px rgba(20,24,26,.22);
-  --sheet-shadow: -18px 0 48px -22px rgba(20,24,26,.45);
+  --hour-h:56px;
+  --gutter-w:58px;
+  --radius:6px;
 
-  --hour-h: 58px;
-  --gutter-w: 62px;
-  --radius: 7px;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif;
+  --serif:"Noto Serif TC","PingFang TC",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 
-  --sans:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --display:"Fraunces", Georgia, "Times New Roman", serif;
-
-  color-scheme: light;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#171b19;
-    --ground:#101413;
-    --sunken:#1c2120;
-    --weekend:#1b201e;
-    --ink:#e7ede9;
-    --ink-2:#a3aeaa;
-    --ink-3:#77827e;
-    --rule:#2c332f;
-    --rule-2:#232927;
+    --paper:#16191c;
+    --ground:#0e1114;
+    --soft:#1c2024;
+    --ink:#e6eaef;
+    --ink-2:#a6aeb8;
+    --ink-3:#7b838e;
+    --rule:#2d333a;
+    --rule-2:#24292e;
 
-    --accent:#5cb193;
-    --accent-soft:#17302a;
-    --accent-line:#2b5a4b;
-    --accent-ink:#a9dcc8;
+    --uni:#7ba6dd;
+    --uni-fill:#2a5b96;
+    --work:#4fb083;
+    --work-fill:#0a7a4c;
 
-    --brass:#d9a94a;
-    --brass-soft:#2e2617;
-    --brass-line:#5a4a24;
-    --brass-ink:#eed9a6;
+    --open:#e59650;
+    --open-soft:#2c1f12;
+    --open-line:#7a4f1f;
+    --open-ink:#f0bd85;
 
-    --clay:#d8846f;
-    --clay-soft:#31201c;
+    --rest:#6f7783;
+    --warn-soft:#2a2114;
+    --danger:#e08a7a;
 
-    --now:#f97316;
-
-    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
-    --sheet-shadow: -18px 0 48px -22px rgba(0,0,0,.8);
-    color-scheme: dark;
+    --shadow:0 1px 2px rgba(0,0,0,.55), 0 10px 28px -14px rgba(0,0,0,.75);
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#171b19;
-  --ground:#101413;
-  --sunken:#1c2120;
-  --weekend:#1b201e;
-  --ink:#e7ede9;
-  --ink-2:#a3aeaa;
-  --ink-3:#77827e;
-  --rule:#2c332f;
-  --rule-2:#232927;
+  --paper:#16191c;
+  --ground:#0e1114;
+  --soft:#1c2024;
+  --ink:#e6eaef;
+  --ink-2:#a6aeb8;
+  --ink-3:#7b838e;
+  --rule:#2d333a;
+  --rule-2:#24292e;
 
-  --accent:#5cb193;
-  --accent-soft:#17302a;
-  --accent-line:#2b5a4b;
-  --accent-ink:#a9dcc8;
+  --uni:#7ba6dd;
+  --uni-fill:#2a5b96;
+  --work:#4fb083;
+  --work-fill:#0a7a4c;
 
-  --brass:#d9a94a;
-  --brass-soft:#2e2617;
-  --brass-line:#5a4a24;
-  --brass-ink:#eed9a6;
+  --open:#e59650;
+  --open-soft:#2c1f12;
+  --open-line:#7a4f1f;
+  --open-ink:#f0bd85;
 
-  --clay:#d8846f;
-  --clay-soft:#31201c;
+  --rest:#6f7783;
+  --warn-soft:#2a2114;
+  --danger:#e08a7a;
 
-  --now:#f97316;
-
-  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
-  --sheet-shadow: -18px 0 48px -22px rgba(0,0,0,.8);
-  color-scheme: dark;
+  --shadow:0 1px 2px rgba(0,0,0,.55), 0 10px 28px -14px rgba(0,0,0,.75);
+  color-scheme:dark;
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{height:100%}
 body{
   margin:0; background:var(--ground); color:var(--ink);
-  font-family:var(--sans); font-size:14px; line-height:1.45;
+  font-family:var(--sans); font-size:14px; line-height:1.5;
   -webkit-font-smoothing:antialiased;
   display:flex; flex-direction:column; overflow:hidden;
 }
 button,input,select,textarea{font:inherit; color:inherit}
-:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+:focus-visible{outline:2px solid var(--open); outline-offset:2px; border-radius:4px}
 @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
 
-/* ---------- top bar ---------- */
+/* ---------- 頁首 ---------- */
 .topbar{
-  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
-  padding:12px 18px; background:var(--paper);
-  border-bottom:1px solid var(--rule); flex:0 0 auto;
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:11px 18px 10px; background:var(--paper);
+  border-bottom:3px solid var(--work); flex:0 0 auto;
 }
 .brand{display:flex; flex-direction:column; gap:1px; margin-right:auto; min-width:0}
 .brand h1{
-  font-family:var(--display); font-weight:600; font-size:21px;
-  letter-spacing:-.01em; margin:0; line-height:1.15;
+  font-family:var(--serif); font-weight:700; font-size:19px; margin:0; line-height:1.25;
+  color:var(--uni); letter-spacing:.01em;
 }
-.brand .tz{
-  font-family:var(--mono); font-size:10.5px; color:var(--ink-3);
-  letter-spacing:.04em; text-transform:uppercase;
-}
+.brand .sub{font-size:11.5px; color:var(--work); font-weight:500}
 .owner-tag{
-  font-family:var(--mono); font-size:9.5px; letter-spacing:.09em;
-  text-transform:uppercase; color:var(--accent);
-  border:1px solid var(--accent-line); background:var(--accent-soft);
-  padding:1px 6px; border-radius:3px; margin-left:7px; vertical-align:2px;
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--open); border:1px solid var(--open-line); background:var(--open-soft);
+  padding:1px 6px; border-radius:3px; margin-left:8px; vertical-align:3px;
 }
-
 .cluster{display:flex; align-items:center; gap:8px}
 
-.seg{display:flex; background:var(--sunken); border-radius:var(--radius); padding:2px; gap:2px}
+.seg{display:flex; background:var(--soft); border-radius:var(--radius); padding:2px; gap:2px}
 .seg button{
   border:0; background:transparent; color:var(--ink-2); cursor:pointer;
-  padding:5px 13px; border-radius:5px; font-size:13px; font-weight:500;
-  transition:background .13s, color .13s;
+  padding:5px 14px; border-radius:4px; font-size:13px; font-weight:500;
 }
-.seg button[aria-pressed="true"]{background:var(--paper); color:var(--ink); box-shadow:0 1px 2px rgba(20,24,26,.10)}
+.seg button[aria-pressed="true"]{background:var(--paper); color:var(--uni); font-weight:700; box-shadow:0 1px 2px rgba(26,29,33,.12)}
 
 .icobtn{
   border:1px solid var(--rule); background:var(--paper); color:var(--ink-2);
   width:31px; height:31px; border-radius:var(--radius); cursor:pointer;
-  display:grid; place-items:center; padding:0; transition:background .13s, border-color .13s;
+  display:grid; place-items:center; padding:0;
 }
-.icobtn:hover{background:var(--sunken); border-color:var(--ink-3)}
-.icobtn svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+.icobtn:hover{background:var(--soft); border-color:var(--ink-3)}
+.icobtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 
 .tbtn{
   border:1px solid var(--rule); background:var(--paper); color:var(--ink);
   padding:5px 12px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:500;
-  transition:background .13s, border-color .13s;
 }
-.tbtn:hover{background:var(--sunken); border-color:var(--ink-3)}
+.tbtn:hover{background:var(--soft); border-color:var(--ink-3)}
 .tbtn.ghost{border-color:transparent; background:transparent; color:var(--ink-2)}
-.tbtn.ghost:hover{background:var(--sunken); color:var(--ink)}
+.tbtn.ghost:hover{background:var(--soft); color:var(--ink)}
 
 .pbtn{
-  border:1px solid var(--accent); background:var(--accent); color:#fff;
-  padding:6px 14px; border-radius:var(--radius); cursor:pointer;
-  font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;
-  transition:filter .13s;
+  border:1px solid var(--work); background:var(--work-fill); color:#fff;
+  padding:6px 15px; border-radius:var(--radius); cursor:pointer;
+  font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:6px;
 }
-:root[data-theme="dark"] .pbtn, :root:not([data-theme="light"]) .pbtn{color:#0d1a15}
-@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .pbtn{color:#fff} }
-.pbtn:hover{filter:brightness(1.08)}
-.pbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.pbtn:hover{filter:brightness(1.12)}
+.pbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
 
-/* ---------- period bar ---------- */
+/* ---------- 期間列 ---------- */
 .periodbar{
-  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-  padding:9px 18px; background:var(--paper); border-bottom:1px solid var(--rule); flex:0 0 auto;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:8px 18px; background:var(--paper); border-bottom:1px solid var(--rule); flex:0 0 auto;
 }
-#periodLabel{
-  font-family:var(--display); font-size:17px; font-weight:400; margin:0;
-  letter-spacing:-.005em; white-space:nowrap;
-}
-#periodLabel .yr{color:var(--ink-3)}
-.legend{display:flex; gap:14px; align-items:center; margin-left:auto; flex-wrap:wrap}
-.key{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-2)}
-.swatch{width:18px; height:10px; border-radius:2px; flex:0 0 auto}
-.swatch.busy{background:var(--accent-soft); border:1px solid var(--accent); border-left-width:3px}
-.swatch.tent{background:var(--brass-soft); border:1px solid var(--brass); border-left-width:3px}
-.hint{font-size:11.5px; color:var(--ink-3); font-family:var(--mono)}
+#periodLabel{font-size:15px; font-weight:700; margin:0; color:var(--ink); white-space:nowrap}
+.legend{display:flex; gap:13px; align-items:center; margin-left:auto; flex-wrap:wrap}
+.key{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--ink-2)}
+.sw{width:11px; height:11px; border-radius:2px; flex:0 0 auto}
+.sw.u{background:var(--uni-fill)}
+.sw.w{background:var(--work-fill)}
+.sw.o{background:var(--open-soft); border:1.5px dashed var(--open)}
+.sw.r{background:var(--rest)}
 
-/* ---------- viewport ---------- */
+/* ---------- 主區 ---------- */
 main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 .view{position:absolute; inset:0; display:flex; flex-direction:column}
 .view[hidden]{display:none}
 
-/* ---------- month ---------- */
+/* ---------- 月曆 ---------- */
 #monthView{background:var(--paper); overflow:auto}
 .mdow{
   display:grid; grid-template-columns:repeat(7,minmax(0,1fr));
-  border-bottom:1px solid var(--rule); position:sticky; top:0; background:var(--paper); z-index:3;
+  border-bottom:2px solid var(--rule); position:sticky; top:0; background:var(--paper); z-index:3;
 }
-.mdow div{
-  padding:7px 9px; font-family:var(--mono); font-size:10.5px; letter-spacing:.08em;
-  text-transform:uppercase; color:var(--ink-3);
-}
-.mgrid{
-  display:grid; grid-template-columns:repeat(7,minmax(0,1fr));
-  grid-auto-rows:minmax(104px,1fr); flex:1 1 auto;
-}
+.mdow div{padding:6px 9px; font-size:11.5px; font-weight:700; color:var(--uni)}
+.mdow div.off{color:var(--rest)}
+.mgrid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); grid-auto-rows:minmax(102px,1fr); flex:1 1 auto}
 .mcell{
   border-right:1px solid var(--rule-2); border-bottom:1px solid var(--rule-2);
-  padding:5px 5px 6px; min-width:0; display:flex; flex-direction:column; gap:3px;
+  padding:4px 5px 6px; min-width:0; display:flex; flex-direction:column; gap:3px;
   cursor:pointer; position:relative;
 }
 .mcell:nth-child(7n){border-right:0}
-.mcell:hover{background:var(--sunken)}
-.mcell.wknd{background:var(--weekend)}
+.mcell:hover{background:var(--soft)}
+.mcell.closed{background:var(--soft)}
 .mcell.out{background:var(--ground)}
-.mcell.out .dnum{color:var(--ink-3); opacity:.6}
+.mcell.out .dnum{opacity:.45}
+.dtop{display:flex; align-items:baseline; gap:5px}
 .dnum{
-  font-family:var(--mono); font-size:12px; color:var(--ink-2);
-  width:23px; height:21px; display:grid; place-items:center; border-radius:5px;
-  font-variant-numeric:tabular-nums; align-self:flex-start;
+  font-family:var(--mono); font-size:12.5px; color:var(--ink-2); font-weight:500;
+  min-width:22px; height:20px; display:grid; place-items:center; border-radius:4px;
+  font-variant-numeric:tabular-nums;
 }
-.mcell.today .dnum{background:var(--accent); color:var(--paper); font-weight:500}
-:root[data-theme="dark"] .mcell.today .dnum{color:#0d1a15}
+.mcell.today .dnum{background:var(--uni); color:#fff}
+.holi{font-size:10px; color:var(--open); font-weight:700; margin-left:auto; text-align:right; line-height:1.25}
 .chips{display:flex; flex-direction:column; gap:2px; min-width:0; overflow:hidden}
 .chip{
-  display:flex; gap:5px; align-items:baseline; min-width:0;
-  font-size:11.5px; padding:2px 5px; border-radius:4px; cursor:pointer;
-  border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent-ink);
-  text-align:left; border-top:0; border-right:0; border-bottom:0;
+  display:flex; gap:5px; align-items:baseline; min-width:0; border:0;
+  font-size:11.5px; padding:2px 5px; border-radius:3px; cursor:pointer; text-align:left;
+  background:var(--work-fill); color:#fff;
 }
-.chip.tentative{border-left-color:var(--brass); background:var(--brass-soft); color:var(--brass-ink)}
-.chip:hover{filter:brightness(.97)}
-:root[data-theme="dark"] .chip:hover{filter:brightness(1.25)}
-.chip time{font-family:var(--mono); font-size:10.5px; opacity:.8; flex:0 0 auto; font-variant-numeric:tabular-nums}
+.chip.uni{background:var(--uni-fill)}
+.chip.tentative{background:var(--open-soft); color:var(--open-ink); border:1px dashed var(--open)}
+.chip:hover{filter:brightness(1.14)}
+.chip time{font-family:var(--mono); font-size:10px; opacity:.85; flex:0 0 auto; font-variant-numeric:tabular-nums}
 .chip span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.more{
-  font-size:11px; color:var(--ink-3); background:none; border:0; padding:1px 5px;
-  cursor:pointer; text-align:left; font-family:var(--mono);
+.freeline{
+  font-size:10.5px; color:var(--open); font-weight:500; padding:1px 4px; border-radius:3px;
+  background:var(--open-soft); border:1px dashed var(--open-line); text-align:left;
+  cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.more:hover{color:var(--accent); text-decoration:underline}
+.more{font-size:10.5px; color:var(--ink-3); background:none; border:0; padding:1px 4px; cursor:pointer; text-align:left; font-family:var(--mono)}
+.more:hover{color:var(--open); text-decoration:underline}
 
-/* ---------- week ---------- */
+/* ---------- 週表 ---------- */
 #weekView{background:var(--paper)}
 .whead{
-  display:grid; grid-template-columns:var(--gutter-w) repeat(7,minmax(84px,1fr));
-  border-bottom:1px solid var(--rule); flex:0 0 auto;
+  display:grid; grid-template-columns:var(--gutter-w) repeat(7,minmax(88px,1fr));
+  border-bottom:2px solid var(--rule); flex:0 0 auto;
 }
 .whead .corner{
-  border-right:1px solid var(--rule-2); display:flex; align-items:flex-end;
-  justify-content:flex-end; padding:0 8px 7px 0;
+  border-right:1px solid var(--rule-2); display:flex; align-items:flex-end; justify-content:flex-end;
+  padding:0 7px 6px 0;
 }
-.whead .corner span{
-  font-family:var(--mono); font-size:10px; color:var(--ink-3); white-space:nowrap;
-  letter-spacing:.03em; font-variant-numeric:tabular-nums;
-}
+.whead .corner span{font-family:var(--mono); font-size:9.5px; color:var(--ink-3); white-space:nowrap}
 .dhead{
-  padding:6px 8px 7px; border-right:1px solid var(--rule-2); min-width:0;
-  display:flex; flex-direction:column; gap:0; cursor:pointer;
+  padding:5px 7px 6px; border-right:1px solid var(--rule-2); min-width:0;
+  display:flex; flex-direction:column; gap:0; cursor:pointer; text-align:center;
 }
 .dhead:last-child{border-right:0}
-.dhead:hover{background:var(--sunken)}
-.dhead .dw{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
-.dhead .dd{font-family:var(--display); font-size:19px; line-height:1.15; font-variant-numeric:tabular-nums}
-.dhead.today .dd{color:var(--accent); font-weight:600}
-.dhead .tot{font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-top:1px}
+.dhead:hover{background:var(--soft)}
+.dhead .dw{font-size:12.5px; font-weight:700; color:var(--uni)}
+.dhead .dw em{font-family:var(--mono); font-size:9px; font-style:normal; opacity:.65; margin-left:3px}
+.dhead.closed .dw{color:var(--rest)}
+.dhead .dd{font-family:var(--mono); font-size:15px; font-variant-numeric:tabular-nums; line-height:1.2}
+.dhead.today .dd{color:var(--open); font-weight:700}
+.dhead .tag{font-size:9.5px; line-height:1.3; color:var(--open); font-weight:500}
+.dhead.closed .tag{color:var(--rest)}
+.dhead .tag.holiday{color:var(--open); font-weight:700}
 
 .wscroll{flex:1 1 auto; overflow:auto; position:relative; display:flex; flex-direction:column}
 .wgrid{
-  display:grid; grid-template-columns:var(--gutter-w) repeat(7,minmax(84px,1fr));
-  flex:1 0 auto; min-height:calc(var(--hour-h) * var(--win-hours, 24)); position:relative;
+  display:grid; grid-template-columns:var(--gutter-w) repeat(7,minmax(88px,1fr));
+  flex:1 0 auto; min-height:calc(var(--hour-h) * var(--win-hours,15)); position:relative;
 }
 .gutter{border-right:1px solid var(--rule-2); position:relative}
 .gutter .hl{
-  position:absolute; right:8px; transform:translateY(-50%);
-  font-family:var(--mono); font-size:10.5px; color:var(--ink-3);
+  position:absolute; right:7px; transform:translateY(-50%);
+  font-family:var(--mono); font-size:10.5px; color:var(--uni); font-weight:500;
   font-variant-numeric:tabular-nums; white-space:nowrap;
 }
 .gutter .hl.last{transform:translateY(-100%)}
 .dcol{
   position:relative; border-right:1px solid var(--rule-2); min-width:0;
-  --hstep:calc(100% / var(--win-hours, 24));
-  background-image:
-    repeating-linear-gradient(to bottom,
-      var(--rule) 0, var(--rule) 1px,
-      transparent 1px, transparent var(--hstep));
+  --hstep:calc(100% / var(--win-hours,15));
+  background-image:repeating-linear-gradient(to bottom,
+    var(--rule) 0, var(--rule) 1px, transparent 1px, transparent var(--hstep));
 }
 .dcol::after{
   content:""; position:absolute; inset:0; pointer-events:none;
-  background-image:
-    repeating-linear-gradient(to bottom,
-      transparent 0,
-      transparent calc(var(--hstep) / 2 - 1px),
-      var(--rule-2) calc(var(--hstep) / 2 - 1px),
-      var(--rule-2) calc(var(--hstep) / 2),
-      transparent calc(var(--hstep) / 2),
-      transparent var(--hstep));
+  background-image:repeating-linear-gradient(to bottom,
+    transparent 0, transparent calc(var(--hstep)/2 - 1px),
+    var(--rule-2) calc(var(--hstep)/2 - 1px), var(--rule-2) calc(var(--hstep)/2),
+    transparent calc(var(--hstep)/2), transparent var(--hstep));
 }
 .dcol:last-child{border-right:0}
-.dcol.weekend{background-color:var(--weekend)}
-.dcol.todaycol{background-color:color-mix(in srgb, var(--accent-soft) 45%, transparent)}
+.dcol.closed{background-color:var(--soft)}
 
 .ev{
-  position:absolute; border-radius:5px; padding:3px 5px 3px 6px; overflow:hidden;
-  border:1px solid var(--accent-line); border-left:3px solid var(--accent);
-  background:var(--accent-soft); color:var(--accent-ink);
-  cursor:pointer; text-align:left; font-size:11.5px; line-height:1.28;
-  display:flex; flex-direction:column; gap:0; min-height:14px;
+  position:absolute; border-radius:4px; padding:3px 5px; overflow:hidden;
+  cursor:pointer; text-align:center; font-size:11.5px; line-height:1.3;
+  display:flex; flex-direction:column; justify-content:center; align-items:center; gap:1px;
+  background:var(--work-fill); color:#fff; border:1px solid rgba(0,0,0,.16);
 }
-.ev.tentative{border-color:var(--brass-line); border-left-color:var(--brass); background:var(--brass-soft); color:var(--brass-ink)}
-.ev:hover{filter:brightness(.97); z-index:5}
-:root[data-theme="dark"] .ev:hover{filter:brightness(1.28)}
-.ev b{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.ev time{font-family:var(--mono); font-size:10px; opacity:.85; font-variant-numeric:tabular-nums; white-space:nowrap}
-.ev .who{font-size:10.5px; opacity:.85; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.ev.short{flex-direction:row; align-items:baseline; gap:5px; padding-top:1px; padding-bottom:1px}
-.ev.short time{order:2}
+.ev.uni{background:var(--uni-fill)}
+.ev b{font-weight:700; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ev time{font-family:var(--mono); font-size:9.5px; opacity:.88; font-variant-numeric:tabular-nums}
+.ev .rm{font-size:9.5px; opacity:.82; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ev:hover{filter:brightness(1.15); z-index:6}
+.ev.short{flex-direction:row; gap:5px; padding:1px 5px}
+.ev.once::before{
+  content:"單次"; position:absolute; top:2px; right:3px;
+  font-size:8px; background:rgba(255,255,255,.28); padding:0 3px; border-radius:2px;
+}
+
+.slot{
+  position:absolute; border-radius:4px; padding:3px 4px; overflow:hidden; cursor:pointer;
+  background:var(--open-soft); border:1.5px dashed var(--open); color:var(--open-ink);
+  display:flex; flex-direction:column; justify-content:center; align-items:center; gap:1px;
+  text-align:center; font-size:11px; line-height:1.3;
+}
+.slot b{font-weight:700; font-size:12px}
+.slot time{font-family:var(--mono); font-size:10px; font-weight:500; font-variant-numeric:tabular-nums}
+.slot .hrs{font-size:9.5px; opacity:.8}
+.slot:hover{background:var(--open); color:#fff; border-style:solid}
+.slot.tiny{padding:1px 3px}
+.slot.tiny .hrs, .slot.tiny b{display:none}
+
+.restday{
+  position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:3px; color:var(--rest); pointer-events:none; text-align:center;
+}
+.restday b{font-size:13px; font-weight:700}
+.restday span{font-size:10.5px}
 
 .ghost-sel{
-  position:absolute; left:2px; right:2px; border-radius:5px; pointer-events:none;
-  background:var(--accent-soft); border:1px dashed var(--accent); z-index:6;
+  position:absolute; left:2px; right:2px; border-radius:4px; pointer-events:none;
+  background:var(--open-soft); border:1.5px dashed var(--open); z-index:7;
   display:flex; align-items:center; justify-content:center;
-  font-family:var(--mono); font-size:10.5px; color:var(--accent); font-variant-numeric:tabular-nums;
+  font-family:var(--mono); font-size:10.5px; color:var(--open-ink); font-variant-numeric:tabular-nums;
 }
-.nowline{position:absolute; left:0; right:0; height:0; border-top:1.5px solid var(--now); z-index:7; pointer-events:none}
-.nowline::before{
-  content:""; position:absolute; left:-4px; top:-4px; width:7px; height:7px;
-  border-radius:50%; background:var(--now);
-}
+.nowline{position:absolute; left:0; right:0; height:0; border-top:1.5px solid var(--open); z-index:8; pointer-events:none}
+.nowline::before{content:""; position:absolute; left:-4px; top:-4px; width:7px; height:7px; border-radius:50%; background:var(--open)}
 .nowlabel{
-  position:absolute; right:8px; transform:translateY(-50%); z-index:8; pointer-events:none;
-  font-family:var(--mono); font-size:10px; color:var(--paper); background:var(--now);
+  position:absolute; right:6px; transform:translateY(-50%); z-index:9; pointer-events:none;
+  font-family:var(--mono); font-size:9.5px; color:#fff; background:var(--open);
   padding:0 4px; border-radius:3px; font-variant-numeric:tabular-nums;
 }
 
-/* ---------- sheet ---------- */
-.backdrop{
-  position:fixed; inset:0; background:rgba(16,20,19,.42); z-index:40;
-  opacity:0; pointer-events:none; transition:opacity .16s;
+/* ---------- 頁尾 ---------- */
+.foot{
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  padding:6px 18px; background:var(--paper); border-top:1px solid var(--rule);
+  font-size:10.5px; color:var(--ink-3); flex:0 0 auto;
 }
+.foot .mid{margin:0 auto}
+
+/* ---------- 彈出視窗 ---------- */
+.backdrop{position:fixed; inset:0; background:rgba(14,17,20,.45); z-index:40; opacity:0; pointer-events:none; transition:opacity .16s}
 .backdrop.on{opacity:1; pointer-events:auto}
 .sheet{
-  position:fixed; top:0; right:0; bottom:0; width:min(400px,100%);
-  background:var(--paper); border-left:1px solid var(--rule); box-shadow:var(--sheet-shadow);
-  z-index:41; transform:translateX(101%); transition:transform .2s cubic-bezier(.4,0,.2,1);
-  display:flex; flex-direction:column;
+  position:fixed; z-index:41; background:var(--paper); box-shadow:var(--shadow);
+  left:50%; top:50%; transform:translate(-50%,-46%) scale(.97);
+  width:min(400px, calc(100vw - 28px)); max-height:min(88vh, 780px);
+  border-radius:12px; border:1px solid var(--rule);
+  display:flex; flex-direction:column; opacity:0; pointer-events:none;
+  transition:opacity .16s, transform .16s cubic-bezier(.4,0,.2,1);
 }
-.sheet.on{transform:none}
-.sheet header{
-  display:flex; align-items:center; gap:10px; padding:14px 18px 12px; border-bottom:1px solid var(--rule);
-}
-.sheet header h2{font-family:var(--display); font-size:18px; font-weight:600; margin:0; margin-right:auto}
-.sheet form{padding:16px 18px 18px; overflow:auto; display:flex; flex-direction:column; gap:13px; flex:1 1 auto}
+.sheet.on{opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1)}
+.sheet header{display:flex; align-items:center; gap:10px; padding:14px 16px 11px; border-bottom:1px solid var(--rule-2)}
+.sheet header h2{font-family:var(--serif); font-size:17px; font-weight:700; margin:0; margin-right:auto; color:var(--uni)}
+.sheet form{padding:15px 16px 16px; overflow:auto; display:flex; flex-direction:column; gap:12px; flex:1 1 auto}
 .field{display:flex; flex-direction:column; gap:4px}
-.field label{
-  font-family:var(--mono); font-size:10px; letter-spacing:.08em;
-  text-transform:uppercase; color:var(--ink-3);
-}
+.field > label{font-size:11.5px; font-weight:700; color:var(--ink-2)}
 .field input, .field textarea, .field select{
-  width:100%; padding:8px 10px; border:1px solid var(--rule); border-radius:var(--radius);
-  background:var(--ground); color:var(--ink); font-size:14px;
+  width:100%; padding:9px 10px; border:1px solid var(--rule); border-radius:var(--radius);
+  background:var(--soft); color:var(--ink); font-size:14px;
 }
-.field input:focus, .field textarea:focus{outline:none; border-color:var(--accent); background:var(--paper)}
-.field textarea{resize:vertical; min-height:60px; font-family:inherit}
-.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.row2 input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
-.dur{font-family:var(--mono); font-size:11px; color:var(--ink-3); align-self:center}
-.quick{display:flex; gap:5px; flex-wrap:wrap}
+.field input:focus, .field textarea:focus, .field select:focus{outline:none; border-color:var(--work); background:var(--paper)}
+#fTitle{font-size:15.5px; font-weight:500}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:9px; align-items:end}
+input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.durline{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
+
+.repeat{
+  display:flex; align-items:flex-start; gap:9px; padding:10px 11px;
+  border:1px solid var(--work); background:color-mix(in srgb, var(--work) 9%, transparent);
+  border-radius:var(--radius); cursor:pointer;
+}
+.repeat.off{border-color:var(--rule); background:var(--soft)}
+.repeat input{margin:2px 0 0; accent-color:var(--work); width:16px; height:16px; flex:0 0 auto}
+.repeat .txt{display:flex; flex-direction:column; gap:1px; min-width:0}
+.repeat b{font-size:13px; font-weight:700}
+.repeat small{font-size:11px; color:var(--ink-2); line-height:1.4}
+
+.kinds{display:flex; gap:8px}
+.kinds label{
+  flex:1; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;
+  border:1px solid var(--rule); border-radius:var(--radius); padding:8px 6px; font-size:12.5px; font-weight:500;
+}
+.kinds label:has(input[value="uni"]:checked){border-color:var(--uni); background:color-mix(in srgb, var(--uni) 13%, transparent); color:var(--uni); font-weight:700}
+.kinds label:has(input[value="work"]:checked){border-color:var(--work); background:color-mix(in srgb, var(--work) 13%, transparent); color:var(--work); font-weight:700}
+.kinds input{position:absolute; opacity:0; pointer-events:none}
+.dot{width:10px; height:10px; border-radius:2px; flex:0 0 auto}
+.dot.u{background:var(--uni-fill)} .dot.w{background:var(--work-fill)}
+
+.quick{display:flex; gap:5px; flex-wrap:wrap; align-items:center}
 .quick button{
-  border:1px solid var(--rule); background:var(--ground); border-radius:20px;
-  padding:3px 10px; font-size:11.5px; font-family:var(--mono); cursor:pointer; color:var(--ink-2);
+  border:1px solid var(--rule); background:var(--soft); border-radius:16px;
+  padding:3px 11px; font-size:11.5px; font-family:var(--mono); cursor:pointer; color:var(--ink-2);
 }
-.quick button:hover{border-color:var(--accent); color:var(--accent)}
-.statusrow{display:flex; gap:8px}
-.statusrow label{
-  flex:1; display:flex; align-items:center; gap:7px; cursor:pointer;
-  border:1px solid var(--rule); border-radius:var(--radius); padding:8px 10px;
-  font-family:var(--sans); font-size:12.5px; text-transform:none; letter-spacing:0; color:var(--ink);
-}
-.statusrow label:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
-.statusrow label:has(input[value="tentative"]:checked){border-color:var(--brass); background:var(--brass-soft)}
-.statusrow input{accent-color:var(--accent); margin:0}
+.quick button:hover{border-color:var(--open); color:var(--open)}
 
 .warn{
   display:flex; gap:8px; padding:9px 11px; border-radius:var(--radius);
-  background:var(--brass-soft); border:1px solid var(--brass-line);
-  color:var(--brass-ink); font-size:12.5px; line-height:1.4;
+  background:var(--warn-soft); border:1px solid var(--open-line); color:var(--open-ink);
+  font-size:12px; line-height:1.45;
 }
 .warn[hidden]{display:none}
 .warn svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.ro{font-size:12px; color:var(--ink-2); padding:9px 11px; border-radius:var(--radius); background:var(--soft); border:1px solid var(--rule-2); line-height:1.5}
 
-.sheet footer{
-  display:flex; gap:8px; align-items:center; padding:12px 18px;
-  border-top:1px solid var(--rule); background:var(--ground); flex:0 0 auto;
-}
+.sheet footer{display:flex; gap:8px; align-items:center; padding:11px 16px; border-top:1px solid var(--rule-2); background:var(--soft); border-radius:0 0 11px 11px; flex:0 0 auto; flex-wrap:wrap}
 .sheet footer .spacer{margin-left:auto}
-.dbtn{
-  border:1px solid var(--rule); background:transparent; color:var(--clay);
-  padding:6px 12px; border-radius:var(--radius); cursor:pointer; font-size:13px;
-}
-.dbtn:hover{background:var(--clay-soft); border-color:var(--clay)}
-.dbtn.arm{background:var(--clay); border-color:var(--clay); color:#fff; font-weight:600}
-:root[data-theme="dark"] .dbtn.arm{color:#1a0f0c}
+.dbtn{border:1px solid var(--rule); background:transparent; color:var(--danger); padding:6px 11px; border-radius:var(--radius); cursor:pointer; font-size:12.5px}
+.dbtn:hover{border-color:currentColor}
+.delchoice{display:flex; gap:6px; width:100%}
+.delchoice[hidden]{display:none}
+.delchoice button{flex:1; border:1px solid var(--danger); background:transparent; color:var(--danger); padding:7px 6px; border-radius:var(--radius); cursor:pointer; font-size:12px; font-weight:500}
+.delchoice button:hover{background:var(--danger); color:var(--paper)}
 
-.readonly-note{
-  font-size:12px; color:var(--ink-3); padding:9px 11px; border-radius:var(--radius);
-  background:var(--sunken); border:1px solid var(--rule-2); line-height:1.45;
-}
-
-/* ---------- toast ---------- */
 #toast{
-  position:fixed; bottom:18px; left:50%; transform:translate(-50%,14px);
-  background:var(--ink); color:var(--paper); padding:9px 16px; border-radius:20px;
+  position:fixed; bottom:20px; left:50%; transform:translate(-50%,14px);
+  background:var(--ink); color:var(--paper); padding:9px 16px; border-radius:18px;
   font-size:13px; z-index:60; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
-  box-shadow:var(--shadow); max-width:min(92vw,420px); text-align:center;
+  box-shadow:var(--shadow); max-width:min(92vw,440px); text-align:center;
 }
 #toast.on{opacity:1; transform:translate(-50%,0)}
 
-/* ---------- storage banner ---------- */
 .banner{
-  display:flex; gap:9px; align-items:center; padding:7px 18px; font-size:12px;
-  background:var(--brass-soft); color:var(--brass-ink); border-bottom:1px solid var(--brass-line);
-  flex:0 0 auto; line-height:1.4;
+  display:flex; gap:9px; align-items:center; padding:6px 18px; font-size:11.5px;
+  background:var(--soft); color:var(--ink-2); border-bottom:1px solid var(--rule); flex:0 0 auto; line-height:1.45;
 }
 .banner[hidden]{display:none}
 .banner svg{width:14px;height:14px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.banner button{
-  margin-left:auto; background:none; border:0; color:inherit; cursor:pointer;
-  font-family:var(--mono); font-size:11px; text-decoration:underline; padding:0; flex:0 0 auto;
-}
+.banner button{margin-left:auto; background:none; border:0; color:inherit; cursor:pointer; font-size:11px; text-decoration:underline; padding:0; flex:0 0 auto}
 
-/* ---------- responsive ---------- */
-@media (max-width:860px){
-  .brand h1{font-size:18px}
+@media (max-width:900px){
+  .topbar{gap:9px; padding:9px 12px}
+  .brand h1{font-size:16px}
+  .periodbar{padding:7px 12px}
   .legend{width:100%; margin-left:0}
-  .topbar{gap:10px; padding:10px 12px}
-  .periodbar{padding:8px 12px}
-  .wscroll{overflow:auto}
-  .wgrid, .whead{grid-template-columns:var(--gutter-w) repeat(7,minmax(76px,1fr)); min-width:640px}
+  .wgrid,.whead{grid-template-columns:var(--gutter-w) repeat(7,minmax(78px,1fr)); min-width:640px}
   .whead{overflow:hidden}
-  .mgrid{grid-auto-rows:minmax(78px,1fr)}
-  .hint{display:none}
+  .mgrid{grid-auto-rows:minmax(80px,1fr)}
+  .foot .mid{margin:0}
 }
 @media (max-width:520px){
-  :root{--hour-h:52px; --gutter-w:48px}
-  .brand .tz{display:none}
+  :root{--hour-h:50px; --gutter-w:46px}
   .mcell{padding:3px}
   .chip time{display:none}
 }
 </style>
 
+<!-- =====================================================================
+     設定 — 平時要改的東西全部都在這裡
+     ===================================================================== -->
+<script>
+window.CALENDAR_CONFIG = {
+
+  title: "每週固定時間表",
+  subtitle: "港大課堂 × 新東方教學 ・ 可排課空檔一覽",
+  footNote: "新東方 ・ 前途出國",
+  copyright: "© By Bosco Fung, All rights reserved",
+
+  // 加 #你的密語 在網址最尾就進入管理模式（可改／刪任何課堂）。
+  // 分享網址之前務必改成只有你知道的字。
+  ownerKey: "owner",
+
+  // 週表顯示的時間範圍，同時也是可以排課的範圍
+  dayStart: "08:00",
+  dayEnd:   "23:00",
+
+  // 交通緩衝：緊接港大課堂的空檔要扣幾多分鐘（0 = 不扣）
+  travelBuffer: 30,
+  // 短過幾多分鐘就不當作可排課
+  minSlot: 60,
+
+  // 邊幾日開放收新課。索引 0=星期一 … 6=星期日
+  openDays: [true, true, false, true, true, false, false],
+
+  // 某日只開放部分時段（只有 openDays 標 false 的日子先需要用）
+  extraWindows: { 2: [["09:30", "11:30"]] },
+
+  // 假期／特別日子：格仔會標示，當日不計可排課
+  holidays: {
+    "2026-09-25": "中秋節",
+    "2026-09-26": "中秋節翌日"
+  },
+
+  // ---- 共用儲存 -------------------------------------------------------
+  // 已接駁 Firestore：所有人睇到同一份資料，改動即時同步。
+  // 想暫時斷開改返本機測試，把下面成段換成 firebase: null 就得。
+  firebase: {
+    apiKey: "AIzaSyB_ul9mlqMuEHkwDIeHRQdNl2B5azS8NP0",
+    authDomain: "boscofungg-web.firebaseapp.com",
+    projectId: "boscofungg-web",
+    storageBucket: "boscofungg-web.firebasestorage.app",
+    messagingSenderId: "940059203418",
+    appId: "1:940059203418:web:de4a33b7bb3c7e46e08563"
+  }
+};
+</script>
+
 <header class="topbar">
   <div class="brand">
-    <h1>Open Slots<span class="owner-tag" id="ownerTag" hidden>owner</span></h1>
-    <span class="tz" id="tzline">Hong Kong · GMT+8</span>
+    <h1 id="hTitle">每週固定時間表<span class="owner-tag" id="ownerTag" hidden>管理模式</span></h1>
+    <span class="sub" id="hSub"></span>
   </div>
 
   <div class="cluster">
-    <div class="seg" role="group" aria-label="Calendar view">
-      <button id="btnMonth" aria-pressed="false">Month</button>
-      <button id="btnWeek" aria-pressed="true">Week</button>
+    <div class="seg" role="group" aria-label="檢視模式">
+      <button id="btnMonth" aria-pressed="false">月曆</button>
+      <button id="btnWeek" aria-pressed="true">週表</button>
     </div>
   </div>
 
   <div class="cluster">
-    <button class="icobtn" id="btnPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-    <button class="tbtn" id="btnToday">Today</button>
-    <button class="icobtn" id="btnNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="icobtn" id="btnPrev" aria-label="上一頁"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="tbtn" id="btnToday">本週</button>
+    <button class="icobtn" id="btnNext" aria-label="下一頁"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
   </div>
 
   <div class="cluster">
-    <button class="tbtn ghost" id="btnClock" title="Toggle 12/24-hour clock">24h</button>
-    <button class="tbtn ghost" id="btnIcs" title="Download all bookings as a calendar file">Export</button>
-    <button class="pbtn" id="btnNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Request a slot</button>
+    <button class="tbtn ghost" id="btnIcs" title="下載日曆檔，可匯入 Google／Apple 日曆">匯出</button>
+    <button class="pbtn" id="btnNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增課堂</button>
   </div>
 </header>
 
 <div class="banner" id="banner" hidden>
   <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
   <span id="bannerText"></span>
-  <button id="bannerX">dismiss</button>
+  <button id="bannerX">關閉</button>
 </div>
 
 <div class="periodbar">
   <h2 id="periodLabel">—</h2>
   <div class="legend">
-    <span class="key"><i class="swatch busy"></i>Confirmed</span>
-    <span class="key"><i class="swatch tent"></i>Awaiting confirmation</span>
-    <span class="hint" id="hint">drag on the grid to pick a time</span>
+    <span class="key"><i class="sw u"></i>港大課堂</span>
+    <span class="key"><i class="sw w"></i>新東方教學</span>
+    <span class="key"><i class="sw o"></i>可排課空檔</span>
+    <span class="key"><i class="sw r"></i>不開放</span>
   </div>
 </div>
 
@@ -517,61 +554,84 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
   </section>
 </main>
 
+<div class="foot">
+  <span id="fLeft"></span>
+  <span class="mid" id="fMid"></span>
+  <span id="fRight">所有時間為香港時間</span>
+</div>
+
 <div class="backdrop" id="backdrop"></div>
 
 <aside class="sheet" id="sheet" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <header>
-    <h2 id="sheetTitle">Request a slot</h2>
-    <button class="icobtn" id="btnClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="sheetTitle">新增課堂</h2>
+    <button class="icobtn" id="btnClose" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </header>
 
   <form id="form" autocomplete="off">
     <div class="field">
-      <label for="fTitle">What is it</label>
-      <input id="fTitle" name="title" required maxlength="80" placeholder="e.g. Chemistry — Redox revision">
+      <label for="fTitle">課堂名稱</label>
+      <input id="fTitle" name="title" required maxlength="40" placeholder="例：陳大文 1v1">
     </div>
 
-    <div class="field">
-      <label for="fWho">Your name</label>
-      <input id="fWho" name="who" maxlength="50" placeholder="So I know who booked it">
+    <label class="repeat" id="repeatBox">
+      <input type="checkbox" id="fRepeat" checked>
+      <span class="txt">
+        <b>每週重複</b>
+        <small id="repeatHint">每個星期同一時間都會出現</small>
+      </span>
+    </label>
+
+    <div class="field" id="dowField">
+      <label for="fDow">星期</label>
+      <select id="fDow">
+        <option value="0">星期一</option><option value="1">星期二</option>
+        <option value="2">星期三</option><option value="3">星期四</option>
+        <option value="4">星期五</option><option value="5">星期六</option>
+        <option value="6">星期日</option>
+      </select>
     </div>
 
-    <div class="field">
-      <label for="fDate">Date</label>
-      <input id="fDate" name="date" type="date" required>
+    <div class="field" id="dateField" hidden>
+      <label for="fDate">日期</label>
+      <input id="fDate" type="date">
     </div>
 
     <div class="row2">
       <div class="field">
-        <label for="fStart">Starts</label>
-        <input id="fStart" name="start" type="time" step="300" required>
+        <label for="fStart">開始</label>
+        <input id="fStart" type="time" step="300" required>
       </div>
       <div class="field">
-        <label for="fEnd">Ends</label>
-        <input id="fEnd" name="end" type="time" step="300" required>
+        <label for="fEnd">結束</label>
+        <input id="fEnd" type="time" step="300" required>
       </div>
     </div>
 
     <div class="quick" id="quick">
-      <button type="button" data-min="30">30 min</button>
-      <button type="button" data-min="45">45 min</button>
-      <button type="button" data-min="60">1 hr</button>
-      <button type="button" data-min="90">1½ hr</button>
-      <button type="button" data-min="120">2 hr</button>
-      <span class="dur" id="durOut"></span>
+      <button type="button" data-min="60">1 小時</button>
+      <button type="button" data-min="90">1.5 小時</button>
+      <button type="button" data-min="120">2 小時</button>
+      <button type="button" data-min="180">3 小時</button>
+      <span class="durline" id="durOut"></span>
     </div>
 
-    <div class="field">
-      <label>Status</label>
-      <div class="statusrow">
-        <label><input type="radio" name="status" value="tentative" checked>Requested</label>
-        <label><input type="radio" name="status" value="busy">Confirmed</label>
+    <div class="field" id="whoField">
+      <label for="fWho">你的名字 <span style="font-weight:400;color:var(--ink-3)">（方便聯絡，選填）</span></label>
+      <input id="fWho" maxlength="30" placeholder="選填">
+    </div>
+
+    <div class="field" id="kindField" hidden>
+      <label>類別</label>
+      <div class="kinds">
+        <label><input type="radio" name="kind" value="uni"><i class="dot u"></i>港大課堂</label>
+        <label><input type="radio" name="kind" value="work" checked><i class="dot w"></i>新東方教學</label>
       </div>
     </div>
 
-    <div class="field">
-      <label for="fNote">Notes <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
-      <textarea id="fNote" name="note" maxlength="400" placeholder="Topics to cover, where to meet, phone number…"></textarea>
+    <div class="field" id="noteField" hidden>
+      <label for="fNote">備註 <span style="font-weight:400;color:var(--ink-3)">（課室／科目代碼，選填）</span></label>
+      <input id="fNote" maxlength="40" placeholder="例：KKLG110">
     </div>
 
     <div class="warn" id="clash" hidden>
@@ -579,177 +639,122 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
       <span id="clashText"></span>
     </div>
 
-    <div class="readonly-note" id="roNote" hidden></div>
+    <div class="ro" id="roNote" hidden></div>
   </form>
 
   <footer>
-    <button class="dbtn" id="btnDelete" hidden>Delete</button>
+    <button class="dbtn" id="btnDelete" type="button" hidden>刪除</button>
     <span class="spacer"></span>
-    <button class="tbtn" id="btnCancel" type="button">Cancel</button>
-    <button class="pbtn" id="btnSave" type="submit" form="form">Save</button>
+    <button class="tbtn" id="btnCancel" type="button">取消</button>
+    <button class="pbtn" id="btnSave" type="submit" form="form">儲存</button>
+    <div class="delchoice" id="delChoice" hidden>
+      <button type="button" id="delOne">只刪這一次</button>
+      <button type="button" id="delAll">刪除整個系列</button>
+      <button type="button" id="delCancel" style="flex:0 0 auto;border-color:var(--rule);color:var(--ink-2)">返回</button>
+    </div>
   </footer>
 </aside>
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<!-- =====================================================================
-     SETTINGS — everything you'd normally want to change lives right here.
-     ===================================================================== -->
-<script>
-window.CALENDAR_CONFIG = {
-
-  // Shown as the page heading and the browser tab title.
-  title: "Open Slots",
-
-  // Small line under the heading. Say where you are so people book sanely.
-  tz: "Hong Kong \u00b7 GMT+8",
-
-  // Add #yourSecretWord to the end of your URL to unlock owner mode
-  // (edit and delete anything, and new entries default to Confirmed).
-  // CHANGE THIS to something only you know.
-  ownerKey: "owner",
-
-  // Monday-first week. Set to false for a Sunday-first week.
-  weekStartsMonday: true,
-
-  // The hours the week grid shows. Nothing can be booked outside them,
-  // so the dead hours overnight don't take up half the screen.
-  dayStart: "08:00",
-  dayEnd:   "23:00",
-
-  // Fills the calendar with example bookings so you can try it out.
-  // Set to false before you share the link with anyone.
-  demo: false,
-
-  // ---- Shared storage -------------------------------------------------
-  // Leave as null and bookings are saved in each visitor's own browser
-  // (fine for testing, useless for real booking - nobody sees anyone else's).
-  //
-  // Paste your Firebase web config here to make it a real shared calendar.
-  // Step-by-step instructions are in README.md.
-  firebase: null
-  /*
-  firebase: {
-    apiKey: "...",
-    authDomain: "your-project.firebaseapp.com",
-    projectId: "your-project",
-    storageBucket: "your-project.firebasestorage.app",
-    messagingSenderId: "...",
-    appId: "..."
-  }
-  */
-};
-</script>
-
 <script>
 "use strict";
-/* =====================================================================
-   CONFIG — edit index.html's CALENDAR_CONFIG block (below the app) to
-   point this at Firebase. With no config it stores bookings in this
-   browser only, which is perfect for trying it out.
-   ===================================================================== */
+
 const CFG = Object.assign({
-  title: "Open Slots",
-  tz: "Hong Kong · GMT+8",
-  ownerKey: "owner",
-  weekStartsMonday: true,
-  dayStart: "08:00",
-  dayEnd: "23:00",
-  demo: false,
-  firebase: null
+  title: "每週固定時間表", subtitle: "", footNote: "", copyright: "",
+  ownerKey: "owner", dayStart: "08:00", dayEnd: "23:00",
+  travelBuffer: 30, minSlot: 60,
+  openDays: [true, true, true, true, true, false, false],
+  extraWindows: {}, holidays: {}, firebase: null
 }, window.CALENDAR_CONFIG || {});
 
-document.title = CFG.title;
-document.querySelector(".brand h1").firstChild.nodeValue = CFG.title;
-document.getElementById("tzline").textContent = CFG.tz;
-
 const IS_OWNER = location.hash.replace(/^#/, "") === CFG.ownerKey;
-if (IS_OWNER) document.getElementById("ownerTag").hidden = false;
 
 /* ---------------------------------------------------------------
-   Date + time helpers
+   時間 / 日期小工具
    --------------------------------------------------------------- */
-const DAY_MS = 86400000;
 const pad = n => String(n).padStart(2, "0");
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 const addDays = (d, n) => { const c = new Date(d); c.setDate(c.getDate() + n); return c; };
 const sameDay = (a, b) => ymd(a) === ymd(b);
-const toMin = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-const toHHMM = m => `${pad(Math.floor(m / 60) % 24)}:${pad(Math.round(m) % 60)}`;
+const toMin = t => { const [h, m] = String(t).split(":").map(Number); return h * 60 + m; };
+const toHHMM = m => `${pad(Math.floor(m / 60))}:${pad(Math.round(m) % 60)}`;
+const fmt = m => toHHMM(m);
+const fmtRange = (a, b) => `${fmt(a)}–${fmt(b)}`;
+const hrs = m => (Math.round((m / 60) * 100) / 100).toString();
 
-/* The visible slice of the day. Everything in the week grid is measured
-   against this window rather than a full 24 hours. */
+/* 星期一 = 0，同 gen_weekly.py 的 E 字典一致 */
+const dowOf = d => (d.getDay() + 6) % 7;
+const startOfWeek = d => { const c = new Date(d); c.setHours(0,0,0,0); return addDays(c, -dowOf(c)); };
+
+const DOW_ZH = ["星期一","星期二","星期三","星期四","星期五","星期六","星期日"];
+const DOW_EN = ["MON","TUE","WED","THU","FRI","SAT","SUN"];
+
 const WIN_A = toMin(CFG.dayStart);
 const WIN_B = toMin(CFG.dayEnd);
 const WIN   = WIN_B - WIN_A;
 const HOURS = Math.round(WIN / 60);
-const pct   = m => ((m - WIN_A) / WIN) * 100;      // minute -> % down the grid
+const pct = m => ((m - WIN_A) / WIN) * 100;
 const inWindow = m => m >= WIN_A && m <= WIN_B;
 
-function startOfWeek(d) {
-  const c = new Date(d); c.setHours(0, 0, 0, 0);
-  const dow = c.getDay();                      // 0 = Sun
-  const back = CFG.weekStartsMonday ? (dow + 6) % 7 : dow;
-  return addDays(c, -back);
-}
-
-let use12 = false;
-function fmt(m) {
-  m = Math.round(m);
-  const h = Math.floor(m / 60) % 24, mi = m % 60;
-  if (!use12) return `${pad(h)}:${pad(mi)}`;
-  const ap = h < 12 ? "am" : "pm";
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return mi ? `${h12}:${pad(mi)}${ap}` : `${h12}${ap}`;
-}
-function fmtRange(a, b) { return `${fmt(a)}–${fmt(b)}`; }
-function fmtDur(m) {
-  if (m <= 0) return "—";
-  const h = Math.floor(m / 60), mi = m % 60;
-  return (h ? `${h} hr ` : "") + (mi ? `${mi} min` : "") || `${h} hr`;
-}
-
-const DOW_LONG = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const DOW_SHORT = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const isOpenDay = dow => !!CFG.openDays[dow];
+const windowsFor = dow => (CFG.extraWindows[dow] || []).map(w => [toMin(w[0]), toMin(w[1])]);
+const holidayOn = key => CFG.holidays[key] || null;
 
 /* ---------------------------------------------------------------
-   Demo data — only in the preview build (CALENDAR_CONFIG.demo),
-   only when nothing is stored yet. Never runs on the real site.
+   預設課堂表 — 直接由 gen_weekly.py 的 E 字典搬過嚟
+   dow：0=星期一 … 6=星期日；時間用分鐘
    --------------------------------------------------------------- */
-function seedDemo() {
-  const mon = startOfWeek(new Date());
-  const D = n => ymd(addDays(mon, n));
-  return [
-    { title: "Chemistry — Redox & electrolysis", who: "Karen Y. (S6)",  date: D(0), start: 16*60,      end: 17*60+30, status: "busy",      note: "Bring 2023 Paper 1 Q7–Q9." },
-    { title: "M1 — Binomial & Poisson",          who: "Marcus L.",      date: D(0), start: 19*60,      end: 20*60+30, status: "busy",      note: "" },
-    { title: "Physics — Mechanics Q&A",          who: "Tsang siblings", date: D(1), start: 11*60+30,   end: 12*60+15, status: "busy",      note: "Short session, projectile motion only." },
-    { title: "Marking — mock papers",            who: "",               date: D(1), start: 14*60,      end: 16*60,    status: "busy",      note: "Blocked out, not available." },
-    { title: "Chemistry — trial lesson",         who: "Priya S.",       date: D(2), start: 17*60+15,   end: 18*60,    status: "tentative", note: "First time — confirm by Wednesday." },
-    { title: "M1 — Calculus catch-up",           who: "Karen Y. (S6)",  date: D(3), start: 16*60,      end: 17*60,    status: "busy",      note: "" },
-    { title: "Physics — past paper drill",       who: "Marcus L.",      date: D(4), start: 18*60+30,   end: 20*60,    status: "tentative", note: "" },
-    { title: "Group revision — DSE Chem",        who: "4 students",     date: D(5), start: 10*60,      end: 12*60+30, status: "busy",      note: "Room B, bring the Chapter 9 booklet." }
-  ].map((e, i) => ({ ...e, id: "demo" + i, createdAt: Date.now() }));
+function defaultTimetable() {
+  const T = (h, m) => h * 60 + (m || 0);
+  const rows = [
+    [0, T(12),    T(12,50), "uni",  "FINA 4354",      "KKLG110"],
+    [0, T(15),    T(17),    "work", "李子敬 1v1",      "ACCT1101"],
+    [0, T(17),    T(18),    "work", "揚帆班課",        ""],
+    [0, T(18),    T(20),    "work", "來晏如 1v1",      ""],
+
+    [1, T(9),     T(11,50), "uni",  "STAT 4601",      "MWT2"],
+    [1, T(13),    T(14,50), "uni",  "FINA 2390",      "KK101"],
+    [1, T(17),    T(19),    "work", "陳子洋 1v1",      ""],
+    [1, T(19),    T(21),    "work", "周子揚 1v1",      ""],
+
+    [2, T(9,30),  T(11,30), "work", "盛涵宇 1v1",      ""],
+    [2, T(12),    T(12,50), "uni",  "FINA 2390",      "KK101"],
+    [2, T(13),    T(13,50), "uni",  "STAT 4601 導修",  "CPD2.37"],
+    [2, T(17),    T(19),    "work", "揚帆班課",        ""],
+
+    [3, T(12,30), T(14,30), "work", "黃歆茹 1v1",      ""],
+    [3, T(14,30), T(16,30), "work", "李子敬 1v1",      "ECON1210"],
+    [3, T(17),    T(18,50), "uni",  "FINA 4354",      "KKLG110"],
+    [3, T(19),    T(21),    "work", "徐詩雅 1v1",      ""],
+
+    [4, T(10),    T(10,50), "uni",  "FINA 2390 導修",  "KK1104"],
+    [4, T(17),    T(19),    "work", "揚帆班課",        ""],
+    [4, T(19),    T(21),    "work", "周子揚 1v1",      ""],
+
+    [5, T(10),    T(12),    "work", "揚帆班課",        ""],
+    [5, T(13),    T(15),    "work", "揚帆班課",        ""],
+    [5, T(15),    T(17),    "work", "揚帆自習＋Michael 1v1", "可延至 18:00"]
+  ];
+  return rows.map((r, i) => ({
+    id: "base" + i, dow: r[0], start: r[1], end: r[2], kind: r[3],
+    title: r[4], note: r[5], who: "", repeat: true, skip: [],
+    status: "busy", createdAt: Date.now()
+  }));
 }
 
 /* ---------------------------------------------------------------
-   Storage — Firebase Firestore when configured, else this browser
+   儲存 — 有 Firebase 就用 Firebase，否則存在本機瀏覽器
    --------------------------------------------------------------- */
 const Store = (() => {
-  let events = [];
-  let onChange = () => {};
-  let mode = "local";
-  let fs = null;                       // { db, api } once Firebase is up
-  const LS_KEY = "openslots.events.v1";
-  const MINE_KEY = "openslots.mine.v1";
+  let events = [], onChange = () => {}, mode = "local", fs = null, seeded = false;
+  const LS = "timetable.events.v2", MINE = "timetable.mine.v2";
 
-  const readLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch { return []; } };
-  const writeLocal = v => { try { localStorage.setItem(LS_KEY, JSON.stringify(v)); } catch {} };
-
-  let mine = (() => { try { return new Set(JSON.parse(localStorage.getItem(MINE_KEY) || "[]")); } catch { return new Set(); } })();
-  const remember = id => { mine.add(id); try { localStorage.setItem(MINE_KEY, JSON.stringify([...mine])); } catch {} };
-
+  const readLocal = () => { try { return JSON.parse(localStorage.getItem(LS) || "null"); } catch { return null; } };
+  const writeLocal = v => { try { localStorage.setItem(LS, JSON.stringify(v)); } catch {} };
+  let mine = (() => { try { return new Set(JSON.parse(localStorage.getItem(MINE) || "[]")); } catch { return new Set(); } })();
+  const remember = id => { mine.add(id); try { localStorage.setItem(MINE, JSON.stringify([...mine])); } catch {} };
   const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
   async function initFirebase(cfg) {
@@ -757,13 +762,27 @@ const Store = (() => {
     const { initializeApp } = await import(base + "firebase-app.js");
     const api = await import(base + "firebase-firestore.js");
     const db = api.getFirestore(initializeApp(cfg));
-    fs = { db, api };
-    mode = "firebase";
-    api.onSnapshot(
-      api.collection(db, "events"),
-      snap => { events = snap.docs.map(d => ({ id: d.id, ...d.data() })); onChange(); },
-      err => { console.error("[openslots]", err); banner("Can't reach the booking database right now — showing the last data loaded. " + (err.code || "")); }
-    );
+    fs = { db, api }; mode = "firebase";
+
+    api.onSnapshot(api.collection(db, "lessons"),
+      async snap => {
+        events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // 資料庫係空嘅（第一次用）→ 把預設時間表寫上去，只做一次
+        if (!events.length && !snap.metadata.fromCache && !seeded) {
+          seeded = true;
+          try {
+            for (const e of defaultTimetable()) {
+              const b = { ...e }; delete b.id; delete b.skip;
+              b.skip = [];
+              const ref = await api.addDoc(api.collection(db, "lessons"), b);
+              remember(ref.id);
+            }
+          } catch (err) { console.error("[timetable] 寫入預設時間表失敗:", err); banner("寫入預設時間表失敗，請檢查 Firestore 規則。"); }
+          return;                      // onSnapshot 會再叫一次
+        }
+        onChange();
+      },
+      err => { console.error("[timetable]", err); banner("暫時連唔到資料庫，顯示緊上次載入嘅內容。" + (err.code || "")); });
   }
 
   return {
@@ -774,24 +793,19 @@ const Store = (() => {
       onChange = cb;
       if (CFG.firebase && CFG.firebase.projectId) {
         try { await initFirebase(CFG.firebase); return; }
-        catch (e) {
-          console.error("[openslots] Firebase failed to load:", e);
-          banner("Couldn't connect to Firebase, so bookings are being saved in this browser only.");
-        }
+        catch (e) { console.error("[timetable] Firebase 載入失敗:", e); banner("連唔到 Firebase，課堂暫時只存喺你自己部機。"); }
       }
-      events = readLocal();
-      if (!events.length && CFG.demo) { events = seedDemo(); writeLocal(events); events.forEach(e => remember(e.id)); }
+      const stored = readLocal();
+      events = stored === null ? defaultTimetable() : stored;
+      if (stored === null) { writeLocal(events); events.forEach(e => remember(e.id)); }
       onChange();
-      if (!CFG.firebase) {
-        banner("Saved in this browser only — nobody else can see these bookings yet. Connect Firebase to make it shared. ", true);
-      }
+      if (!CFG.firebase) banner("課堂只儲存喺你自己部瀏覽器，其他人睇唔到。接駁 Firebase 之後先會共用。");
     },
     async save(ev) {
       if (mode === "firebase") {
-        const { api, db } = fs;
-        const body = { ...ev }; delete body.id;
-        if (ev.id) { await api.setDoc(api.doc(db, "events", ev.id), body); return ev.id; }
-        const ref = await api.addDoc(api.collection(db, "events"), body);
+        const { api, db } = fs, body = { ...ev }; delete body.id;
+        if (ev.id) { await api.setDoc(api.doc(db, "lessons", ev.id), body); return ev.id; }
+        const ref = await api.addDoc(api.collection(db, "lessons"), body);
         remember(ref.id); return ref.id;
       }
       if (ev.id) { const i = events.findIndex(e => e.id === ev.id); if (i > -1) events[i] = { ...ev }; }
@@ -799,214 +813,260 @@ const Store = (() => {
       writeLocal(events); onChange(); return ev.id;
     },
     async remove(id) {
-      if (mode === "firebase") { await fs.api.deleteDoc(fs.api.doc(fs.db, "events", id)); return; }
+      if (mode === "firebase") { await fs.api.deleteDoc(fs.api.doc(fs.db, "lessons", id)); return; }
       events = events.filter(e => e.id !== id); writeLocal(events); onChange();
     }
   };
 })();
 
-function banner(text, soft) {
-  const b = document.getElementById("banner");
+function banner(text) {
   document.getElementById("bannerText").textContent = text;
-  b.hidden = false;
-  if (soft) b.style.background = "var(--sunken)", b.style.color = "var(--ink-2)", b.style.borderColor = "var(--rule)";
+  document.getElementById("banner").hidden = false;
 }
 document.getElementById("bannerX").onclick = () => { document.getElementById("banner").hidden = true; };
 
 /* ---------------------------------------------------------------
-   App state
+   把「每週重複」展開成某一日嘅課堂
    --------------------------------------------------------------- */
-const state = { view: "week", cursor: new Date() };
-const byDate = new Map();
-
-function index() {
-  byDate.clear();
-  for (const e of Store.all()) {
-    if (!e || !e.date) continue;
-    if (!byDate.has(e.date)) byDate.set(e.date, []);
-    byDate.get(e.date).push(e);
-  }
-  for (const list of byDate.values()) list.sort((a, b) => a.start - b.start || a.end - b.end);
+function lessonsOn(date) {
+  const key = ymd(date), dow = dowOf(date);
+  return Store.all()
+    .filter(e => e && (e.repeat ? e.dow === dow && !(e.skip || []).includes(key) : e.date === key))
+    .sort((a, b) => a.start - b.start || a.end - b.end);
 }
-const dayEvents = d => byDate.get(ymd(d)) || [];
 
-function canEdit(ev) { return IS_OWNER || !ev.id || Store.isMine(ev.id); }
+/* 可排課空檔 — 演算法照搬 gen_weekly.py 的 free_slots() */
+function freeSlots(date) {
+  const dow = dowOf(date), key = ymd(date);
+  if (holidayOn(key)) return [];
+  const wins = windowsFor(dow);
+  if (!isOpenDay(dow) && !wins.length) return [];
+
+  const evs = lessonsOn(date);
+  const BUF = CFG.travelBuffer, MIN = CFG.minSlot;
+  const up = t => Math.ceil(t / 30) * 30, down = t => Math.floor(t / 30) * 30;
+
+  const gaps = [];
+  let cur = WIN_A, pk = null;
+  for (const e of evs) {
+    if (e.start > cur) gaps.push([cur, e.start, pk, e.kind]);
+    if (e.end > cur) { cur = e.end; pk = e.kind; }
+  }
+  if (cur < WIN_B) gaps.push([cur, WIN_B, pk, null]);
+
+  let out = [];
+  for (const [g0, g1, prev, next] of gaps) {
+    const a = up(g0 + (prev === "uni" ? BUF : 0));
+    const b = down(g1 - (next === "uni" ? BUF : 0));
+    if (b - a >= MIN) out.push([a, b]);
+  }
+  if (wins.length) {
+    const clipped = [];
+    for (const [a, b] of out) for (const [w0, w1] of wins) {
+      const lo = Math.max(a, w0), hi = Math.min(b, w1);
+      if (hi - lo >= MIN) clipped.push([lo, hi]);
+    }
+    out = clipped;
+  }
+  return out;
+}
 
 /* ---------------------------------------------------------------
-   Month view
+   狀態
+   --------------------------------------------------------------- */
+const state = { view: "week", cursor: new Date() };
+const canEdit = ev => IS_OWNER || !ev.id || Store.isMine(ev.id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+/* ---------------------------------------------------------------
+   月曆
    --------------------------------------------------------------- */
 const mdow = document.getElementById("mdow");
 const mgrid = document.getElementById("mgrid");
-
-(function buildDow() {
-  const order = CFG.weekStartsMonday ? [1,2,3,4,5,6,0] : [0,1,2,3,4,5,6];
-  mdow.innerHTML = order.map(i => `<div>${DOW_SHORT[i]}</div>`).join("");
-})();
+mdow.innerHTML = DOW_ZH.map((z, i) => `<div class="${isOpenDay(i) ? "" : "off"}">${z}</div>`).join("");
 
 function renderMonth() {
   const cur = state.cursor;
   const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
   const gridStart = startOfWeek(first);
   const last = new Date(cur.getFullYear(), cur.getMonth() + 1, 0);
-  const weeks = Math.ceil((Math.round((startOfWeek(last) - gridStart) / DAY_MS) + 7) / 7);
+  const weeks = Math.ceil((Math.round((startOfWeek(last) - gridStart) / 86400000) + 7) / 7);
   const today = new Date();
 
-  const cells = [];
+  let html = "";
   for (let i = 0; i < weeks * 7; i++) {
-    const d = addDays(gridStart, i);
+    const d = addDays(gridStart, i), key = ymd(d), dow = dowOf(d);
     const out = d.getMonth() !== cur.getMonth();
-    const evs = dayEvents(d);
-    const shown = evs.slice(0, 3);
-    const chips = shown.map(e => `
-      <button class="chip ${e.status === "tentative" ? "tentative" : ""}" data-ev="${e.id}" type="button">
+    const holi = holidayOn(key);
+    const evs = lessonsOn(d);
+    const free = freeSlots(d);
+    const chips = evs.slice(0, 3).map(e => `
+      <button class="chip ${e.kind === "uni" ? "uni" : ""} ${e.status === "tentative" ? "tentative" : ""}"
+              data-ev="${e.id}" data-on="${key}" type="button">
         <time>${fmt(e.start)}</time><span>${esc(e.title)}</span>
       </button>`).join("");
-    const more = evs.length > 3
-      ? `<button class="more" data-goweek="${ymd(d)}" type="button">+${evs.length - 3} more</button>` : "";
-    cells.push(`
-      <div class="mcell ${out ? "out" : (d.getDay() === 0 || d.getDay() === 6) ? "wknd" : ""} ${sameDay(d, today) ? "today" : ""}" data-day="${ymd(d)}">
-        <span class="dnum">${d.getDate()}</span>
-        <div class="chips">${chips}${more}</div>
-      </div>`);
+    const more = evs.length > 3 ? `<button class="more" data-goweek="${key}" type="button">還有 ${evs.length - 3} 堂</button>` : "";
+    const freeTotal = free.reduce((s, [a, b]) => s + (b - a), 0);
+    const freeLine = free.length && !out
+      ? `<button class="freeline" data-goweek="${key}" type="button">可排課 ${hrs(freeTotal)} 小時</button>` : "";
+    const closed = !isOpenDay(dow) && !windowsFor(dow).length;
+
+    html += `
+      <div class="mcell ${out ? "out" : ""} ${closed && !out ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-day="${key}">
+        <div class="dtop">
+          <span class="dnum">${d.getDate()}</span>
+          ${holi ? `<span class="holi">${esc(holi)}</span>` : ""}
+        </div>
+        <div class="chips">${chips}${more}${freeLine}</div>
+      </div>`;
   }
-  mgrid.innerHTML = cells.join("");
-  mgrid.style.gridAutoRows = `minmax(${weeks > 5 ? 88 : 104}px, 1fr)`;
+  mgrid.innerHTML = html;
+  mgrid.style.gridAutoRows = `minmax(${weeks > 5 ? 86 : 102}px, 1fr)`;
 }
 
 /* ---------------------------------------------------------------
-   Week view
+   週表
    --------------------------------------------------------------- */
 const whead = document.getElementById("whead");
 const wgrid = document.getElementById("wgrid");
 const gutter = document.getElementById("gutter");
-const wscroll = document.getElementById("wscroll");
 
 const HOUR_MARKS = [];
 for (let m = WIN_A + 60; m <= WIN_B; m += 60) HOUR_MARKS.push(m);
-
-function buildGutter() {
-  gutter.innerHTML = HOUR_MARKS.map((m, i) =>
-    `<span class="hl${i === HOUR_MARKS.length - 1 ? " last" : ""}" style="top:${pct(m)}%">${fmt(m)}</span>`
-  ).join("");
-}
-buildGutter();
-const relabelGutter = buildGutter;
-document.getElementById("winLabel").textContent = `${Math.floor(WIN_A/60)}\u2013${Math.floor(WIN_B/60)}h`;
+gutter.innerHTML = HOUR_MARKS.map((m, i) =>
+  `<span class="hl${i === HOUR_MARKS.length - 1 ? " last" : ""}" style="top:${pct(m)}%">${fmt(m)}</span>`).join("");
+document.getElementById("winLabel").textContent = `${Math.floor(WIN_A/60)}–${Math.floor(WIN_B/60)}h`;
 
 function layoutColumns(evs) {
-  // Split into clusters of mutually overlapping events, then pack columns.
   const out = evs.map(e => ({ e, col: 0, cols: 1 }));
   let cluster = [], clusterEnd = -1;
   const flush = () => {
     if (!cluster.length) return;
     const lanes = [];
-    for (const item of cluster) {
+    for (const it of cluster) {
       let placed = false;
-      for (let i = 0; i < lanes.length; i++) {
-        if (lanes[i] <= item.e.start) { lanes[i] = item.e.end; item.col = i; placed = true; break; }
-      }
-      if (!placed) { item.col = lanes.length; lanes.push(item.e.end); }
+      for (let i = 0; i < lanes.length; i++) if (lanes[i] <= it.e.start) { lanes[i] = it.e.end; it.col = i; placed = true; break; }
+      if (!placed) { it.col = lanes.length; lanes.push(it.e.end); }
     }
-    for (const item of cluster) item.cols = lanes.length;
+    for (const it of cluster) it.cols = lanes.length;
     cluster = []; clusterEnd = -1;
   };
-  for (const item of out) {
-    if (cluster.length && item.e.start >= clusterEnd) flush();
-    cluster.push(item); clusterEnd = Math.max(clusterEnd, item.e.end);
+  for (const it of out) {
+    if (cluster.length && it.e.start >= clusterEnd) flush();
+    cluster.push(it); clusterEnd = Math.max(clusterEnd, it.e.end);
   }
   flush();
   return out;
 }
 
 function renderWeek() {
-  const ws = startOfWeek(state.cursor);
-  const today = new Date();
+  const ws = startOfWeek(state.cursor), today = new Date();
 
-  // headers
-  let head = `<div class="corner"><span>${Math.floor(WIN_A/60)}\u2013${Math.floor(WIN_B/60)}h</span></div>`;
+  let head = `<div class="corner"><span>${Math.floor(WIN_A/60)}–${Math.floor(WIN_B/60)}h</span></div>`;
   for (let i = 0; i < 7; i++) {
-    const d = addDays(ws, i);
-    const n = dayEvents(d).length;
+    const d = addDays(ws, i), key = ymd(d);
+    const holi = holidayOn(key), wins = windowsFor(i);
+    const closed = !isOpenDay(i) && !wins.length;
+    let tag, cls = "tag";
+    if (holi) { tag = holi; cls = "tag holiday"; }
+    else if (isOpenDay(i)) tag = "可安排新課";
+    else if (wins.length) tag = "只開放 " + wins.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join("、");
+    else tag = "不開放新課";
     head += `
-      <div class="dhead ${sameDay(d, today) ? "today" : ""}" data-goday="${ymd(d)}">
-        <span class="dw">${DOW_SHORT[d.getDay()]}</span>
+      <div class="dhead ${closed ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-goday="${key}">
+        <span class="dw">${DOW_ZH[i]}<em>${DOW_EN[i]}</em></span>
         <span class="dd">${d.getDate()}</span>
-        <span class="tot">${n ? n + (n === 1 ? " booking" : " bookings") : "free"}</span>
+        <span class="${cls}">${esc(tag)}</span>
       </div>`;
   }
   whead.innerHTML = head;
 
-  // columns
   let cols = "";
   for (let i = 0; i < 7; i++) {
-    const d = addDays(ws, i);
-    const isToday = sameDay(d, today);
-    const wknd = d.getDay() === 0 || d.getDay() === 6;
-    const items = layoutColumns(dayEvents(d));
-    let evs = "";
-    for (const { e, col, cols: n } of items) {
-      const vs = Math.max(e.start, WIN_A), ve = Math.min(e.end, WIN_B);
-      if (ve <= vs) continue;                       // entirely outside working hours
-      const top = pct(vs);
-      const hgt = ((ve - vs) / WIN) * 100;
-      const w = 100 / n;
-      const short = (ve - vs) <= 35;
-      evs += `
-        <button class="ev ${e.status === "tentative" ? "tentative" : ""} ${short ? "short" : ""}" type="button"
-                data-ev="${e.id}"
-                title="${esc(e.title)} · ${fmtRange(e.start, e.end)}${e.who ? " · " + esc(e.who) : ""}"
-                style="top:${top}%; height:${hgt}%; left:calc(${col * w}% + 2px); width:calc(${w}% - 4px);">
-          <b>${esc(e.title)}</b>
-          <time>${fmtRange(e.start, e.end)}</time>
-          ${e.who && !short ? `<span class="who">${esc(e.who)}</span>` : ""}
+    const d = addDays(ws, i), key = ymd(d);
+    const wins = windowsFor(i);
+    const closed = !isOpenDay(i) && !wins.length;
+    const evs = lessonsOn(d);
+    let inner = "";
+
+    for (const [a, b] of freeSlots(d)) {
+      const tiny = (b - a) < 75;
+      inner += `
+        <button class="slot ${tiny ? "tiny" : ""}" type="button" data-slot="${key}|${a}|${b}"
+                title="可排課 ${fmtRange(a, b)}（${hrs(b - a)} 小時）"
+                style="top:${pct(a)}%; height:${((b - a) / WIN) * 100}%; left:2px; right:2px;">
+          <b>可排課</b><time>${fmtRange(a, b)}</time><span class="hrs">（${hrs(b - a)} 小時）</span>
         </button>`;
     }
-    let now = "";
-    if (isToday) {
-      const m = today.getHours() * 60 + today.getMinutes();
-      if (inWindow(m)) now = `<div class="nowline" style="top:${pct(m)}%"></div>`;
-    }
-    cols += `<div class="dcol ${wknd ? "weekend" : ""} ${isToday ? "todaycol" : ""}" data-col="${ymd(d)}">${evs}${now}</div>`;
-  }
-  wgrid.style.setProperty("--win-hours", HOURS);
-  wgrid.innerHTML = `<div class="gutter" id="gutter">${gutter.innerHTML}</div>` + cols;
 
-  // current-time chip in the gutter
+    for (const { e, col, cols: n } of layoutColumns(evs)) {
+      const vs = Math.max(e.start, WIN_A), ve = Math.min(e.end, WIN_B);
+      if (ve <= vs) continue;
+      const w = 100 / n, short = (ve - vs) <= 40;
+      inner += `
+        <button class="ev ${e.kind === "uni" ? "uni" : ""} ${short ? "short" : ""} ${e.repeat ? "" : "once"}"
+                type="button" data-ev="${e.id}" data-on="${key}"
+                title="${esc(e.title)} ${fmtRange(e.start, e.end)}${e.note ? " ・ " + esc(e.note) : ""}"
+                style="top:${pct(vs)}%; height:${((ve - vs) / WIN) * 100}%; left:calc(${col * w}% + 2px); width:calc(${w}% - 4px); z-index:2;">
+          <b>${esc(e.title)}</b><time>${fmtRange(e.start, e.end)}</time>
+          ${e.note && !short ? `<span class="rm">${esc(e.note)}</span>` : ""}
+        </button>`;
+    }
+
+    if (closed && !evs.length) inner += `<div class="restday"><b>休息日</b><span>溫習 ・ 備課</span></div>`;
+    if (sameDay(d, today)) {
+      const m = today.getHours() * 60 + today.getMinutes();
+      if (inWindow(m)) inner += `<div class="nowline" style="top:${pct(m)}%"></div>`;
+    }
+    cols += `<div class="dcol ${closed ? "closed" : ""}" data-col="${key}">${inner}</div>`;
+  }
+
+  wgrid.style.setProperty("--win-hours", HOURS);
+  wgrid.innerHTML = `<div class="gutter">${gutter.innerHTML}</div>` + cols;
+
   const nowM = today.getHours() * 60 + today.getMinutes();
   if (ws <= today && today < addDays(ws, 7) && inWindow(nowM)) {
-    const g = wgrid.querySelector(".gutter");
     const chip = document.createElement("span");
     chip.className = "nowlabel"; chip.style.top = `${pct(nowM)}%`; chip.textContent = fmt(nowM);
-    g.appendChild(chip);
+    wgrid.querySelector(".gutter").appendChild(chip);
   }
 }
 
-
-
 /* ---------------------------------------------------------------
-   Render + navigation
+   繪製 / 導覽
    --------------------------------------------------------------- */
 function render() {
-  index();
   const isWeek = state.view === "week";
   document.getElementById("weekView").hidden = !isWeek;
   document.getElementById("monthView").hidden = isWeek;
   document.getElementById("btnWeek").setAttribute("aria-pressed", String(isWeek));
   document.getElementById("btnMonth").setAttribute("aria-pressed", String(!isWeek));
-  document.getElementById("hint").textContent = isWeek ? "drag on the grid to pick a time" : "click a day to open its week";
+  document.getElementById("btnToday").textContent = isWeek ? "本週" : "本月";
 
   if (isWeek) {
     const ws = startOfWeek(state.cursor), we = addDays(ws, 6);
-    const label = ws.getMonth() === we.getMonth()
-      ? `${MONTHS[ws.getMonth()]} ${ws.getDate()} – ${we.getDate()} <span class="yr">${we.getFullYear()}</span>`
-      : `${MONTHS[ws.getMonth()].slice(0,3)} ${ws.getDate()} – ${MONTHS[we.getMonth()].slice(0,3)} ${we.getDate()} <span class="yr">${we.getFullYear()}</span>`;
-    document.getElementById("periodLabel").innerHTML = label;
+    document.getElementById("periodLabel").textContent =
+      `${ws.getFullYear()} 年 ${ws.getMonth() + 1} 月 ${ws.getDate()} 日 – ${we.getMonth() + 1} 月 ${we.getDate()} 日`;
     renderWeek();
   } else {
-    document.getElementById("periodLabel").innerHTML =
-      `${MONTHS[state.cursor.getMonth()]} <span class="yr">${state.cursor.getFullYear()}</span>`;
+    document.getElementById("periodLabel").textContent =
+      `${state.cursor.getFullYear()} 年 ${state.cursor.getMonth() + 1} 月`;
     renderMonth();
   }
+  updateFooter();
+}
+
+function updateFooter() {
+  const ws = startOfWeek(state.cursor);
+  let free = 0, uni = 0, work = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i);
+    for (const [a, b] of freeSlots(d)) free += b - a;
+    for (const e of lessonsOn(d)) (e.kind === "uni" ? (uni += e.end - e.start) : (work += e.end - e.start));
+  }
+  document.getElementById("fLeft").textContent =
+    `本週：港大課堂 ${hrs(uni)} 小時 ・ 新東方教學 ${hrs(work)} 小時 ・ 可排課 ${hrs(free)} 小時`;
+  document.getElementById("fMid").textContent = CFG.copyright;
 }
 
 function go(delta) {
@@ -1014,64 +1074,54 @@ function go(delta) {
   else state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + delta, 1);
   render();
 }
-
 document.getElementById("btnPrev").onclick = () => go(-1);
 document.getElementById("btnNext").onclick = () => go(1);
 document.getElementById("btnToday").onclick = () => { state.cursor = new Date(); render(); };
 document.getElementById("btnMonth").onclick = () => { state.view = "month"; render(); };
 document.getElementById("btnWeek").onclick = () => { state.view = "week"; render(); };
-document.getElementById("btnClock").onclick = e => {
-  use12 = !use12; e.currentTarget.textContent = use12 ? "12h" : "24h";
-  relabelGutter(); render();
-};
 
 /* ---------------------------------------------------------------
-   Clicks on the grids
+   點擊
    --------------------------------------------------------------- */
 mgrid.addEventListener("click", e => {
   const chip = e.target.closest("[data-ev]");
-  if (chip) { openEvent(chip.dataset.ev); return; }
-  const more = e.target.closest("[data-goweek]");
-  if (more) { state.view = "week"; state.cursor = parseYmd(more.dataset.goweek); render(); return; }
+  if (chip) return openEvent(chip.dataset.ev, chip.dataset.on);
+  const jump = e.target.closest("[data-goweek]");
+  if (jump) { state.view = "week"; state.cursor = parseYmd(jump.dataset.goweek); render(); return; }
   const cell = e.target.closest("[data-day]");
-  if (cell) openNew(cell.dataset.day, WIN_A + 60, WIN_A + 120);
+  if (cell) openNew(parseYmd(cell.dataset.day), WIN_A + 60, WIN_A + 120);
 });
-
 whead.addEventListener("click", e => {
   const h = e.target.closest("[data-goday]");
   if (h) { state.cursor = parseYmd(h.dataset.goday); render(); }
 });
-
 wgrid.addEventListener("click", e => {
   const ev = e.target.closest("[data-ev]");
-  if (ev) { openEvent(ev.dataset.ev); }
+  if (ev) return openEvent(ev.dataset.ev, ev.dataset.on);
+  const sl = e.target.closest("[data-slot]");
+  if (sl) {
+    const [key, a, b] = sl.dataset.slot.split("|");
+    openNew(parseYmd(key), Number(a), Math.min(Number(b), Number(a) + 120));
+  }
 });
 
-/* ---------- drag to create ---------- */
+/* 拖曳揀時間 */
 const SNAP = 15;
 let drag = null;
-
-function minutesAt(col, clientY) {
+function minutesAt(col, y) {
   const r = col.getBoundingClientRect();
-  const raw = WIN_A + ((clientY - r.top) / r.height) * WIN;
+  const raw = WIN_A + ((y - r.top) / r.height) * WIN;
   return Math.max(WIN_A, Math.min(WIN_B, Math.round(raw / SNAP) * SNAP));
 }
-
 wgrid.addEventListener("pointerdown", e => {
-  if (e.button !== 0) return;
-  if (e.target.closest(".ev")) return;
-  const col = e.target.closest(".dcol");
-  if (!col) return;
+  if (e.button !== 0 || e.target.closest(".ev,.slot")) return;
+  const col = e.target.closest(".dcol"); if (!col) return;
   const m = minutesAt(col, e.clientY);
-  const ghost = document.createElement("div");
-  ghost.className = "ghost-sel";
+  const ghost = document.createElement("div"); ghost.className = "ghost-sel";
   col.appendChild(ghost);
   drag = { col, anchor: m, a: m, b: m + SNAP * 2, ghost, moved: false };
-  paintGhost();
-  col.setPointerCapture(e.pointerId);
-  e.preventDefault();
+  paintGhost(); col.setPointerCapture(e.pointerId); e.preventDefault();
 });
-
 function paintGhost() {
   if (!drag) return;
   const a = Math.min(drag.a, drag.b), b = Math.max(drag.a, drag.b);
@@ -1079,7 +1129,6 @@ function paintGhost() {
   drag.ghost.style.height = `${((b - a) / WIN) * 100}%`;
   drag.ghost.textContent = (b - a) >= 30 ? fmtRange(a, b) : "";
 }
-
 wgrid.addEventListener("pointermove", e => {
   if (!drag) return;
   const m = minutesAt(drag.col, e.clientY);
@@ -1088,227 +1137,261 @@ wgrid.addEventListener("pointermove", e => {
   if (Math.abs(drag.b - drag.a) < SNAP) drag.b = drag.a + SNAP;
   paintGhost();
 });
-
-function endDrag() {
+wgrid.addEventListener("pointerup", () => {
   if (!drag) return;
   const a = Math.min(drag.a, drag.b), b = Math.max(drag.a, drag.b);
-  const date = drag.col.dataset.col;
-  drag.ghost.remove();
-  const dur = drag.moved ? Math.max(SNAP, b - a) : 60;
-  drag = null;
-  openNew(date, a, Math.min(WIN_B, a + dur));
-}
-wgrid.addEventListener("pointerup", endDrag);
+  const key = drag.col.dataset.col, moved = drag.moved;
+  drag.ghost.remove(); drag = null;
+  openNew(parseYmd(key), a, Math.min(WIN_B, a + (moved ? Math.max(SNAP, b - a) : 60)));
+});
 wgrid.addEventListener("pointercancel", () => { if (drag) { drag.ghost.remove(); drag = null; } });
 
 /* ---------------------------------------------------------------
-   The booking sheet
+   彈出視窗
    --------------------------------------------------------------- */
-const sheet = document.getElementById("sheet");
-const backdrop = document.getElementById("backdrop");
+const sheet = document.getElementById("sheet"), backdrop = document.getElementById("backdrop");
 const form = document.getElementById("form");
 const fTitle = document.getElementById("fTitle"), fWho = document.getElementById("fWho");
-const fDate = document.getElementById("fDate"), fStart = document.getElementById("fStart"), fEnd = document.getElementById("fEnd");
-const fNote = document.getElementById("fNote");
-fStart.min = fEnd.min = CFG.dayStart;      // browsers won't offer times outside working hours
+const fDow = document.getElementById("fDow"), fDate = document.getElementById("fDate");
+const fStart = document.getElementById("fStart"), fEnd = document.getElementById("fEnd");
+const fNote = document.getElementById("fNote"), fRepeat = document.getElementById("fRepeat");
+const btnDelete = document.getElementById("btnDelete"), delChoice = document.getElementById("delChoice");
+fStart.min = fEnd.min = CFG.dayStart;
 fStart.max = fEnd.max = CFG.dayEnd;
-const btnDelete = document.getElementById("btnDelete");
-const roNote = document.getElementById("roNote");
-let editing = null;      // event object being edited, or null for new
-let armed = false;
+
+let editing = null, editingOn = null;
+
+if (IS_OWNER) {
+  document.getElementById("ownerTag").hidden = false;
+  document.getElementById("kindField").hidden = false;
+  document.getElementById("noteField").hidden = false;
+  document.getElementById("whoField").hidden = true;
+}
+document.getElementById("hTitle").firstChild.nodeValue = CFG.title;
+document.getElementById("hSub").textContent = CFG.subtitle;
+document.getElementById("fRight").textContent =
+  (CFG.footNote ? CFG.footNote + " ・ " : "") + "所有時間為香港時間";
+document.title = CFG.title;
+
+function syncRepeat() {
+  const on = fRepeat.checked;
+  document.getElementById("repeatBox").classList.toggle("off", !on);
+  document.getElementById("dowField").hidden = !on;
+  document.getElementById("dateField").hidden = on;
+  document.getElementById("repeatHint").textContent =
+    on ? "每個星期同一時間都會出現" : "只有這一日，之後不會重複";
+}
+fRepeat.addEventListener("change", () => { syncRepeat(); checkClash(); });
 
 function openSheet() {
   sheet.classList.add("on"); backdrop.classList.add("on");
   sheet.setAttribute("aria-hidden", "false");
-  setTimeout(() => fTitle.focus(), 190);
+  setTimeout(() => fTitle.focus(), 170);
 }
 function closeSheet() {
   sheet.classList.remove("on"); backdrop.classList.remove("on");
   sheet.setAttribute("aria-hidden", "true");
-  editing = null; disarm();
+  editing = null; editingOn = null; delChoice.hidden = true;
 }
-function disarm() { armed = false; btnDelete.classList.remove("arm"); btnDelete.textContent = "Delete"; }
-
-function openNew(dateStr, startMin, endMin) {
-  editing = null;
-  document.getElementById("sheetTitle").textContent = IS_OWNER ? "New booking" : "Request a slot";
-  form.reset();
-  fDate.value = dateStr;
-  fStart.value = toHHMM(Math.max(WIN_A, Math.min(WIN_B - 15, startMin)));
-  fEnd.value = toHHMM(Math.min(WIN_B, endMin));
-  form.status.value = IS_OWNER ? "busy" : "tentative";
-  btnDelete.hidden = true;
-  roNote.hidden = true;
-  setFormEnabled(true);
-  checkClash(); updateDur();
-  openSheet();
-}
-
-function openEvent(id) {
-  const ev = Store.all().find(e => e.id === id);
-  if (!ev) return;
-  editing = ev;
-  document.getElementById("sheetTitle").textContent = canEdit(ev) ? "Edit booking" : "Booking details";
-  fTitle.value = ev.title || "";
-  fWho.value = ev.who || "";
-  fDate.value = ev.date;
-  fStart.value = toHHMM(ev.start);
-  fEnd.value = toHHMM(ev.end);
-  form.status.value = ev.status || "busy";
-  fNote.value = ev.note || "";
-  const editable = canEdit(ev);
-  btnDelete.hidden = !editable;
-  roNote.hidden = editable;
-  if (!editable) roNote.textContent = "This slot was booked by someone else, so it's read-only here. Ask the calendar owner to change or cancel it.";
-  setFormEnabled(editable);
-  checkClash(); updateDur();
-  openSheet();
-}
-
-function setFormEnabled(on) {
-  [...form.elements].forEach(el => { el.disabled = !on; });
+function setEnabled(on) {
+  [...form.elements].forEach(el => el.disabled = !on);
   document.getElementById("btnSave").hidden = !on;
   [...document.querySelectorAll("#quick button")].forEach(b => b.disabled = !on);
 }
 
+function openNew(date, a, b) {
+  editing = null; editingOn = ymd(date);
+  document.getElementById("sheetTitle").textContent = IS_OWNER ? "新增課堂" : "預約時段";
+  form.reset();
+  fRepeat.checked = true; syncRepeat();
+  fDow.value = String(dowOf(date));
+  fDate.value = ymd(date);
+  fStart.value = toHHMM(Math.max(WIN_A, Math.min(WIN_B - 15, a)));
+  fEnd.value = toHHMM(Math.min(WIN_B, b));
+  if (IS_OWNER) form.kind.value = "work";
+  btnDelete.hidden = true; delChoice.hidden = true;
+  document.getElementById("roNote").hidden = true;
+  setEnabled(true); checkClash(); updateDur();
+  openSheet();
+}
+
+function openEvent(id, onKey) {
+  const ev = Store.all().find(e => e.id === id);
+  if (!ev) return;
+  editing = ev; editingOn = onKey || null;
+  const editable = canEdit(ev);
+  document.getElementById("sheetTitle").textContent = editable ? "編輯課堂" : "課堂詳情";
+  fTitle.value = ev.title || "";
+  fWho.value = ev.who || "";
+  fRepeat.checked = !!ev.repeat; syncRepeat();
+  fDow.value = String(ev.repeat ? ev.dow : dowOf(parseYmd(ev.date)));
+  fDate.value = ev.repeat ? (onKey || "") : ev.date;
+  fStart.value = toHHMM(ev.start); fEnd.value = toHHMM(ev.end);
+  if (IS_OWNER) { form.kind.value = ev.kind || "work"; fNote.value = ev.note || ""; }
+  const ro = document.getElementById("roNote");
+  ro.hidden = editable;
+  if (!editable) ro.textContent = "這個時段係其他人預約嘅，所以只可以查看。要改動或取消，請聯絡時間表擁有人。";
+  setEnabled(editable);
+  btnDelete.hidden = !editable; delChoice.hidden = true;
+  checkClash(); updateDur();
+  openSheet();
+}
+
 document.getElementById("btnNew").onclick = () => {
   const base = state.view === "week" ? startOfWeek(state.cursor) : state.cursor;
-  const d = (base <= new Date() && new Date() < addDays(base, 7)) ? new Date() : base;
-  openNew(ymd(d), WIN_A + 60, WIN_A + 120);
+  const now = new Date();
+  openNew((base <= now && now < addDays(base, 7)) ? now : base, WIN_A + 60, WIN_A + 120);
 };
 document.getElementById("btnClose").onclick = closeSheet;
 document.getElementById("btnCancel").onclick = closeSheet;
 backdrop.onclick = closeSheet;
 
-/* duration chips */
 document.getElementById("quick").addEventListener("click", e => {
   const b = e.target.closest("[data-min]");
   if (!b || !fStart.value) return;
   fEnd.value = toHHMM(Math.min(WIN_B, toMin(fStart.value) + Number(b.dataset.min)));
   checkClash(); updateDur();
 });
-
 function updateDur() {
   const out = document.getElementById("durOut");
   if (!fStart.value || !fEnd.value) { out.textContent = ""; return; }
   const d = toMin(fEnd.value) - toMin(fStart.value);
-  out.textContent = d > 0 ? fmtDur(d) : "end must be after start";
+  out.textContent = d > 0 ? `共 ${hrs(d)} 小時` : "結束要遲過開始";
 }
-
 fStart.addEventListener("change", () => {
   if (fEnd.value && toMin(fEnd.value) <= toMin(fStart.value))
     fEnd.value = toHHMM(Math.min(WIN_B, toMin(fStart.value) + 60));
   checkClash(); updateDur();
 });
-[fEnd, fDate].forEach(el => el.addEventListener("change", () => { checkClash(); updateDur(); }));
+[fEnd, fDow, fDate].forEach(el => el.addEventListener("change", () => { checkClash(); updateDur(); }));
 
 function checkClash() {
   const box = document.getElementById("clash");
-  if (!fDate.value || !fStart.value || !fEnd.value) { box.hidden = true; return; }
+  if (!fStart.value || !fEnd.value) { box.hidden = true; return; }
   const s = toMin(fStart.value), e = toMin(fEnd.value);
-  const hits = (byDate.get(fDate.value) || [])
-    .filter(x => (!editing || x.id !== editing.id) && x.start < e && s < x.end);
+  let probe;
+  if (fRepeat.checked) probe = addDays(startOfWeek(state.cursor), Number(fDow.value));
+  else if (fDate.value) probe = parseYmd(fDate.value);
+  else { box.hidden = true; return; }
+  const hits = lessonsOn(probe).filter(x => (!editing || x.id !== editing.id) && x.start < e && s < x.end);
   if (!hits.length) { box.hidden = true; return; }
   document.getElementById("clashText").textContent =
-    `Overlaps ${hits.map(h => `"${h.title}" (${fmtRange(h.start, h.end)})`).join(" and ")}. You can still save it if a double booking is fine.`;
+    `同 ${hits.map(h => `「${h.title}」（${fmtRange(h.start, h.end)}）`).join("、")} 撞時間。照樣儲存都可以，但當日會重疊。`;
   box.hidden = false;
 }
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const s = toMin(fStart.value), en = toMin(fEnd.value);
-  if (en <= s) { toast("The end time has to be after the start time."); fEnd.focus(); return; }
-  if (s < WIN_A || en > WIN_B) {
-    toast(`Bookings run between ${fmt(WIN_A)} and ${fmt(WIN_B)}.`);
-    (s < WIN_A ? fStart : fEnd).focus();
-    return;
-  }
+  if (en <= s) { toast("結束時間要遲過開始時間。"); fEnd.focus(); return; }
+  if (s < WIN_A || en > WIN_B) { toast(`只可以排 ${fmt(WIN_A)} 至 ${fmt(WIN_B)} 之間。`); return; }
+  if (!fRepeat.checked && !fDate.value) { toast("請揀日期。"); fDate.focus(); return; }
+
+  const rep = fRepeat.checked;
   const rec = {
-    id: editing ? editing.id : undefined,
-    title: fTitle.value.trim() || "Booked",
-    who: fWho.value.trim(),
-    date: fDate.value,
-    start: s,
-    end: en,
-    note: fNote.value.trim(),
-    status: form.status.value,
+    title: fTitle.value.trim() || "課堂",
+    who: IS_OWNER ? (editing ? editing.who || "" : "") : fWho.value.trim(),
+    kind: IS_OWNER ? form.kind.value : (editing ? editing.kind || "work" : "work"),
+    note: IS_OWNER ? fNote.value.trim() : (editing ? editing.note || "" : ""),
+    start: s, end: en,
+    repeat: rep,
+    dow: rep ? Number(fDow.value) : 0,
+    date: rep ? "" : fDate.value,
+    skip: editing ? (editing.skip || []) : [],
+    status: IS_OWNER ? "busy" : "tentative",
     createdAt: editing ? (editing.createdAt || Date.now()) : Date.now()
   };
+  if (editing) rec.id = editing.id;
+
   const save = document.getElementById("btnSave");
   save.disabled = true;
   try {
     await Store.save(rec);
-    state.cursor = parseYmd(rec.date);
+    state.cursor = rep ? addDays(startOfWeek(state.cursor), rec.dow) : parseYmd(rec.date);
+    const wasEditing = !!editing;
     closeSheet();
-    toast(editing ? "Booking updated." : (rec.status === "tentative" ? "Slot requested — waiting on confirmation." : "Booking added."));
+    toast(wasEditing ? "已更新。" : (rep ? "已加入，每週重複。" : "已加入，只此一次。"));
   } catch (err) {
     console.error(err);
-    toast("Couldn't save that. " + (err && err.message ? err.message : "Check your connection and try again."));
+    toast("儲存唔到。" + (err && err.message ? err.message : "請檢查網絡再試。"));
   } finally { save.disabled = false; }
 });
 
-btnDelete.onclick = async () => {
+/* 刪除：重複課堂要問清楚 */
+btnDelete.onclick = () => {
   if (!editing) return;
-  if (!armed) { armed = true; btnDelete.classList.add("arm"); btnDelete.textContent = "Tap again to delete"; setTimeout(disarm, 4000); return; }
-  const id = editing.id;
-  try { await Store.remove(id); closeSheet(); toast("Booking deleted."); }
-  catch (err) { console.error(err); toast("Couldn't delete that one."); }
+  if (editing.repeat && editingOn) { btnDelete.hidden = true; delChoice.hidden = false; }
+  else doDelete("all");
 };
+document.getElementById("delCancel").onclick = () => { delChoice.hidden = true; btnDelete.hidden = false; };
+document.getElementById("delOne").onclick = () => doDelete("one");
+document.getElementById("delAll").onclick = () => doDelete("all");
+
+async function doDelete(scope) {
+  if (!editing) return;
+  const target = editing, on = editingOn;
+  try {
+    if (scope === "one" && target.repeat && on) {
+      await Store.save({ ...target, skip: [...new Set([...(target.skip || []), on])] });
+      closeSheet(); toast("已刪除這一次。");
+    } else {
+      await Store.remove(target.id);
+      closeSheet(); toast("已刪除。");
+    }
+  } catch (err) { console.error(err); toast("刪除唔到，請再試。"); }
+}
 
 /* ---------------------------------------------------------------
-   Export .ics
+   匯出 .ics（把未來 16 週的重複課堂展開）
    --------------------------------------------------------------- */
 document.getElementById("btnIcs").onclick = () => {
-  const evs = Store.all();
-  if (!evs.length) { toast("Nothing to export yet."); return; }
-  const stamp = d => d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + "T" +
+  const stamp = d => d.getUTCFullYear() + pad(d.getUTCMonth()+1) + pad(d.getUTCDate()) + "T" +
                      pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + "00Z";
-  const at = (dateStr, m) => { const d = parseYmd(dateStr); d.setHours(Math.floor(m / 60), m % 60, 0, 0); return d; };
-  const fold = s => s.replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Open Slots//EN", "CALSCALE:GREGORIAN"];
-  for (const e of evs) {
-    lines.push("BEGIN:VEVENT",
-      `UID:${e.id}@openslots`,
-      `DTSTAMP:${stamp(new Date())}`,
-      `DTSTART:${stamp(at(e.date, e.start))}`,
-      `DTEND:${stamp(at(e.date, e.end))}`,
-      `SUMMARY:${fold(e.title || "Booked")}${e.status === "tentative" ? " (requested)" : ""}`,
-      `STATUS:${e.status === "tentative" ? "TENTATIVE" : "CONFIRMED"}`,
-      e.who ? `ORGANIZER;CN=${fold(e.who)}:mailto:noreply@example.com` : "",
-      e.note ? `DESCRIPTION:${fold(e.note)}` : "",
-      "END:VEVENT");
+  const at = (date, m) => { const d = new Date(date); d.setHours(Math.floor(m/60), m%60, 0, 0); return d; };
+  const q = s => String(s).replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
+  const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Bosco Fung Timetable//EN","CALSCALE:GREGORIAN"];
+  const from = startOfWeek(new Date());
+  let n = 0;
+  for (let i = 0; i < 16 * 7; i++) {
+    const d = addDays(from, i);
+    for (const e of lessonsOn(d)) {
+      lines.push("BEGIN:VEVENT",
+        `UID:${e.id}-${ymd(d)}@timetable`,
+        `DTSTAMP:${stamp(new Date())}`,
+        `DTSTART:${stamp(at(d, e.start))}`,
+        `DTEND:${stamp(at(d, e.end))}`,
+        `SUMMARY:${q(e.title)}`,
+        `CATEGORIES:${e.kind === "uni" ? "港大課堂" : "新東方教學"}`,
+        e.note ? `LOCATION:${q(e.note)}` : "",
+        `STATUS:${e.status === "tentative" ? "TENTATIVE" : "CONFIRMED"}`,
+        "END:VEVENT");
+      n++;
+    }
   }
   lines.push("END:VCALENDAR");
-  offerFile("open-slots.ics", lines.filter(Boolean).join("\r\n"), "text/calendar");
+  if (!n) { toast("暫時無課堂可以匯出。"); return; }
+  offerFile("timetable.ics", lines.filter(Boolean).join("\r\n"), "text/calendar");
 };
 
-/* Hands the viewer a file. Uses the Claude artifact download bridge when the
-   page is running inside claude.ai, and an ordinary link everywhere else
-   (which is what happens on GitHub Pages). */
 async function offerFile(filename, text, mime) {
   try {
     if (window.claude && typeof window.claude.use === "function") {
       const dl = await window.claude.use("downloads");
-      if (dl) {
-        await dl.save({ filename, data: text });
-        toast("Calendar file saved.");
-        return;
-      }
+      if (dl) { await dl.save({ filename, data: text }); toast("已儲存日曆檔。"); return; }
     }
   } catch (err) {
-    if (err && err.code === "declined") return;      // viewer said no; nothing to report
-    console.warn("[openslots] download bridge unavailable:", err);
+    if (err && err.code === "declined") return;
+    console.warn("[timetable]", err);
   }
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([text], { type: mime }));
-  a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove();
+  a.download = filename; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  toast("Calendar file downloaded.");
+  toast("已下載日曆檔。");
 }
 
 /* ---------------------------------------------------------------
-   Misc
+   雜項
    --------------------------------------------------------------- */
 let toastT;
 function toast(msg) {
@@ -1316,12 +1399,9 @@ function toast(msg) {
   t.textContent = msg; t.classList.add("on");
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 3200);
 }
-function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
-
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && sheet.classList.contains("on")) { closeSheet(); return; }
-  if (sheet.classList.contains("on")) return;
-  if (e.target.matches("input,textarea,select")) return;
+  if (sheet.classList.contains("on") || e.target.matches("input,textarea,select")) return;
   if (e.key === "ArrowLeft") go(-1);
   else if (e.key === "ArrowRight") go(1);
   else if (e.key.toLowerCase() === "t") document.getElementById("btnToday").click();
@@ -1329,13 +1409,12 @@ document.addEventListener("keydown", e => {
   else if (e.key.toLowerCase() === "w") { state.view = "week"; render(); }
   else if (e.key.toLowerCase() === "n") document.getElementById("btnNew").click();
 });
-
-/* keep the "now" line honest */
 setInterval(() => { if (state.view === "week") render(); }, 60000);
 
-/* ---------------------------------------------------------------
-   Boot
-   --------------------------------------------------------------- */
+/* 用家喺網址加／刪 #密語 時要重新載入，管理模式先會生效 */
+window.addEventListener("hashchange", () => location.reload());
+
+syncRepeat();
 Store.init(render);
 render();
 </script>
