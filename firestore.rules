@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// Firestore security rules for Open Slots.
+//
+// Paste this into: Firebase console -> Firestore Database -> Rules -> Publish.
+//
+// What it allows:
+//   * anyone can READ the bookings          (that's the point — people need to see what's free)
+//   * anyone can CREATE a booking           (that's also the point — people book slots)
+//   * anyone can EDIT or DELETE a booking   (needed so people can cancel their own)
+//
+// What it prevents:
+//   * junk documents with the wrong shape, missing fields, or wrong types
+//   * oversized text fields being used to fill your free quota
+//   * writes to any collection other than `events`
+//
+// This is the right trade-off for a small calendar you share with students.
+// It is NOT the right trade-off for a public link posted anywhere a stranger
+// might find it — nothing here proves *who* is deleting a booking. If you need
+// that, add Firebase Authentication and gate update/delete on request.auth.uid.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /events/{eventId} {
+
+      allow read: if true;
+
+      allow create, update: if isWellFormed(request.resource.data);
+
+      allow delete: if true;
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+function isWellFormed(d) {
+  return d.keys().hasOnly(['title', 'who', 'date', 'start', 'end', 'note', 'status', 'createdAt'])
+      && d.keys().hasAll(['title', 'date', 'start', 'end', 'status'])
+
+      && d.title is string  && d.title.size() > 0 && d.title.size() <= 80
+      && d.date  is string  && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+
+      && d.start is int && d.start >= 0    && d.start < 1440
+      && d.end   is int && d.end   >  d.start && d.end <= 1440
+
+      && d.status in ['busy', 'tentative']
+
+      && (!('who'  in d.keys()) || (d.who  is string && d.who.size()  <= 50))
+      && (!('note' in d.keys()) || (d.note is string && d.note.size() <= 400))
+      && (!('createdAt' in d.keys()) || d.createdAt is int);
+}

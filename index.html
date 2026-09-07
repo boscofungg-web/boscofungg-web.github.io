@@ -1,0 +1,1341 @@
+<title>Open Slots</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+/* ============================================================
+   Open Slots — booking calendar
+   Palette: ledger green + brass on a green-biased neutral
+   ============================================================ */
+:root{
+  --paper:#ffffff;
+  --ground:#eff2ef;
+  --sunken:#e6eae6;
+  --weekend:#f6f8f6;
+  --ink:#14181a;
+  --ink-2:#4a5450;
+  --ink-3:#7d8783;
+  --rule:#d7ddd8;
+  --rule-2:#e6ebe7;
+
+  --accent:#1f5e4a;
+  --accent-soft:#e2efe9;
+  --accent-line:#bcd8cb;
+  --accent-ink:#14402f;
+
+  --brass:#96690f;
+  --brass-soft:#f7edd8;
+  --brass-line:#e4cf9f;
+  --brass-ink:#6d4b06;
+
+  --clay:#9e3a2b;
+  --clay-soft:#f8e6e2;
+
+  --now:#c2410c;
+
+  --shadow: 0 1px 2px rgba(20,24,26,.06), 0 8px 24px -12px rgba(20,24,26,.22);
+  --sheet-shadow: -18px 0 48px -22px rgba(20,24,26,.45);
+
+  --hour-h: 58px;
+  --gutter-w: 62px;
+  --radius: 7px;
+
+  --sans:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#171b19;
+    --ground:#101413;
+    --sunken:#1c2120;
+    --weekend:#1b201e;
+    --ink:#e7ede9;
+    --ink-2:#a3aeaa;
+    --ink-3:#77827e;
+    --rule:#2c332f;
+    --rule-2:#232927;
+
+    --accent:#5cb193;
+    --accent-soft:#17302a;
+    --accent-line:#2b5a4b;
+    --accent-ink:#a9dcc8;
+
+    --brass:#d9a94a;
+    --brass-soft:#2e2617;
+    --brass-line:#5a4a24;
+    --brass-ink:#eed9a6;
+
+    --clay:#d8846f;
+    --clay-soft:#31201c;
+
+    --now:#f97316;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
+    --sheet-shadow: -18px 0 48px -22px rgba(0,0,0,.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#171b19;
+  --ground:#101413;
+  --sunken:#1c2120;
+  --weekend:#1b201e;
+  --ink:#e7ede9;
+  --ink-2:#a3aeaa;
+  --ink-3:#77827e;
+  --rule:#2c332f;
+  --rule-2:#232927;
+
+  --accent:#5cb193;
+  --accent-soft:#17302a;
+  --accent-line:#2b5a4b;
+  --accent-ink:#a9dcc8;
+
+  --brass:#d9a94a;
+  --brass-soft:#2e2617;
+  --brass-line:#5a4a24;
+  --brass-ink:#eed9a6;
+
+  --clay:#d8846f;
+  --clay-soft:#31201c;
+
+  --now:#f97316;
+
+  --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.7);
+  --sheet-shadow: -18px 0 48px -22px rgba(0,0,0,.8);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  padding:12px 18px; background:var(--paper);
+  border-bottom:1px solid var(--rule); flex:0 0 auto;
+}
+.brand{display:flex; flex-direction:column; gap:1px; margin-right:auto; min-width:0}
+.brand h1{
+  font-family:var(--display); font-weight:600; font-size:21px;
+  letter-spacing:-.01em; margin:0; line-height:1.15;
+}
+.brand .tz{
+  font-family:var(--mono); font-size:10.5px; color:var(--ink-3);
+  letter-spacing:.04em; text-transform:uppercase;
+}
+.owner-tag{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--accent);
+  border:1px solid var(--accent-line); background:var(--accent-soft);
+  padding:1px 6px; border-radius:3px; margin-left:7px; vertical-align:2px;
+}
+
+.cluster{display:flex; align-items:center; gap:8px}
+
+.seg{display:flex; background:var(--sunken); border-radius:var(--radius); padding:2px; gap:2px}
+.seg button{
+  border:0; background:transparent; color:var(--ink-2); cursor:pointer;
+  padding:5px 13px; border-radius:5px; font-size:13px; font-weight:500;
+  transition:background .13s, color .13s;
+}
+.seg button[aria-pressed="true"]{background:var(--paper); color:var(--ink); box-shadow:0 1px 2px rgba(20,24,26,.10)}
+
+.icobtn{
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink-2);
+  width:31px; height:31px; border-radius:var(--radius); cursor:pointer;
+  display:grid; place-items:center; padding:0; transition:background .13s, border-color .13s;
+}
+.icobtn:hover{background:var(--sunken); border-color:var(--ink-3)}
+.icobtn svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round}
+
+.tbtn{
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink);
+  padding:5px 12px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:500;
+  transition:background .13s, border-color .13s;
+}
+.tbtn:hover{background:var(--sunken); border-color:var(--ink-3)}
+.tbtn.ghost{border-color:transparent; background:transparent; color:var(--ink-2)}
+.tbtn.ghost:hover{background:var(--sunken); color:var(--ink)}
+
+.pbtn{
+  border:1px solid var(--accent); background:var(--accent); color:#fff;
+  padding:6px 14px; border-radius:var(--radius); cursor:pointer;
+  font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;
+  transition:filter .13s;
+}
+:root[data-theme="dark"] .pbtn, :root:not([data-theme="light"]) .pbtn{color:#0d1a15}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .pbtn{color:#fff} }
+.pbtn:hover{filter:brightness(1.08)}
+.pbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+
+/* ---------- period bar ---------- */
+.periodbar{
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:9px 18px; background:var(--paper); border-bottom:1px solid var(--rule); flex:0 0 auto;
+}
+#periodLabel{
+  font-family:var(--display); font-size:17px; font-weight:400; margin:0;
+  letter-spacing:-.005em; white-space:nowrap;
+}
+#periodLabel .yr{color:var(--ink-3)}
+.legend{display:flex; gap:14px; align-items:center; margin-left:auto; flex-wrap:wrap}
+.key{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-2)}
+.swatch{width:18px; height:10px; border-radius:2px; flex:0 0 auto}
+.swatch.busy{background:var(--accent-soft); border:1px solid var(--accent); border-left-width:3px}
+.swatch.tent{background:var(--brass-soft); border:1px solid var(--brass); border-left-width:3px}
+.hint{font-size:11.5px; color:var(--ink-3); font-family:var(--mono)}
+
+/* ---------- viewport ---------- */
+main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
+.view{position:absolute; inset:0; display:flex; flex-direction:column}
+.view[hidden]{display:none}
+
+/* ---------- month ---------- */
+#monthView{background:var(--paper); overflow:auto}
+.mdow{
+  display:grid; grid-template-columns:repeat(7,minmax(0,1fr));
+  border-bottom:1px solid var(--rule); position:sticky; top:0; background:var(--paper); z-index:3;
+}
+.mdow div{
+  padding:7px 9px; font-family:var(--mono); font-size:10.5px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.mgrid{
+  display:grid; grid-template-columns:repeat(7,minmax(0,1fr));
+  grid-auto-rows:minmax(104px,1fr); flex:1 1 auto;
+}
+.mcell{
+  border-right:1px solid var(--rule-2); border-bottom:1px solid var(--rule-2);
+  padding:5px 5px 6px; min-width:0; display:flex; flex-direction:column; gap:3px;
+  cursor:pointer; position:relative;
+}
+.mcell:nth-child(7n){border-right:0}
+.mcell:hover{background:var(--sunken)}
+.mcell.wknd{background:var(--weekend)}
+.mcell.out{background:var(--ground)}
+.mcell.out .dnum{color:var(--ink-3); opacity:.6}
+.dnum{
+  font-family:var(--mono); font-size:12px; color:var(--ink-2);
+  width:23px; height:21px; display:grid; place-items:center; border-radius:5px;
+  font-variant-numeric:tabular-nums; align-self:flex-start;
+}
+.mcell.today .dnum{background:var(--accent); color:var(--paper); font-weight:500}
+:root[data-theme="dark"] .mcell.today .dnum{color:#0d1a15}
+.chips{display:flex; flex-direction:column; gap:2px; min-width:0; overflow:hidden}
+.chip{
+  display:flex; gap:5px; align-items:baseline; min-width:0;
+  font-size:11.5px; padding:2px 5px; border-radius:4px; cursor:pointer;
+  border-left:3px solid var(--accent); background:var(--accent-soft); color:var(--accent-ink);
+  text-align:left; border-top:0; border-right:0; border-bottom:0;
+}
+.chip.tentative{border-left-color:var(--brass); background:var(--brass-soft); color:var(--brass-ink)}
+.chip:hover{filter:brightness(.97)}
+:root[data-theme="dark"] .chip:hover{filter:brightness(1.25)}
+.chip time{font-family:var(--mono); font-size:10.5px; opacity:.8; flex:0 0 auto; font-variant-numeric:tabular-nums}
+.chip span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.more{
+  font-size:11px; color:var(--ink-3); background:none; border:0; padding:1px 5px;
+  cursor:pointer; text-align:left; font-family:var(--mono);
+}
+.more:hover{color:var(--accent); text-decoration:underline}
+
+/* ---------- week ---------- */
+#weekView{background:var(--paper)}
+.whead{
+  display:grid; grid-template-columns:var(--gutter-w) repeat(7,minmax(84px,1fr));
+  border-bottom:1px solid var(--rule); flex:0 0 auto;
+}
+.whead .corner{
+  border-right:1px solid var(--rule-2); display:flex; align-items:flex-end;
+  justify-content:flex-end; padding:0 8px 7px 0;
+}
+.whead .corner span{
+  font-family:var(--mono); font-size:10px; color:var(--ink-3); white-space:nowrap;
+  letter-spacing:.03em; font-variant-numeric:tabular-nums;
+}
+.dhead{
+  padding:6px 8px 7px; border-right:1px solid var(--rule-2); min-width:0;
+  display:flex; flex-direction:column; gap:0; cursor:pointer;
+}
+.dhead:last-child{border-right:0}
+.dhead:hover{background:var(--sunken)}
+.dhead .dw{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.dhead .dd{font-family:var(--display); font-size:19px; line-height:1.15; font-variant-numeric:tabular-nums}
+.dhead.today .dd{color:var(--accent); font-weight:600}
+.dhead .tot{font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-top:1px}
+
+.wscroll{flex:1 1 auto; overflow:auto; position:relative; display:flex; flex-direction:column}
+.wgrid{
+  display:grid; grid-template-columns:var(--gutter-w) repeat(7,minmax(84px,1fr));
+  flex:1 0 auto; min-height:calc(var(--hour-h) * var(--win-hours, 24)); position:relative;
+}
+.gutter{border-right:1px solid var(--rule-2); position:relative}
+.gutter .hl{
+  position:absolute; right:8px; transform:translateY(-50%);
+  font-family:var(--mono); font-size:10.5px; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.gutter .hl.last{transform:translateY(-100%)}
+.dcol{
+  position:relative; border-right:1px solid var(--rule-2); min-width:0;
+  --hstep:calc(100% / var(--win-hours, 24));
+  background-image:
+    repeating-linear-gradient(to bottom,
+      var(--rule) 0, var(--rule) 1px,
+      transparent 1px, transparent var(--hstep));
+}
+.dcol::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(to bottom,
+      transparent 0,
+      transparent calc(var(--hstep) / 2 - 1px),
+      var(--rule-2) calc(var(--hstep) / 2 - 1px),
+      var(--rule-2) calc(var(--hstep) / 2),
+      transparent calc(var(--hstep) / 2),
+      transparent var(--hstep));
+}
+.dcol:last-child{border-right:0}
+.dcol.weekend{background-color:var(--weekend)}
+.dcol.todaycol{background-color:color-mix(in srgb, var(--accent-soft) 45%, transparent)}
+
+.ev{
+  position:absolute; border-radius:5px; padding:3px 5px 3px 6px; overflow:hidden;
+  border:1px solid var(--accent-line); border-left:3px solid var(--accent);
+  background:var(--accent-soft); color:var(--accent-ink);
+  cursor:pointer; text-align:left; font-size:11.5px; line-height:1.28;
+  display:flex; flex-direction:column; gap:0; min-height:14px;
+}
+.ev.tentative{border-color:var(--brass-line); border-left-color:var(--brass); background:var(--brass-soft); color:var(--brass-ink)}
+.ev:hover{filter:brightness(.97); z-index:5}
+:root[data-theme="dark"] .ev:hover{filter:brightness(1.28)}
+.ev b{font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ev time{font-family:var(--mono); font-size:10px; opacity:.85; font-variant-numeric:tabular-nums; white-space:nowrap}
+.ev .who{font-size:10.5px; opacity:.85; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ev.short{flex-direction:row; align-items:baseline; gap:5px; padding-top:1px; padding-bottom:1px}
+.ev.short time{order:2}
+
+.ghost-sel{
+  position:absolute; left:2px; right:2px; border-radius:5px; pointer-events:none;
+  background:var(--accent-soft); border:1px dashed var(--accent); z-index:6;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:10.5px; color:var(--accent); font-variant-numeric:tabular-nums;
+}
+.nowline{position:absolute; left:0; right:0; height:0; border-top:1.5px solid var(--now); z-index:7; pointer-events:none}
+.nowline::before{
+  content:""; position:absolute; left:-4px; top:-4px; width:7px; height:7px;
+  border-radius:50%; background:var(--now);
+}
+.nowlabel{
+  position:absolute; right:8px; transform:translateY(-50%); z-index:8; pointer-events:none;
+  font-family:var(--mono); font-size:10px; color:var(--paper); background:var(--now);
+  padding:0 4px; border-radius:3px; font-variant-numeric:tabular-nums;
+}
+
+/* ---------- sheet ---------- */
+.backdrop{
+  position:fixed; inset:0; background:rgba(16,20,19,.42); z-index:40;
+  opacity:0; pointer-events:none; transition:opacity .16s;
+}
+.backdrop.on{opacity:1; pointer-events:auto}
+.sheet{
+  position:fixed; top:0; right:0; bottom:0; width:min(400px,100%);
+  background:var(--paper); border-left:1px solid var(--rule); box-shadow:var(--sheet-shadow);
+  z-index:41; transform:translateX(101%); transition:transform .2s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+}
+.sheet.on{transform:none}
+.sheet header{
+  display:flex; align-items:center; gap:10px; padding:14px 18px 12px; border-bottom:1px solid var(--rule);
+}
+.sheet header h2{font-family:var(--display); font-size:18px; font-weight:600; margin:0; margin-right:auto}
+.sheet form{padding:16px 18px 18px; overflow:auto; display:flex; flex-direction:column; gap:13px; flex:1 1 auto}
+.field{display:flex; flex-direction:column; gap:4px}
+.field label{
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.field input, .field textarea, .field select{
+  width:100%; padding:8px 10px; border:1px solid var(--rule); border-radius:var(--radius);
+  background:var(--ground); color:var(--ink); font-size:14px;
+}
+.field input:focus, .field textarea:focus{outline:none; border-color:var(--accent); background:var(--paper)}
+.field textarea{resize:vertical; min-height:60px; font-family:inherit}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.row2 input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.dur{font-family:var(--mono); font-size:11px; color:var(--ink-3); align-self:center}
+.quick{display:flex; gap:5px; flex-wrap:wrap}
+.quick button{
+  border:1px solid var(--rule); background:var(--ground); border-radius:20px;
+  padding:3px 10px; font-size:11.5px; font-family:var(--mono); cursor:pointer; color:var(--ink-2);
+}
+.quick button:hover{border-color:var(--accent); color:var(--accent)}
+.statusrow{display:flex; gap:8px}
+.statusrow label{
+  flex:1; display:flex; align-items:center; gap:7px; cursor:pointer;
+  border:1px solid var(--rule); border-radius:var(--radius); padding:8px 10px;
+  font-family:var(--sans); font-size:12.5px; text-transform:none; letter-spacing:0; color:var(--ink);
+}
+.statusrow label:has(input:checked){border-color:var(--accent); background:var(--accent-soft)}
+.statusrow label:has(input[value="tentative"]:checked){border-color:var(--brass); background:var(--brass-soft)}
+.statusrow input{accent-color:var(--accent); margin:0}
+
+.warn{
+  display:flex; gap:8px; padding:9px 11px; border-radius:var(--radius);
+  background:var(--brass-soft); border:1px solid var(--brass-line);
+  color:var(--brass-ink); font-size:12.5px; line-height:1.4;
+}
+.warn[hidden]{display:none}
+.warn svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+
+.sheet footer{
+  display:flex; gap:8px; align-items:center; padding:12px 18px;
+  border-top:1px solid var(--rule); background:var(--ground); flex:0 0 auto;
+}
+.sheet footer .spacer{margin-left:auto}
+.dbtn{
+  border:1px solid var(--rule); background:transparent; color:var(--clay);
+  padding:6px 12px; border-radius:var(--radius); cursor:pointer; font-size:13px;
+}
+.dbtn:hover{background:var(--clay-soft); border-color:var(--clay)}
+.dbtn.arm{background:var(--clay); border-color:var(--clay); color:#fff; font-weight:600}
+:root[data-theme="dark"] .dbtn.arm{color:#1a0f0c}
+
+.readonly-note{
+  font-size:12px; color:var(--ink-3); padding:9px 11px; border-radius:var(--radius);
+  background:var(--sunken); border:1px solid var(--rule-2); line-height:1.45;
+}
+
+/* ---------- toast ---------- */
+#toast{
+  position:fixed; bottom:18px; left:50%; transform:translate(-50%,14px);
+  background:var(--ink); color:var(--paper); padding:9px 16px; border-radius:20px;
+  font-size:13px; z-index:60; opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;
+  box-shadow:var(--shadow); max-width:min(92vw,420px); text-align:center;
+}
+#toast.on{opacity:1; transform:translate(-50%,0)}
+
+/* ---------- storage banner ---------- */
+.banner{
+  display:flex; gap:9px; align-items:center; padding:7px 18px; font-size:12px;
+  background:var(--brass-soft); color:var(--brass-ink); border-bottom:1px solid var(--brass-line);
+  flex:0 0 auto; line-height:1.4;
+}
+.banner[hidden]{display:none}
+.banner svg{width:14px;height:14px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.banner button{
+  margin-left:auto; background:none; border:0; color:inherit; cursor:pointer;
+  font-family:var(--mono); font-size:11px; text-decoration:underline; padding:0; flex:0 0 auto;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:860px){
+  .brand h1{font-size:18px}
+  .legend{width:100%; margin-left:0}
+  .topbar{gap:10px; padding:10px 12px}
+  .periodbar{padding:8px 12px}
+  .wscroll{overflow:auto}
+  .wgrid, .whead{grid-template-columns:var(--gutter-w) repeat(7,minmax(76px,1fr)); min-width:640px}
+  .whead{overflow:hidden}
+  .mgrid{grid-auto-rows:minmax(78px,1fr)}
+  .hint{display:none}
+}
+@media (max-width:520px){
+  :root{--hour-h:52px; --gutter-w:48px}
+  .brand .tz{display:none}
+  .mcell{padding:3px}
+  .chip time{display:none}
+}
+</style>
+
+<header class="topbar">
+  <div class="brand">
+    <h1>Open Slots<span class="owner-tag" id="ownerTag" hidden>owner</span></h1>
+    <span class="tz" id="tzline">Hong Kong · GMT+8</span>
+  </div>
+
+  <div class="cluster">
+    <div class="seg" role="group" aria-label="Calendar view">
+      <button id="btnMonth" aria-pressed="false">Month</button>
+      <button id="btnWeek" aria-pressed="true">Week</button>
+    </div>
+  </div>
+
+  <div class="cluster">
+    <button class="icobtn" id="btnPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="tbtn" id="btnToday">Today</button>
+    <button class="icobtn" id="btnNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+
+  <div class="cluster">
+    <button class="tbtn ghost" id="btnClock" title="Toggle 12/24-hour clock">24h</button>
+    <button class="tbtn ghost" id="btnIcs" title="Download all bookings as a calendar file">Export</button>
+    <button class="pbtn" id="btnNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Request a slot</button>
+  </div>
+</header>
+
+<div class="banner" id="banner" hidden>
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+  <span id="bannerText"></span>
+  <button id="bannerX">dismiss</button>
+</div>
+
+<div class="periodbar">
+  <h2 id="periodLabel">—</h2>
+  <div class="legend">
+    <span class="key"><i class="swatch busy"></i>Confirmed</span>
+    <span class="key"><i class="swatch tent"></i>Awaiting confirmation</span>
+    <span class="hint" id="hint">drag on the grid to pick a time</span>
+  </div>
+</div>
+
+<main>
+  <section class="view" id="monthView" hidden>
+    <div class="mdow" id="mdow"></div>
+    <div class="mgrid" id="mgrid"></div>
+  </section>
+
+  <section class="view" id="weekView">
+    <div class="whead" id="whead"><div class="corner"><span id="winLabel"></span></div></div>
+    <div class="wscroll" id="wscroll">
+      <div class="wgrid" id="wgrid"><div class="gutter" id="gutter"></div></div>
+    </div>
+  </section>
+</main>
+
+<div class="backdrop" id="backdrop"></div>
+
+<aside class="sheet" id="sheet" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <header>
+    <h2 id="sheetTitle">Request a slot</h2>
+    <button class="icobtn" id="btnClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+
+  <form id="form" autocomplete="off">
+    <div class="field">
+      <label for="fTitle">What is it</label>
+      <input id="fTitle" name="title" required maxlength="80" placeholder="e.g. Chemistry — Redox revision">
+    </div>
+
+    <div class="field">
+      <label for="fWho">Your name</label>
+      <input id="fWho" name="who" maxlength="50" placeholder="So I know who booked it">
+    </div>
+
+    <div class="field">
+      <label for="fDate">Date</label>
+      <input id="fDate" name="date" type="date" required>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="fStart">Starts</label>
+        <input id="fStart" name="start" type="time" step="300" required>
+      </div>
+      <div class="field">
+        <label for="fEnd">Ends</label>
+        <input id="fEnd" name="end" type="time" step="300" required>
+      </div>
+    </div>
+
+    <div class="quick" id="quick">
+      <button type="button" data-min="30">30 min</button>
+      <button type="button" data-min="45">45 min</button>
+      <button type="button" data-min="60">1 hr</button>
+      <button type="button" data-min="90">1½ hr</button>
+      <button type="button" data-min="120">2 hr</button>
+      <span class="dur" id="durOut"></span>
+    </div>
+
+    <div class="field">
+      <label>Status</label>
+      <div class="statusrow">
+        <label><input type="radio" name="status" value="tentative" checked>Requested</label>
+        <label><input type="radio" name="status" value="busy">Confirmed</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="fNote">Notes <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+      <textarea id="fNote" name="note" maxlength="400" placeholder="Topics to cover, where to meet, phone number…"></textarea>
+    </div>
+
+    <div class="warn" id="clash" hidden>
+      <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17v.01M10.3 3.9L2.4 17.5A1.9 1.9 0 004 20.4h16a1.9 1.9 0 001.6-2.9L13.7 3.9a1.9 1.9 0 00-3.4 0z"/></svg>
+      <span id="clashText"></span>
+    </div>
+
+    <div class="readonly-note" id="roNote" hidden></div>
+  </form>
+
+  <footer>
+    <button class="dbtn" id="btnDelete" hidden>Delete</button>
+    <span class="spacer"></span>
+    <button class="tbtn" id="btnCancel" type="button">Cancel</button>
+    <button class="pbtn" id="btnSave" type="submit" form="form">Save</button>
+  </footer>
+</aside>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- =====================================================================
+     SETTINGS — everything you'd normally want to change lives right here.
+     ===================================================================== -->
+<script>
+window.CALENDAR_CONFIG = {
+
+  // Shown as the page heading and the browser tab title.
+  title: "Open Slots",
+
+  // Small line under the heading. Say where you are so people book sanely.
+  tz: "Hong Kong \u00b7 GMT+8",
+
+  // Add #yourSecretWord to the end of your URL to unlock owner mode
+  // (edit and delete anything, and new entries default to Confirmed).
+  // CHANGE THIS to something only you know.
+  ownerKey: "owner",
+
+  // Monday-first week. Set to false for a Sunday-first week.
+  weekStartsMonday: true,
+
+  // The hours the week grid shows. Nothing can be booked outside them,
+  // so the dead hours overnight don't take up half the screen.
+  dayStart: "08:00",
+  dayEnd:   "23:00",
+
+  // Fills the calendar with example bookings so you can try it out.
+  // Set to false before you share the link with anyone.
+  demo: false,
+
+  // ---- Shared storage -------------------------------------------------
+  // Leave as null and bookings are saved in each visitor's own browser
+  // (fine for testing, useless for real booking - nobody sees anyone else's).
+  //
+  // Paste your Firebase web config here to make it a real shared calendar.
+  // Step-by-step instructions are in README.md.
+  firebase: null
+  /*
+  firebase: {
+    apiKey: "...",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project",
+    storageBucket: "your-project.firebasestorage.app",
+    messagingSenderId: "...",
+    appId: "..."
+  }
+  */
+};
+</script>
+
+<script>
+"use strict";
+/* =====================================================================
+   CONFIG — edit index.html's CALENDAR_CONFIG block (below the app) to
+   point this at Firebase. With no config it stores bookings in this
+   browser only, which is perfect for trying it out.
+   ===================================================================== */
+const CFG = Object.assign({
+  title: "Open Slots",
+  tz: "Hong Kong · GMT+8",
+  ownerKey: "owner",
+  weekStartsMonday: true,
+  dayStart: "08:00",
+  dayEnd: "23:00",
+  demo: false,
+  firebase: null
+}, window.CALENDAR_CONFIG || {});
+
+document.title = CFG.title;
+document.querySelector(".brand h1").firstChild.nodeValue = CFG.title;
+document.getElementById("tzline").textContent = CFG.tz;
+
+const IS_OWNER = location.hash.replace(/^#/, "") === CFG.ownerKey;
+if (IS_OWNER) document.getElementById("ownerTag").hidden = false;
+
+/* ---------------------------------------------------------------
+   Date + time helpers
+   --------------------------------------------------------------- */
+const DAY_MS = 86400000;
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const c = new Date(d); c.setDate(c.getDate() + n); return c; };
+const sameDay = (a, b) => ymd(a) === ymd(b);
+const toMin = t => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+const toHHMM = m => `${pad(Math.floor(m / 60) % 24)}:${pad(Math.round(m) % 60)}`;
+
+/* The visible slice of the day. Everything in the week grid is measured
+   against this window rather than a full 24 hours. */
+const WIN_A = toMin(CFG.dayStart);
+const WIN_B = toMin(CFG.dayEnd);
+const WIN   = WIN_B - WIN_A;
+const HOURS = Math.round(WIN / 60);
+const pct   = m => ((m - WIN_A) / WIN) * 100;      // minute -> % down the grid
+const inWindow = m => m >= WIN_A && m <= WIN_B;
+
+function startOfWeek(d) {
+  const c = new Date(d); c.setHours(0, 0, 0, 0);
+  const dow = c.getDay();                      // 0 = Sun
+  const back = CFG.weekStartsMonday ? (dow + 6) % 7 : dow;
+  return addDays(c, -back);
+}
+
+let use12 = false;
+function fmt(m) {
+  m = Math.round(m);
+  const h = Math.floor(m / 60) % 24, mi = m % 60;
+  if (!use12) return `${pad(h)}:${pad(mi)}`;
+  const ap = h < 12 ? "am" : "pm";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return mi ? `${h12}:${pad(mi)}${ap}` : `${h12}${ap}`;
+}
+function fmtRange(a, b) { return `${fmt(a)}–${fmt(b)}`; }
+function fmtDur(m) {
+  if (m <= 0) return "—";
+  const h = Math.floor(m / 60), mi = m % 60;
+  return (h ? `${h} hr ` : "") + (mi ? `${mi} min` : "") || `${h} hr`;
+}
+
+const DOW_LONG = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const DOW_SHORT = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+/* ---------------------------------------------------------------
+   Demo data — only in the preview build (CALENDAR_CONFIG.demo),
+   only when nothing is stored yet. Never runs on the real site.
+   --------------------------------------------------------------- */
+function seedDemo() {
+  const mon = startOfWeek(new Date());
+  const D = n => ymd(addDays(mon, n));
+  return [
+    { title: "Chemistry — Redox & electrolysis", who: "Karen Y. (S6)",  date: D(0), start: 16*60,      end: 17*60+30, status: "busy",      note: "Bring 2023 Paper 1 Q7–Q9." },
+    { title: "M1 — Binomial & Poisson",          who: "Marcus L.",      date: D(0), start: 19*60,      end: 20*60+30, status: "busy",      note: "" },
+    { title: "Physics — Mechanics Q&A",          who: "Tsang siblings", date: D(1), start: 11*60+30,   end: 12*60+15, status: "busy",      note: "Short session, projectile motion only." },
+    { title: "Marking — mock papers",            who: "",               date: D(1), start: 14*60,      end: 16*60,    status: "busy",      note: "Blocked out, not available." },
+    { title: "Chemistry — trial lesson",         who: "Priya S.",       date: D(2), start: 17*60+15,   end: 18*60,    status: "tentative", note: "First time — confirm by Wednesday." },
+    { title: "M1 — Calculus catch-up",           who: "Karen Y. (S6)",  date: D(3), start: 16*60,      end: 17*60,    status: "busy",      note: "" },
+    { title: "Physics — past paper drill",       who: "Marcus L.",      date: D(4), start: 18*60+30,   end: 20*60,    status: "tentative", note: "" },
+    { title: "Group revision — DSE Chem",        who: "4 students",     date: D(5), start: 10*60,      end: 12*60+30, status: "busy",      note: "Room B, bring the Chapter 9 booklet." }
+  ].map((e, i) => ({ ...e, id: "demo" + i, createdAt: Date.now() }));
+}
+
+/* ---------------------------------------------------------------
+   Storage — Firebase Firestore when configured, else this browser
+   --------------------------------------------------------------- */
+const Store = (() => {
+  let events = [];
+  let onChange = () => {};
+  let mode = "local";
+  let fs = null;                       // { db, api } once Firebase is up
+  const LS_KEY = "openslots.events.v1";
+  const MINE_KEY = "openslots.mine.v1";
+
+  const readLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch { return []; } };
+  const writeLocal = v => { try { localStorage.setItem(LS_KEY, JSON.stringify(v)); } catch {} };
+
+  let mine = (() => { try { return new Set(JSON.parse(localStorage.getItem(MINE_KEY) || "[]")); } catch { return new Set(); } })();
+  const remember = id => { mine.add(id); try { localStorage.setItem(MINE_KEY, JSON.stringify([...mine])); } catch {} };
+
+  const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  async function initFirebase(cfg) {
+    const base = "https://www.gstatic.com/firebasejs/10.12.2/";
+    const { initializeApp } = await import(base + "firebase-app.js");
+    const api = await import(base + "firebase-firestore.js");
+    const db = api.getFirestore(initializeApp(cfg));
+    fs = { db, api };
+    mode = "firebase";
+    api.onSnapshot(
+      api.collection(db, "events"),
+      snap => { events = snap.docs.map(d => ({ id: d.id, ...d.data() })); onChange(); },
+      err => { console.error("[openslots]", err); banner("Can't reach the booking database right now — showing the last data loaded. " + (err.code || "")); }
+    );
+  }
+
+  return {
+    get mode() { return mode; },
+    all() { return events; },
+    isMine(id) { return mine.has(id); },
+    async init(cb) {
+      onChange = cb;
+      if (CFG.firebase && CFG.firebase.projectId) {
+        try { await initFirebase(CFG.firebase); return; }
+        catch (e) {
+          console.error("[openslots] Firebase failed to load:", e);
+          banner("Couldn't connect to Firebase, so bookings are being saved in this browser only.");
+        }
+      }
+      events = readLocal();
+      if (!events.length && CFG.demo) { events = seedDemo(); writeLocal(events); events.forEach(e => remember(e.id)); }
+      onChange();
+      if (!CFG.firebase) {
+        banner("Saved in this browser only — nobody else can see these bookings yet. Connect Firebase to make it shared. ", true);
+      }
+    },
+    async save(ev) {
+      if (mode === "firebase") {
+        const { api, db } = fs;
+        const body = { ...ev }; delete body.id;
+        if (ev.id) { await api.setDoc(api.doc(db, "events", ev.id), body); return ev.id; }
+        const ref = await api.addDoc(api.collection(db, "events"), body);
+        remember(ref.id); return ref.id;
+      }
+      if (ev.id) { const i = events.findIndex(e => e.id === ev.id); if (i > -1) events[i] = { ...ev }; }
+      else { ev = { ...ev, id: newId() }; events.push(ev); remember(ev.id); }
+      writeLocal(events); onChange(); return ev.id;
+    },
+    async remove(id) {
+      if (mode === "firebase") { await fs.api.deleteDoc(fs.api.doc(fs.db, "events", id)); return; }
+      events = events.filter(e => e.id !== id); writeLocal(events); onChange();
+    }
+  };
+})();
+
+function banner(text, soft) {
+  const b = document.getElementById("banner");
+  document.getElementById("bannerText").textContent = text;
+  b.hidden = false;
+  if (soft) b.style.background = "var(--sunken)", b.style.color = "var(--ink-2)", b.style.borderColor = "var(--rule)";
+}
+document.getElementById("bannerX").onclick = () => { document.getElementById("banner").hidden = true; };
+
+/* ---------------------------------------------------------------
+   App state
+   --------------------------------------------------------------- */
+const state = { view: "week", cursor: new Date() };
+const byDate = new Map();
+
+function index() {
+  byDate.clear();
+  for (const e of Store.all()) {
+    if (!e || !e.date) continue;
+    if (!byDate.has(e.date)) byDate.set(e.date, []);
+    byDate.get(e.date).push(e);
+  }
+  for (const list of byDate.values()) list.sort((a, b) => a.start - b.start || a.end - b.end);
+}
+const dayEvents = d => byDate.get(ymd(d)) || [];
+
+function canEdit(ev) { return IS_OWNER || !ev.id || Store.isMine(ev.id); }
+
+/* ---------------------------------------------------------------
+   Month view
+   --------------------------------------------------------------- */
+const mdow = document.getElementById("mdow");
+const mgrid = document.getElementById("mgrid");
+
+(function buildDow() {
+  const order = CFG.weekStartsMonday ? [1,2,3,4,5,6,0] : [0,1,2,3,4,5,6];
+  mdow.innerHTML = order.map(i => `<div>${DOW_SHORT[i]}</div>`).join("");
+})();
+
+function renderMonth() {
+  const cur = state.cursor;
+  const first = new Date(cur.getFullYear(), cur.getMonth(), 1);
+  const gridStart = startOfWeek(first);
+  const last = new Date(cur.getFullYear(), cur.getMonth() + 1, 0);
+  const weeks = Math.ceil((Math.round((startOfWeek(last) - gridStart) / DAY_MS) + 7) / 7);
+  const today = new Date();
+
+  const cells = [];
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(gridStart, i);
+    const out = d.getMonth() !== cur.getMonth();
+    const evs = dayEvents(d);
+    const shown = evs.slice(0, 3);
+    const chips = shown.map(e => `
+      <button class="chip ${e.status === "tentative" ? "tentative" : ""}" data-ev="${e.id}" type="button">
+        <time>${fmt(e.start)}</time><span>${esc(e.title)}</span>
+      </button>`).join("");
+    const more = evs.length > 3
+      ? `<button class="more" data-goweek="${ymd(d)}" type="button">+${evs.length - 3} more</button>` : "";
+    cells.push(`
+      <div class="mcell ${out ? "out" : (d.getDay() === 0 || d.getDay() === 6) ? "wknd" : ""} ${sameDay(d, today) ? "today" : ""}" data-day="${ymd(d)}">
+        <span class="dnum">${d.getDate()}</span>
+        <div class="chips">${chips}${more}</div>
+      </div>`);
+  }
+  mgrid.innerHTML = cells.join("");
+  mgrid.style.gridAutoRows = `minmax(${weeks > 5 ? 88 : 104}px, 1fr)`;
+}
+
+/* ---------------------------------------------------------------
+   Week view
+   --------------------------------------------------------------- */
+const whead = document.getElementById("whead");
+const wgrid = document.getElementById("wgrid");
+const gutter = document.getElementById("gutter");
+const wscroll = document.getElementById("wscroll");
+
+const HOUR_MARKS = [];
+for (let m = WIN_A + 60; m <= WIN_B; m += 60) HOUR_MARKS.push(m);
+
+function buildGutter() {
+  gutter.innerHTML = HOUR_MARKS.map((m, i) =>
+    `<span class="hl${i === HOUR_MARKS.length - 1 ? " last" : ""}" style="top:${pct(m)}%">${fmt(m)}</span>`
+  ).join("");
+}
+buildGutter();
+const relabelGutter = buildGutter;
+document.getElementById("winLabel").textContent = `${Math.floor(WIN_A/60)}\u2013${Math.floor(WIN_B/60)}h`;
+
+function layoutColumns(evs) {
+  // Split into clusters of mutually overlapping events, then pack columns.
+  const out = evs.map(e => ({ e, col: 0, cols: 1 }));
+  let cluster = [], clusterEnd = -1;
+  const flush = () => {
+    if (!cluster.length) return;
+    const lanes = [];
+    for (const item of cluster) {
+      let placed = false;
+      for (let i = 0; i < lanes.length; i++) {
+        if (lanes[i] <= item.e.start) { lanes[i] = item.e.end; item.col = i; placed = true; break; }
+      }
+      if (!placed) { item.col = lanes.length; lanes.push(item.e.end); }
+    }
+    for (const item of cluster) item.cols = lanes.length;
+    cluster = []; clusterEnd = -1;
+  };
+  for (const item of out) {
+    if (cluster.length && item.e.start >= clusterEnd) flush();
+    cluster.push(item); clusterEnd = Math.max(clusterEnd, item.e.end);
+  }
+  flush();
+  return out;
+}
+
+function renderWeek() {
+  const ws = startOfWeek(state.cursor);
+  const today = new Date();
+
+  // headers
+  let head = `<div class="corner"><span>${Math.floor(WIN_A/60)}\u2013${Math.floor(WIN_B/60)}h</span></div>`;
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i);
+    const n = dayEvents(d).length;
+    head += `
+      <div class="dhead ${sameDay(d, today) ? "today" : ""}" data-goday="${ymd(d)}">
+        <span class="dw">${DOW_SHORT[d.getDay()]}</span>
+        <span class="dd">${d.getDate()}</span>
+        <span class="tot">${n ? n + (n === 1 ? " booking" : " bookings") : "free"}</span>
+      </div>`;
+  }
+  whead.innerHTML = head;
+
+  // columns
+  let cols = "";
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i);
+    const isToday = sameDay(d, today);
+    const wknd = d.getDay() === 0 || d.getDay() === 6;
+    const items = layoutColumns(dayEvents(d));
+    let evs = "";
+    for (const { e, col, cols: n } of items) {
+      const vs = Math.max(e.start, WIN_A), ve = Math.min(e.end, WIN_B);
+      if (ve <= vs) continue;                       // entirely outside working hours
+      const top = pct(vs);
+      const hgt = ((ve - vs) / WIN) * 100;
+      const w = 100 / n;
+      const short = (ve - vs) <= 35;
+      evs += `
+        <button class="ev ${e.status === "tentative" ? "tentative" : ""} ${short ? "short" : ""}" type="button"
+                data-ev="${e.id}"
+                title="${esc(e.title)} · ${fmtRange(e.start, e.end)}${e.who ? " · " + esc(e.who) : ""}"
+                style="top:${top}%; height:${hgt}%; left:calc(${col * w}% + 2px); width:calc(${w}% - 4px);">
+          <b>${esc(e.title)}</b>
+          <time>${fmtRange(e.start, e.end)}</time>
+          ${e.who && !short ? `<span class="who">${esc(e.who)}</span>` : ""}
+        </button>`;
+    }
+    let now = "";
+    if (isToday) {
+      const m = today.getHours() * 60 + today.getMinutes();
+      if (inWindow(m)) now = `<div class="nowline" style="top:${pct(m)}%"></div>`;
+    }
+    cols += `<div class="dcol ${wknd ? "weekend" : ""} ${isToday ? "todaycol" : ""}" data-col="${ymd(d)}">${evs}${now}</div>`;
+  }
+  wgrid.style.setProperty("--win-hours", HOURS);
+  wgrid.innerHTML = `<div class="gutter" id="gutter">${gutter.innerHTML}</div>` + cols;
+
+  // current-time chip in the gutter
+  const nowM = today.getHours() * 60 + today.getMinutes();
+  if (ws <= today && today < addDays(ws, 7) && inWindow(nowM)) {
+    const g = wgrid.querySelector(".gutter");
+    const chip = document.createElement("span");
+    chip.className = "nowlabel"; chip.style.top = `${pct(nowM)}%`; chip.textContent = fmt(nowM);
+    g.appendChild(chip);
+  }
+}
+
+
+
+/* ---------------------------------------------------------------
+   Render + navigation
+   --------------------------------------------------------------- */
+function render() {
+  index();
+  const isWeek = state.view === "week";
+  document.getElementById("weekView").hidden = !isWeek;
+  document.getElementById("monthView").hidden = isWeek;
+  document.getElementById("btnWeek").setAttribute("aria-pressed", String(isWeek));
+  document.getElementById("btnMonth").setAttribute("aria-pressed", String(!isWeek));
+  document.getElementById("hint").textContent = isWeek ? "drag on the grid to pick a time" : "click a day to open its week";
+
+  if (isWeek) {
+    const ws = startOfWeek(state.cursor), we = addDays(ws, 6);
+    const label = ws.getMonth() === we.getMonth()
+      ? `${MONTHS[ws.getMonth()]} ${ws.getDate()} – ${we.getDate()} <span class="yr">${we.getFullYear()}</span>`
+      : `${MONTHS[ws.getMonth()].slice(0,3)} ${ws.getDate()} – ${MONTHS[we.getMonth()].slice(0,3)} ${we.getDate()} <span class="yr">${we.getFullYear()}</span>`;
+    document.getElementById("periodLabel").innerHTML = label;
+    renderWeek();
+  } else {
+    document.getElementById("periodLabel").innerHTML =
+      `${MONTHS[state.cursor.getMonth()]} <span class="yr">${state.cursor.getFullYear()}</span>`;
+    renderMonth();
+  }
+}
+
+function go(delta) {
+  if (state.view === "week") state.cursor = addDays(state.cursor, 7 * delta);
+  else state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + delta, 1);
+  render();
+}
+
+document.getElementById("btnPrev").onclick = () => go(-1);
+document.getElementById("btnNext").onclick = () => go(1);
+document.getElementById("btnToday").onclick = () => { state.cursor = new Date(); render(); };
+document.getElementById("btnMonth").onclick = () => { state.view = "month"; render(); };
+document.getElementById("btnWeek").onclick = () => { state.view = "week"; render(); };
+document.getElementById("btnClock").onclick = e => {
+  use12 = !use12; e.currentTarget.textContent = use12 ? "12h" : "24h";
+  relabelGutter(); render();
+};
+
+/* ---------------------------------------------------------------
+   Clicks on the grids
+   --------------------------------------------------------------- */
+mgrid.addEventListener("click", e => {
+  const chip = e.target.closest("[data-ev]");
+  if (chip) { openEvent(chip.dataset.ev); return; }
+  const more = e.target.closest("[data-goweek]");
+  if (more) { state.view = "week"; state.cursor = parseYmd(more.dataset.goweek); render(); return; }
+  const cell = e.target.closest("[data-day]");
+  if (cell) openNew(cell.dataset.day, WIN_A + 60, WIN_A + 120);
+});
+
+whead.addEventListener("click", e => {
+  const h = e.target.closest("[data-goday]");
+  if (h) { state.cursor = parseYmd(h.dataset.goday); render(); }
+});
+
+wgrid.addEventListener("click", e => {
+  const ev = e.target.closest("[data-ev]");
+  if (ev) { openEvent(ev.dataset.ev); }
+});
+
+/* ---------- drag to create ---------- */
+const SNAP = 15;
+let drag = null;
+
+function minutesAt(col, clientY) {
+  const r = col.getBoundingClientRect();
+  const raw = WIN_A + ((clientY - r.top) / r.height) * WIN;
+  return Math.max(WIN_A, Math.min(WIN_B, Math.round(raw / SNAP) * SNAP));
+}
+
+wgrid.addEventListener("pointerdown", e => {
+  if (e.button !== 0) return;
+  if (e.target.closest(".ev")) return;
+  const col = e.target.closest(".dcol");
+  if (!col) return;
+  const m = minutesAt(col, e.clientY);
+  const ghost = document.createElement("div");
+  ghost.className = "ghost-sel";
+  col.appendChild(ghost);
+  drag = { col, anchor: m, a: m, b: m + SNAP * 2, ghost, moved: false };
+  paintGhost();
+  col.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+
+function paintGhost() {
+  if (!drag) return;
+  const a = Math.min(drag.a, drag.b), b = Math.max(drag.a, drag.b);
+  drag.ghost.style.top = `${pct(a)}%`;
+  drag.ghost.style.height = `${((b - a) / WIN) * 100}%`;
+  drag.ghost.textContent = (b - a) >= 30 ? fmtRange(a, b) : "";
+}
+
+wgrid.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const m = minutesAt(drag.col, e.clientY);
+  if (m !== drag.b) drag.moved = true;
+  drag.a = drag.anchor; drag.b = m;
+  if (Math.abs(drag.b - drag.a) < SNAP) drag.b = drag.a + SNAP;
+  paintGhost();
+});
+
+function endDrag() {
+  if (!drag) return;
+  const a = Math.min(drag.a, drag.b), b = Math.max(drag.a, drag.b);
+  const date = drag.col.dataset.col;
+  drag.ghost.remove();
+  const dur = drag.moved ? Math.max(SNAP, b - a) : 60;
+  drag = null;
+  openNew(date, a, Math.min(WIN_B, a + dur));
+}
+wgrid.addEventListener("pointerup", endDrag);
+wgrid.addEventListener("pointercancel", () => { if (drag) { drag.ghost.remove(); drag = null; } });
+
+/* ---------------------------------------------------------------
+   The booking sheet
+   --------------------------------------------------------------- */
+const sheet = document.getElementById("sheet");
+const backdrop = document.getElementById("backdrop");
+const form = document.getElementById("form");
+const fTitle = document.getElementById("fTitle"), fWho = document.getElementById("fWho");
+const fDate = document.getElementById("fDate"), fStart = document.getElementById("fStart"), fEnd = document.getElementById("fEnd");
+const fNote = document.getElementById("fNote");
+fStart.min = fEnd.min = CFG.dayStart;      // browsers won't offer times outside working hours
+fStart.max = fEnd.max = CFG.dayEnd;
+const btnDelete = document.getElementById("btnDelete");
+const roNote = document.getElementById("roNote");
+let editing = null;      // event object being edited, or null for new
+let armed = false;
+
+function openSheet() {
+  sheet.classList.add("on"); backdrop.classList.add("on");
+  sheet.setAttribute("aria-hidden", "false");
+  setTimeout(() => fTitle.focus(), 190);
+}
+function closeSheet() {
+  sheet.classList.remove("on"); backdrop.classList.remove("on");
+  sheet.setAttribute("aria-hidden", "true");
+  editing = null; disarm();
+}
+function disarm() { armed = false; btnDelete.classList.remove("arm"); btnDelete.textContent = "Delete"; }
+
+function openNew(dateStr, startMin, endMin) {
+  editing = null;
+  document.getElementById("sheetTitle").textContent = IS_OWNER ? "New booking" : "Request a slot";
+  form.reset();
+  fDate.value = dateStr;
+  fStart.value = toHHMM(Math.max(WIN_A, Math.min(WIN_B - 15, startMin)));
+  fEnd.value = toHHMM(Math.min(WIN_B, endMin));
+  form.status.value = IS_OWNER ? "busy" : "tentative";
+  btnDelete.hidden = true;
+  roNote.hidden = true;
+  setFormEnabled(true);
+  checkClash(); updateDur();
+  openSheet();
+}
+
+function openEvent(id) {
+  const ev = Store.all().find(e => e.id === id);
+  if (!ev) return;
+  editing = ev;
+  document.getElementById("sheetTitle").textContent = canEdit(ev) ? "Edit booking" : "Booking details";
+  fTitle.value = ev.title || "";
+  fWho.value = ev.who || "";
+  fDate.value = ev.date;
+  fStart.value = toHHMM(ev.start);
+  fEnd.value = toHHMM(ev.end);
+  form.status.value = ev.status || "busy";
+  fNote.value = ev.note || "";
+  const editable = canEdit(ev);
+  btnDelete.hidden = !editable;
+  roNote.hidden = editable;
+  if (!editable) roNote.textContent = "This slot was booked by someone else, so it's read-only here. Ask the calendar owner to change or cancel it.";
+  setFormEnabled(editable);
+  checkClash(); updateDur();
+  openSheet();
+}
+
+function setFormEnabled(on) {
+  [...form.elements].forEach(el => { el.disabled = !on; });
+  document.getElementById("btnSave").hidden = !on;
+  [...document.querySelectorAll("#quick button")].forEach(b => b.disabled = !on);
+}
+
+document.getElementById("btnNew").onclick = () => {
+  const base = state.view === "week" ? startOfWeek(state.cursor) : state.cursor;
+  const d = (base <= new Date() && new Date() < addDays(base, 7)) ? new Date() : base;
+  openNew(ymd(d), WIN_A + 60, WIN_A + 120);
+};
+document.getElementById("btnClose").onclick = closeSheet;
+document.getElementById("btnCancel").onclick = closeSheet;
+backdrop.onclick = closeSheet;
+
+/* duration chips */
+document.getElementById("quick").addEventListener("click", e => {
+  const b = e.target.closest("[data-min]");
+  if (!b || !fStart.value) return;
+  fEnd.value = toHHMM(Math.min(WIN_B, toMin(fStart.value) + Number(b.dataset.min)));
+  checkClash(); updateDur();
+});
+
+function updateDur() {
+  const out = document.getElementById("durOut");
+  if (!fStart.value || !fEnd.value) { out.textContent = ""; return; }
+  const d = toMin(fEnd.value) - toMin(fStart.value);
+  out.textContent = d > 0 ? fmtDur(d) : "end must be after start";
+}
+
+fStart.addEventListener("change", () => {
+  if (fEnd.value && toMin(fEnd.value) <= toMin(fStart.value))
+    fEnd.value = toHHMM(Math.min(WIN_B, toMin(fStart.value) + 60));
+  checkClash(); updateDur();
+});
+[fEnd, fDate].forEach(el => el.addEventListener("change", () => { checkClash(); updateDur(); }));
+
+function checkClash() {
+  const box = document.getElementById("clash");
+  if (!fDate.value || !fStart.value || !fEnd.value) { box.hidden = true; return; }
+  const s = toMin(fStart.value), e = toMin(fEnd.value);
+  const hits = (byDate.get(fDate.value) || [])
+    .filter(x => (!editing || x.id !== editing.id) && x.start < e && s < x.end);
+  if (!hits.length) { box.hidden = true; return; }
+  document.getElementById("clashText").textContent =
+    `Overlaps ${hits.map(h => `"${h.title}" (${fmtRange(h.start, h.end)})`).join(" and ")}. You can still save it if a double booking is fine.`;
+  box.hidden = false;
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const s = toMin(fStart.value), en = toMin(fEnd.value);
+  if (en <= s) { toast("The end time has to be after the start time."); fEnd.focus(); return; }
+  if (s < WIN_A || en > WIN_B) {
+    toast(`Bookings run between ${fmt(WIN_A)} and ${fmt(WIN_B)}.`);
+    (s < WIN_A ? fStart : fEnd).focus();
+    return;
+  }
+  const rec = {
+    id: editing ? editing.id : undefined,
+    title: fTitle.value.trim() || "Booked",
+    who: fWho.value.trim(),
+    date: fDate.value,
+    start: s,
+    end: en,
+    note: fNote.value.trim(),
+    status: form.status.value,
+    createdAt: editing ? (editing.createdAt || Date.now()) : Date.now()
+  };
+  const save = document.getElementById("btnSave");
+  save.disabled = true;
+  try {
+    await Store.save(rec);
+    state.cursor = parseYmd(rec.date);
+    closeSheet();
+    toast(editing ? "Booking updated." : (rec.status === "tentative" ? "Slot requested — waiting on confirmation." : "Booking added."));
+  } catch (err) {
+    console.error(err);
+    toast("Couldn't save that. " + (err && err.message ? err.message : "Check your connection and try again."));
+  } finally { save.disabled = false; }
+});
+
+btnDelete.onclick = async () => {
+  if (!editing) return;
+  if (!armed) { armed = true; btnDelete.classList.add("arm"); btnDelete.textContent = "Tap again to delete"; setTimeout(disarm, 4000); return; }
+  const id = editing.id;
+  try { await Store.remove(id); closeSheet(); toast("Booking deleted."); }
+  catch (err) { console.error(err); toast("Couldn't delete that one."); }
+};
+
+/* ---------------------------------------------------------------
+   Export .ics
+   --------------------------------------------------------------- */
+document.getElementById("btnIcs").onclick = () => {
+  const evs = Store.all();
+  if (!evs.length) { toast("Nothing to export yet."); return; }
+  const stamp = d => d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + "T" +
+                     pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + "00Z";
+  const at = (dateStr, m) => { const d = parseYmd(dateStr); d.setHours(Math.floor(m / 60), m % 60, 0, 0); return d; };
+  const fold = s => s.replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Open Slots//EN", "CALSCALE:GREGORIAN"];
+  for (const e of evs) {
+    lines.push("BEGIN:VEVENT",
+      `UID:${e.id}@openslots`,
+      `DTSTAMP:${stamp(new Date())}`,
+      `DTSTART:${stamp(at(e.date, e.start))}`,
+      `DTEND:${stamp(at(e.date, e.end))}`,
+      `SUMMARY:${fold(e.title || "Booked")}${e.status === "tentative" ? " (requested)" : ""}`,
+      `STATUS:${e.status === "tentative" ? "TENTATIVE" : "CONFIRMED"}`,
+      e.who ? `ORGANIZER;CN=${fold(e.who)}:mailto:noreply@example.com` : "",
+      e.note ? `DESCRIPTION:${fold(e.note)}` : "",
+      "END:VEVENT");
+  }
+  lines.push("END:VCALENDAR");
+  offerFile("open-slots.ics", lines.filter(Boolean).join("\r\n"), "text/calendar");
+};
+
+/* Hands the viewer a file. Uses the Claude artifact download bridge when the
+   page is running inside claude.ai, and an ordinary link everywhere else
+   (which is what happens on GitHub Pages). */
+async function offerFile(filename, text, mime) {
+  try {
+    if (window.claude && typeof window.claude.use === "function") {
+      const dl = await window.claude.use("downloads");
+      if (dl) {
+        await dl.save({ filename, data: text });
+        toast("Calendar file saved.");
+        return;
+      }
+    }
+  } catch (err) {
+    if (err && err.code === "declined") return;      // viewer said no; nothing to report
+    console.warn("[openslots] download bridge unavailable:", err);
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast("Calendar file downloaded.");
+}
+
+/* ---------------------------------------------------------------
+   Misc
+   --------------------------------------------------------------- */
+let toastT;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 3200);
+}
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && sheet.classList.contains("on")) { closeSheet(); return; }
+  if (sheet.classList.contains("on")) return;
+  if (e.target.matches("input,textarea,select")) return;
+  if (e.key === "ArrowLeft") go(-1);
+  else if (e.key === "ArrowRight") go(1);
+  else if (e.key.toLowerCase() === "t") document.getElementById("btnToday").click();
+  else if (e.key.toLowerCase() === "m") { state.view = "month"; render(); }
+  else if (e.key.toLowerCase() === "w") { state.view = "week"; render(); }
+  else if (e.key.toLowerCase() === "n") document.getElementById("btnNew").click();
+});
+
+/* keep the "now" line honest */
+setInterval(() => { if (state.view === "week") render(); }, 60000);
+
+/* ---------------------------------------------------------------
+   Boot
+   --------------------------------------------------------------- */
+Store.init(render);
+render();
+</script>
