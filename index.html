@@ -553,10 +553,14 @@ window.CALENDAR_CONFIG = {
   minSlot: 60,
 
   // 邊幾日開放收新課。索引 0=星期一 … 6=星期日
-  openDays: [true, true, false, true, true, false, false],
+  // 而家全部日子都開放：所有冇課、又冇封鎖嘅時間都會自動變「可排課」。
+  // 想成日唔收新課就把嗰日改返 false。
+  openDays: [true, true, true, true, true, true, true],
 
-  // 某日只開放部分時段（只有 openDays 標 false 的日子先需要用）
-  extraWindows: { 2: [["09:30", "11:30"]] },
+  // 某日只開放部分時段。填咗嘅日子就淨係嗰幾段有可排課，其餘時間唔會出。
+  // 空 {} = 唔限制，全日跟 lockedWindows 同 bookableFrom/To 計。
+  // 例：{ 2: [["09:30", "11:30"]] } 代表星期三只開 09:30–11:30。
+  extraWindows: {},
 
   // 封鎖時段：呢啲時間任何人都預約唔到，格線上會打斜紋。
   // 索引 0=星期一 … 6=星期日。管理模式唔受限制（自己張表自己話事）。
@@ -1037,7 +1041,8 @@ function renderMonth() {
     const freeTotal = free.reduce((s, [a, b]) => s + (b - a), 0);
     const freeLine = free.length && !out
       ? `<button class="freeline" data-goweek="${key}" type="button">可排課 ${hrs(freeTotal)} 小時</button>` : "";
-    const closed = !isOpenDay(dow) && !windowsFor(dow).length;
+    const closed = lockedFor(dow).some(([a, b]) => a <= WIN_A && b >= WIN_B)
+                || (!isOpenDay(dow) && !windowsFor(dow).length);
 
     html += `
       <div class="mcell ${out ? "out" : ""} ${closed && !out ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-day="${key}">
@@ -1093,7 +1098,9 @@ function renderWeek() {
   let head = `<div class="corner"><span>${Math.floor(WIN_A/60)}–${Math.floor(WIN_B/60)}h</span></div>`;
   for (let i = 0; i < 7; i++) {
     const d = addDays(ws, i), key = ymd(d);
-    const closed = !isOpenDay(i) && !windowsFor(i).length;
+    const lk = lockedFor(i);
+    const closed = lk.some(([a, bb]) => a <= WIN_A && bb >= WIN_B)
+                || (!isOpenDay(i) && !windowsFor(i).length);
     // 標題淨係得星期同日子。開放狀態睇格線，假期喺月曆度睇。
     head += `
       <div class="dhead ${closed ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-goday="${key}">
@@ -1106,13 +1113,15 @@ function renderWeek() {
   let cols = "";
   for (let i = 0; i < 7; i++) {
     const d = addDays(ws, i), key = ymd(d);
-    const wins = windowsFor(i);
-    const closed = !isOpenDay(i) && !wins.length;
+    const locks = lockedFor(i);
+    // 成日由頭封到尾 = 休息日，畫成灰色
+    const fullyLocked = locks.some(([a, bb]) => a <= WIN_A && bb >= WIN_B);
+    const closed = fullyLocked || (!isOpenDay(i) && !windowsFor(i).length);
     const evs = lessonsOn(d);
     let inner = "";
 
     for (const [a, b] of freeSlots(d)) {
-      const tiny = (b - a) < 75;
+      const tiny = (b - a) < 45;   // 太矮先淨係顯示時間
       inner += `
         <button class="slot ${tiny ? "tiny" : ""}" type="button" data-slot="${key}|${a}|${b}"
                 title="可排課 ${fmtRange(a, b)}（${hrs(b - a)} 小時）"
@@ -1139,7 +1148,7 @@ function renderWeek() {
         </button>`;
     }
 
-    for (const [a, bb] of lockedFor(i)) {
+    for (const [a, bb] of locks) {
       const vs = Math.max(a, WIN_A), ve = Math.min(bb, WIN_B);
       if (ve <= vs) continue;
       inner += `<div class="locked" style="top:${pct(vs)}%; height:${((ve - vs) / WIN) * 100}%"
