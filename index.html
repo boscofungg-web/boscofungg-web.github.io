@@ -270,9 +270,6 @@ main{flex:1 1 auto; min-height:0; position:relative; overflow:hidden}
 .dhead.closed .dw{color:var(--rest)}
 .dhead .dd{font-family:var(--mono); font-size:15px; font-variant-numeric:tabular-nums; line-height:1.2}
 .dhead.today .dd{color:var(--open); font-weight:700}
-.dhead .tag{font-size:9.5px; line-height:1.3; color:var(--open); font-weight:500}
-.dhead.closed .tag{color:var(--rest)}
-.dhead .tag.holiday{color:var(--open); font-weight:700}
 
 .wscroll{flex:1 1 auto; overflow:auto; position:relative; display:flex; flex-direction:column}
 .wgrid{
@@ -1094,15 +1091,12 @@ function renderWeek() {
   let head = `<div class="corner"><span>${Math.floor(WIN_A/60)}–${Math.floor(WIN_B/60)}h</span></div>`;
   for (let i = 0; i < 7; i++) {
     const d = addDays(ws, i), key = ymd(d);
-    const holi = holidayOn(key), wins = windowsFor(i);
-    const closed = !isOpenDay(i) && !wins.length;
-    // 開放狀態唔喺標題度講 —— 格線上嘅斜紋同橙色空檔已經睇得出。
-    // 淨係假期先出一行字，因為嗰個係資料，唔係狀態。
+    const closed = !isOpenDay(i) && !windowsFor(i).length;
+    // 標題淨係得星期同日子。開放狀態睇格線，假期喺月曆度睇。
     head += `
       <div class="dhead ${closed ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-goday="${key}">
         <span class="dw">${DOW_ZH[i]}<em>${DOW_EN[i]}</em></span>
         <span class="dd">${d.getDate()}</span>
-        ${holi ? `<span class="tag holiday">${esc(holi)}</span>` : ""}
       </div>`;
   }
   whead.innerHTML = head;
