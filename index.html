@@ -739,7 +739,7 @@ window.CALENDAR_CONFIG = {
     <button class="pbtn" id="btnSave" type="submit" form="form">儲存</button>
     <div class="delchoice" id="delChoice" hidden>
       <button type="button" id="delOne">只刪這一次</button>
-      <button type="button" id="delAll">刪除整個系列</button>
+      <button type="button" id="delAll">刪除呢次同之後</button>
       <button type="button" id="delCancel" style="flex:0 0 auto;border-color:var(--rule);color:var(--ink-2)">返回</button>
     </div>
   </footer>
@@ -941,9 +941,14 @@ document.getElementById("bannerX").onclick = () => { document.getElementById("ba
    --------------------------------------------------------------- */
 function lessonsOn(date) {
   const key = ymd(date), dow = dowOf(date);
-  return Store.all()
-    .filter(e => e && (e.repeat ? e.dow === dow && !(e.skip || []).includes(key) : e.date === key))
-    .sort((a, b) => a.start - b.start || a.end - b.end);
+  return Store.all().filter(e => {
+    if (!e) return false;
+    if (!e.repeat) return e.date === key;
+    if (e.dow !== dow) return false;
+    if (e.from  && key < e.from)  return false;   // 開始之前唔出現 —— 唔會補返以前嗰啲星期
+    if (e.until && key > e.until) return false;   // 「刪除呢次同之後」之後就到此為止
+    return !(e.skip || []).includes(key);
+  }).sort((a, b) => a.start - b.start || a.end - b.end);
 }
 
 /* 可排課空檔 — 演算法照搬 gen_weekly.py 的 free_slots() */
@@ -1360,13 +1365,15 @@ document.getElementById("fRight").textContent =
   (CFG.footNote ? CFG.footNote + " ・ " : "") + "所有時間為香港時間";
 document.title = CFG.title;
 
+let repeatHint = "";                       // 編輯緊現有課堂時嘅說明，開新嘅就用預設
 function syncRepeat() {
   const on = fRepeat.checked;
   document.getElementById("repeatBox").classList.toggle("off", !on);
   document.getElementById("dowField").hidden = !on;
   document.getElementById("dateField").hidden = on;
-  document.getElementById("repeatHint").textContent =
-    on ? "每個星期同一時間都會出現" : "只有這一日，之後不會重複";
+  document.getElementById("repeatHint").textContent = on
+    ? (repeatHint || "由你而家睇緊嗰一星期開始，之後每星期出現。以前嘅星期唔會補返。")
+    : "只有這一日，之後不會重複";
 }
 fRepeat.addEventListener("change", () => { syncRepeat(); checkClash(); });
 document.getElementById("kindPicker").addEventListener("change", () => { syncTitleLock(); syncPw(); });
@@ -1392,6 +1399,12 @@ function getKind() {
   return el ? el.value : DEFAULT_CAT;
 }
 
+/* 開新重複課堂嗰陣，第一次出現係邊日 —— 用你當時睇緊嗰一週 */
+function firstOccurrence(dowSel) {
+  const anchor = startOfWeek(editingOn ? parseYmd(editingOn) : state.cursor);
+  return ymd(addDays(anchor, dowSel));
+}
+
 function setEnabled(on) {
   [...form.elements].forEach(el => el.disabled = !on);
   document.getElementById("btnSave").hidden = !on;
@@ -1404,6 +1417,7 @@ function openNew(date, a, b) {
   editing = null; editingOn = ymd(date);
   document.getElementById("sheetTitle").textContent = IS_OWNER ? "新增課堂" : "預約時段";
   form.reset();
+  repeatHint = "";
   fRepeat.checked = true; syncRepeat();
   userTitle = ""; fTitle.readOnly = false;
   fDow.value = String(dowOf(date));
@@ -1426,6 +1440,11 @@ function openEvent(id, onKey) {
   fTitle.value = ev.title || "";
   userTitle = fTitle.value; fTitle.readOnly = false;
   fWho.value = ev.who || "";
+  if (ev.repeat) {
+    if (ev.from && ev.until)  repeatHint = `${ev.from} 至 ${ev.until}，每星期重複`;
+    else if (ev.from)         repeatHint = `由 ${ev.from} 開始，每星期重複`;
+    else                      repeatHint = "每星期重複（冇設開始日期，所有星期都會出現）";
+  } else repeatHint = "";
   fRepeat.checked = !!ev.repeat; syncRepeat();
   fDow.value = String(ev.repeat ? ev.dow : dowOf(parseYmd(ev.date)));
   fDate.value = ev.repeat ? (onKey || "") : ev.date;
@@ -1515,8 +1534,11 @@ form.addEventListener("submit", async e => {
     note: IS_OWNER ? fNote.value.trim() : (editing ? editing.note || "" : ""),
     start: s, end: en,
     repeat: rep,
-    dow: rep ? Number(fDow.value) : 0,
+    dow: rep ? dowSel : 0,
     date: rep ? "" : fDate.value,
+    // 由你當時睇緊嗰一週嘅嗰一日開始計，以前嘅星期唔會出現
+    from: rep ? (editing ? (editing.from || "") : firstOccurrence(dowSel)) : "",
+    until: rep && editing ? (editing.until || "") : "",
     skip: editing ? (editing.skip || []) : [],
     status: IS_OWNER ? "busy" : "tentative",
     createdAt: editing ? (editing.createdAt || Date.now()) : Date.now()
@@ -1545,7 +1567,7 @@ btnDelete.onclick = () => {
 };
 document.getElementById("delCancel").onclick = () => { delChoice.hidden = true; btnDelete.hidden = false; };
 document.getElementById("delOne").onclick = () => doDelete("one");
-document.getElementById("delAll").onclick = () => doDelete("all");
+document.getElementById("delAll").onclick = () => doDelete("later");
 
 async function doDelete(scope) {
   if (!editing) return;
@@ -1560,7 +1582,17 @@ async function doDelete(scope) {
   try {
     if (scope === "one" && target.repeat && on) {
       await Store.save({ ...target, skip: [...new Set([...(target.skip || []), on])] });
-      closeSheet(); toast("已刪除這一次。");
+      closeSheet(); toast("已刪除這一次，之前之後嘅照舊。");
+    } else if (scope === "later" && target.repeat && on) {
+      const prevDay = ymd(addDays(parseYmd(on), -1));
+      // 由第一次就開始刪 → 成個系列都冇咗，直接刪走張紀錄
+      if (target.from && prevDay < target.from) {
+        await Store.remove(target.id);
+        closeSheet(); toast("已刪除整個系列。");
+      } else {
+        await Store.save({ ...target, until: prevDay });
+        closeSheet(); toast(`已刪除 ${on} 同之後嘅，之前嘅照舊。`);
+      }
     } else {
       await Store.remove(target.id);
       closeSheet(); toast("已刪除。");

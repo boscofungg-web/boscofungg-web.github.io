@@ -26,7 +26,8 @@ service cloud.firestore {
     // 一堂課嘅合法格式
     function isWellFormed(d) {
       return d.keys().hasOnly(['title','who','kind','note','start','end',
-                               'repeat','dow','date','skip','status','createdAt'])
+                               'repeat','dow','date','from','until',
+                               'skip','status','createdAt'])
           && d.keys().hasAll(['title','start','end','repeat','status'])
 
           && d.title is string && d.title.size() > 0 && d.title.size() <= 40
@@ -41,6 +42,10 @@ service cloud.firestore {
           && (d.repeat
                 ? (d.dow is number && d.dow >= 0 && d.dow <= 6)
                 : (d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+
+          // 重複課堂嘅開始／結束日：空字串 = 冇限制（舊資料就係咁）
+          && (!('from'  in d.keys()) || d.from  == '' || d.from.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
+          && (!('until' in d.keys()) || d.until == '' || d.until.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'))
 
           // 顏色分類。加新分類記得把個 key 加埋落呢度，否則 Firebase 會拒收
           && (!('kind' in d.keys()) || d.kind in ['uni', 'work', 'other', 'open', 'admin'])
