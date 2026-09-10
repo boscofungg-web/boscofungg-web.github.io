@@ -588,6 +588,136 @@ body.clearing .btn-clear{background:var(--danger); border-color:var(--danger); c
   font-variant-numeric:tabular-nums;
 }
 
+
+/* ---------- 收入檢視 ---------- */
+.view.scrolly{overflow:auto; display:block}
+.ibar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:10px 18px; background:var(--paper); border-bottom:1px solid var(--rule);
+  position:sticky; top:0; z-index:5;
+}
+.ibar .ihint{font-size:11.5px; color:var(--ink-3); margin-left:auto}
+.ibar .tbtn.on{background:var(--work-fill); border-color:var(--work); color:#fff; font-weight:700}
+.iwrap{max-width:1020px; margin:0 auto; padding:16px 18px 34px}
+
+.norates{
+  background:var(--paper); border:1px solid var(--open-line); border-left:3px solid var(--open);
+  border-radius:8px; padding:13px 15px; font-size:13px; color:var(--ink-2); line-height:1.7;
+  margin-bottom:14px;
+}
+.norates b{color:var(--ink)}
+
+.hero{
+  background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+  padding:18px 20px; margin-bottom:14px;
+  display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap;
+}
+.hero .big{display:flex; flex-direction:column; gap:2px}
+.hero .big .lab{font-size:11.5px; color:var(--ink-3); font-weight:500}
+.hero .big .amt{
+  font-family:var(--mono); font-size:38px; font-weight:600; color:var(--work);
+  line-height:1.05; font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+}
+.hero .stats{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.hero .stat{display:flex; flex-direction:column; gap:1px}
+.hero .stat .lab{font-size:11px; color:var(--ink-3)}
+.hero .stat .v{font-family:var(--mono); font-size:16px; font-weight:500; font-variant-numeric:tabular-nums}
+
+.types{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.tchip{
+  display:flex; align-items:center; gap:8px; background:var(--paper);
+  border:1px solid var(--rule); border-radius:20px; padding:5px 13px 5px 10px; font-size:12.5px;
+}
+.tchip i{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
+.tchip b{font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums}
+.tchip span{color:var(--ink-3); font-size:11.5px}
+
+.ical{background:var(--paper); border:1px solid var(--rule); border-radius:10px; overflow:hidden}
+.idow{display:grid; grid-template-columns:repeat(7,1fr); border-bottom:2px solid var(--rule)}
+.idow div{padding:7px 10px; font-size:11.5px; font-weight:700; color:var(--uni)}
+.igrid{display:grid; grid-template-columns:repeat(7,1fr)}
+.icell{
+  border-right:1px solid var(--rule-2); border-bottom:1px solid var(--rule-2);
+  min-height:92px; padding:7px 9px 9px; display:flex; flex-direction:column; gap:5px;
+  background:none; text-align:left; font:inherit; color:inherit; cursor:default;
+}
+.icell:nth-child(7n){border-right:0}
+.icell.has{cursor:pointer}
+.icell.has:hover{background:color-mix(in srgb, var(--work) 8%, transparent)}
+.icell.out{background:var(--soft); opacity:.5}
+.icell.sel{box-shadow:inset 0 0 0 2px var(--work); background:color-mix(in srgb, var(--work) 10%, transparent)}
+.icell .dnum{font-family:var(--mono); font-size:12.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.icell.today .dnum{background:var(--uni); color:#fff; border-radius:4px; padding:0 5px; align-self:flex-start}
+.icell .amt{
+  font-family:var(--mono); font-size:17px; font-weight:600; color:var(--work);
+  font-variant-numeric:tabular-nums; line-height:1.15; margin-top:auto;
+}
+.icell .dots{display:flex; gap:3px; flex-wrap:wrap}
+.icell .dots i{width:7px; height:7px; border-radius:50%}
+.icell .none{font-size:11px; color:var(--ink-3); margin-top:auto}
+
+.idetail{background:var(--paper); border:1px solid var(--rule); border-radius:10px; margin-top:14px; overflow:hidden}
+.idetail h2{
+  font-family:var(--serif); font-size:15px; margin:0; padding:11px 16px;
+  border-bottom:1px solid var(--rule-2); display:flex; align-items:baseline; gap:10px;
+}
+.idetail h2 .tot{margin-left:auto; font-family:var(--mono); color:var(--work); font-size:16px}
+.idetail .drow{
+  display:grid; grid-template-columns:96px 1fr auto auto; gap:12px; align-items:center;
+  padding:9px 16px; border-bottom:1px solid var(--rule-2); font-size:13px;
+}
+.idetail .drow:last-child{border-bottom:0}
+.idetail .drow .t{font-family:var(--mono); font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.idetail .drow .n{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.idetail .drow .ty{font-size:11.5px; color:var(--ink-2); display:flex; align-items:center; gap:6px}
+.idetail .drow .ty i{width:8px; height:8px; border-radius:50%; flex:0 0 auto}
+.idetail .drow .f{font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums; min-width:78px; text-align:right}
+.idetail .drow.nofee .f{color:var(--ink-3); font-weight:400}
+
+.year{background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:16px 18px 12px; margin-top:14px}
+.year h2{font-family:var(--serif); font-size:15px; margin:0 0 3px}
+.year .sub{font-size:11.5px; color:var(--ink-3); margin-bottom:16px}
+.bars{display:grid; grid-template-columns:repeat(12,1fr); gap:2px; align-items:end; height:140px; border-bottom:1px solid var(--rule)}
+.bar{position:relative; display:flex; flex-direction:column; justify-content:flex-end; height:100%; background:none; border:0; padding:0 2px; cursor:pointer}
+.bar .fill{background:var(--work-fill); border-radius:4px 4px 0 0; min-height:2px; opacity:.45; transition:opacity .12s}
+.bar.now .fill, .bar:hover .fill{opacity:1}
+.bar .val{font-family:var(--mono); font-size:10px; color:var(--ink-2); text-align:center; margin-bottom:3px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.xaxis{display:grid; grid-template-columns:repeat(12,1fr); gap:2px; margin-top:6px}
+.xaxis span{font-family:var(--mono); font-size:10.5px; color:var(--ink-3); text-align:center; font-variant-numeric:tabular-nums}
+.xaxis span.now{color:var(--work); font-weight:600}
+.yearfoot{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--rule-2); font-size:12.5px}
+.yearfoot b{font-family:var(--mono); font-size:15px; color:var(--work); font-variant-numeric:tabular-nums}
+
+/* ---------- 時薪設定 modal ---------- */
+.modal{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-46%) scale(.97);
+  width:min(380px, calc(100vw - 28px)); background:var(--paper); border:1px solid var(--rule);
+  border-radius:12px; box-shadow:var(--shadow); z-index:41;
+  opacity:0; pointer-events:none; transition:opacity .16s, transform .16s;
+}
+.modal.on{opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1)}
+.modal header{display:flex; align-items:center; gap:10px; padding:14px 16px 11px; border-bottom:1px solid var(--rule-2)}
+.modal header h2{font-family:var(--serif); font-size:16px; margin:0; margin-right:auto; color:var(--uni)}
+.modal .mbody{padding:15px 16px; display:flex; flex-direction:column; gap:11px}
+.rrow{display:grid; grid-template-columns:1fr 120px; gap:10px; align-items:center; margin-bottom:9px}
+.rrow label{font-size:13.5px; font-weight:500; display:flex; align-items:center; gap:8px}
+.rrow label i{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
+.rrow input{
+  width:100%; padding:8px 10px; border:1px solid var(--rule); border-radius:var(--radius);
+  background:var(--soft); color:var(--ink); font-family:var(--mono); text-align:right;
+}
+.rrow input:focus{outline:none; border-color:var(--work); background:var(--paper)}
+.modal .note{font-size:11.5px; color:var(--ink-3); line-height:1.6; margin:0}
+
+@media (max-width:760px){
+  .icell{min-height:74px; padding:5px 6px 7px}
+  .icell .amt{font-size:14px}
+  .hero .big .amt{font-size:30px}
+  .hero .stats{margin-left:0; width:100%}
+  .idetail .drow{grid-template-columns:76px 1fr auto; gap:8px}
+  .idetail .drow .ty{display:none}
+}
+
 #toast{
   position:fixed; bottom:20px; left:50%; transform:translate(-50%,14px);
   background:var(--ink); color:var(--paper); padding:9px 16px; border-radius:18px;
@@ -670,10 +800,11 @@ window.CALENDAR_CONFIG = {
   // ⚠️ 時薪唔喺呢度寫。呢個檔案會放上公開 GitHub repo，寫喺度等於公開你嘅收費。
   //    時薪喺網頁嘅「收費」面板入面設定，只會存喺你自己部機（localStorage），
   //    唔會上載到 GitHub，亦唔會入 Firebase。換部機就要再設定一次。
+  //   colour : 收入檢視入面代表呢個類型嘅色點
   lessonTypes: [
-    { key: "lighthouse", label: "燈塔" },
-    { key: "primary",    label: "中小" },
-    { key: "sail",       label: "揚帆班課" }
+    { key: "lighthouse", label: "燈塔",     colour: "#22508a" },
+    { key: "primary",    label: "中小",     colour: "#007542" },
+    { key: "sail",       label: "揚帆班課", colour: "#b0560a" }
   ],
   currency: "HK$",
 
@@ -734,6 +865,7 @@ window.CALENDAR_CONFIG = {
     <div class="seg" role="group" aria-label="檢視模式">
       <button id="btnMonth" aria-pressed="false">月曆</button>
       <button id="btnWeek" aria-pressed="true">週表</button>
+      <button id="btnIncome" aria-pressed="false" hidden>收入</button>
     </div>
     <button class="btn-clear" id="btnClear" hidden title="揀日子，一次過清走成日嘅課堂">清除日子</button>
   </div>
@@ -745,8 +877,6 @@ window.CALENDAR_CONFIG = {
   </div>
 
   <div class="cluster">
-    <a class="tbtn ghost" id="lnkIncome" href="income.html" title="收入月曆（只有你睇到）" hidden>收入月曆</a>
-    <button class="tbtn ghost" id="btnFee" title="計算收費（只有你睇到）" hidden>收費</button>
     <button class="tbtn ghost" id="btnIcs" title="下載日曆檔，可匯入 Google／Apple 日曆">匯出</button>
     <button class="pbtn" id="btnNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增課堂</button>
   </div>
@@ -777,6 +907,55 @@ window.CALENDAR_CONFIG = {
   <section class="view" id="monthView" hidden>
     <div class="mdow" id="mdow"></div>
     <div class="mgrid" id="mgrid"></div>
+  </section>
+
+  <section class="view scrolly" id="incomeView" hidden>
+    <div class="ibar">
+      <button class="tbtn" id="iRates">時薪設定</button>
+      <button class="tbtn" id="iPick">揀日子計數</button>
+      <button class="tbtn ghost" id="iCsv">匯出 CSV</button>
+      <span class="ihint" id="iHint"></span>
+    </div>
+
+    <div class="iwrap">
+      <div class="norates" id="iNoRates" hidden>
+        <b>仲未設時薪。</b>撳「時薪設定」入返燈塔／中小／揚帆班課嘅每小時收費，呢版就會計到數。
+        時薪只存喺你而家用緊嘅瀏覽器，唔會上載去任何地方。
+      </div>
+
+      <div class="hero" id="iHero">
+        <div class="big">
+          <span class="lab" id="iHeroLab">本月收入</span>
+          <span class="amt" id="iHeroAmt">—</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="lab">課堂</span><span class="v" id="iLessons">—</span></div>
+          <div class="stat"><span class="lab">總時數</span><span class="v" id="iHours">—</span></div>
+          <div class="stat"><span class="lab">平均時薪</span><span class="v" id="iAvg">—</span></div>
+          <div class="stat"><span class="lab">有課日數</span><span class="v" id="iDays">—</span></div>
+        </div>
+      </div>
+
+      <div class="types" id="iChips"></div>
+
+      <div class="ical">
+        <div class="idow" id="iDow"></div>
+        <div class="igrid" id="iGrid"></div>
+      </div>
+
+      <div class="idetail" id="iDetail" hidden></div>
+
+      <div class="year">
+        <h2 id="iYearTitle">十二個月收入</h2>
+        <div class="sub">撳一下柱狀圖跳去嗰個月</div>
+        <div class="bars" id="iBars"></div>
+        <div class="xaxis" id="iXaxis"></div>
+        <div class="yearfoot">
+          <span id="iYearNote">—</span>
+          <span>合計 <b id="iYearTotal">—</b></span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="view" id="weekView">
@@ -890,34 +1069,17 @@ window.CALENDAR_CONFIG = {
   </footer>
 </aside>
 
-<aside class="sheet wide" id="feeSheet" aria-hidden="true" role="dialog" aria-modal="true">
+<aside class="modal" id="rateModal" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
   <header>
-    <h2 id="feeTitle">收費計算</h2>
-    <button class="icobtn" id="feeClose" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h2 id="rmTitle">時薪設定</h2>
+    <button class="icobtn" id="rmClose" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </header>
-
-  <div class="feewrap">
-    <details class="rates" id="rateBox">
-      <summary>時薪設定</summary>
-      <div class="body" id="rateRows"></div>
-      <div class="body" style="padding-top:0">
-        <p class="ratenote">
-          時薪只會存喺你而家用緊嘅瀏覽器，唔會上載到 GitHub，亦唔會入 Firebase。
-          即係話冇人睇得到 —— 但你換部機或者清咗瀏覽器資料就要再入一次。
-        </p>
-      </div>
-    </details>
-
-    <div class="daypick">
-      <button type="button" data-sel="all">全選</button>
-      <button type="button" data-sel="none">全部取消</button>
-      <button type="button" data-sel="paid">只選有收入嘅日</button>
-    </div>
-
-    <div class="daytable" id="dayTable"></div>
-
-    <div class="feetotal" id="feeTotal"></div>
-
+  <div class="mbody">
+    <div id="rateRows"></div>
+    <p class="note">
+      呢啲數字只會存喺你而家用緊嘅瀏覽器（localStorage），唔會上載去 GitHub，亦唔會入 Firebase。
+      即係話冇人睇得到 —— 但你換部機或者清咗瀏覽器資料就要再入一次。
+    </p>
   </div>
 </aside>
 
@@ -986,6 +1148,9 @@ const colourOf = k => "c-" + catOf(k).colour;
 /* ---- 課堂類型（公開）同時薪（只存喺owner部機）---- */
 const TYPES = (CFG.lessonTypes || []).filter(t => t && t.key);
 const TYPE_BY = Object.fromEntries(TYPES.map(t => [t.key, t]));
+const FALLBACK_DOTS = ["#22508a", "#007542", "#b0560a", "#666f7c", "#7b2d8e"];
+const TYPE_COLOUR = Object.fromEntries(
+  TYPES.map((t, i) => [t.key, t.colour || FALLBACK_DOTS[i % FALLBACK_DOTS.length]]));
 const typeLabel = k => (TYPE_BY[k] || {}).label || "";
 
 const RATE_KEY = "timetable.rates.v1";
@@ -1385,12 +1550,26 @@ function renderWeek() {
    繪製 / 導覽
    --------------------------------------------------------------- */
 function render() {
-  const isWeek = state.view === "week";
+  const v = state.view, isWeek = v === "week", isIncome = v === "income";
   document.getElementById("weekView").hidden = !isWeek;
-  document.getElementById("monthView").hidden = isWeek;
+  document.getElementById("monthView").hidden = v !== "month";
+  document.getElementById("incomeView").hidden = !isIncome;
   document.getElementById("btnWeek").setAttribute("aria-pressed", String(isWeek));
-  document.getElementById("btnMonth").setAttribute("aria-pressed", String(!isWeek));
+  document.getElementById("btnMonth").setAttribute("aria-pressed", String(v === "month"));
+  document.getElementById("btnIncome").setAttribute("aria-pressed", String(isIncome));
   document.getElementById("btnToday").textContent = isWeek ? "本週" : "本月";
+  // 收入檢視：唔關課堂顏色事，所以收埋圖例同清除掣
+  document.getElementById("btnClear").hidden = isIncome || !IS_OWNER;
+  document.getElementById("legend").hidden = isIncome;
+  if (isIncome && clearMode) setClearMode(false);
+
+  if (isIncome) {
+    document.getElementById("periodLabel").textContent =
+      `${state.cursor.getFullYear()} 年 ${state.cursor.getMonth() + 1} 月 ・ 收入`;
+    renderIncome();
+    updateFooter();
+    return;
+  }
 
   if (isWeek) {
     const ws = startOfWeek(state.cursor), we = addDays(ws, 6);
@@ -1431,8 +1610,6 @@ function updateFooter() {
 /* ---------------------------------------------------------------
    清除模式 —— 只有管理模式先有。喺日曆度直接揀日子。
    --------------------------------------------------------------- */
-if (IS_OWNER) document.getElementById("btnClear").hidden = false;
-
 function setClearMode(on) {
   clearMode = on;
   document.body.classList.toggle("clearing", on);
@@ -1503,6 +1680,7 @@ async function wipeDays(keys) {
 function go(delta) {
   if (state.view === "week") state.cursor = addDays(state.cursor, 7 * delta);
   else state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + delta, 1);
+  if (state.view === "income") { iSelected = null; iSel.clear(); }
   render();
 }
 document.getElementById("btnPrev").onclick = () => go(-1);
@@ -1510,6 +1688,10 @@ document.getElementById("btnNext").onclick = () => go(1);
 document.getElementById("btnToday").onclick = () => { state.cursor = new Date(); render(); };
 document.getElementById("btnMonth").onclick = () => { state.view = "month"; render(); };
 document.getElementById("btnWeek").onclick = () => { state.view = "week"; render(); };
+document.getElementById("btnIncome").onclick = () => {
+  if (!IS_OWNER) return;
+  state.view = "income"; iSelected = null; render();
+};
 
 /* ---------------------------------------------------------------
    點擊
@@ -1767,7 +1949,7 @@ document.getElementById("btnNew").onclick = () => {
 };
 document.getElementById("btnClose").onclick = closeSheet;
 document.getElementById("btnCancel").onclick = closeSheet;
-backdrop.onclick = () => { closeSheet(); closeFee(); };
+backdrop.onclick = () => { closeSheet(); closeRates(); };
 
 document.getElementById("quick").addEventListener("click", e => {
   const b = e.target.closest("[data-min]");
@@ -1893,18 +2075,13 @@ async function doDelete(scope) {
 }
 
 /* ---------------------------------------------------------------
-   收費計算 —— 只有管理模式先見到，時薪只存喺本機
+   收入檢視 —— 只有管理模式先見到。時薪只存喺本機。
    --------------------------------------------------------------- */
-const feeSheet = document.getElementById("feeSheet");
-let feeSel = new Set();          // 剔咗嘅日子
-let feePeriod = "";              // 用嚟判斷要唔要重設選擇
+let iSelected = null;          // 撳咗邊日睇明細
+let iPick = false;             // 揀日子計數模式
+const iSel = new Set();        // 揀咗嘅日子
 
-if (IS_OWNER) {
-  document.getElementById("btnFee").hidden = false;
-  const lnk = document.getElementById("lnkIncome");
-  lnk.hidden = false;
-  lnk.href = "income.html#" + CFG.ownerKey;      // 帶埋密語過去，唔使再打
-}
+if (IS_OWNER) document.getElementById("btnIncome").hidden = false;
 
 /* 而家睇緊嗰段時間有邊幾日 */
 function periodDays() {
@@ -1919,106 +2096,213 @@ function periodDays() {
   }
   return out;
 }
-function periodKey() {
-  return state.view === "week"
-    ? "w" + ymd(startOfWeek(state.cursor))
-    : "m" + state.cursor.getFullYear() + "-" + (state.cursor.getMonth() + 1);
-}
 
-/* 每日嘅鐘數同金額 */
+/* 一日之中有收入嘅課堂 */
+const paidOn = d => lessonsOn(d).filter(e => TYPE_BY[e.ltype]);
 function dayFee(d) {
   let hours = 0, amount = 0, n = 0;
-  for (const e of lessonsOn(d)) {
-    if (!TYPE_BY[e.ltype]) continue;          // 冇類型 = 唔計錢
-    hours += (e.end - e.start) / 60;
-    amount += feeOf(e);
-    n++;
-  }
+  for (const e of paidOn(d)) { hours += (e.end - e.start) / 60; amount += feeOf(e); n++; }
   return { hours, amount, n };
 }
 
-function openFee() {
-  const pk = periodKey();
-  if (pk !== feePeriod) {                     // 換咗週／月就重設，預設剔晒有收入嗰啲
-    feePeriod = pk;
-    feeSel = new Set(periodDays().filter(d => dayFee(d).n > 0).map(ymd));
-  }
-  document.getElementById("rateRows").innerHTML = TYPES.map(t => `
-    <div class="raterow">
-      <label for="rate-${esc(t.key)}">${esc(t.label)}<span style="color:var(--ink-3);font-weight:400"> ／小時</span></label>
-      <input id="rate-${esc(t.key)}" type="number" min="0" step="10" inputmode="numeric"
-             data-rate="${esc(t.key)}" value="${rateOf(t.key) || ""}" placeholder="0">
-    </div>`).join("");
-  document.getElementById("rateBox").open = !ratesSet();
-  renderFee();
-  feeSheet.classList.add("on"); backdrop.classList.add("on");
-  feeSheet.setAttribute("aria-hidden", "false");
-}
-function closeFee() {
-  feeSheet.classList.remove("on"); backdrop.classList.remove("on");
-  feeSheet.setAttribute("aria-hidden", "true");
-}
-
-function renderFee() {
-  const days = periodDays();
-  document.getElementById("feeTitle").textContent =
-    state.view === "week" ? "收費計算 ・ 本週" : `收費計算 ・ ${state.cursor.getMonth() + 1} 月`;
-
-  document.getElementById("dayTable").innerHTML = days.map(d => {
-    const key = ymd(d), f = dayFee(d), on = feeSel.has(key);
-    return `
-      <label class="dayrow ${f.n ? "" : "empty"} ${on ? "" : "off"}">
-        <input type="checkbox" data-day="${key}" ${on ? "checked" : ""}>
-        <span class="d">${d.getMonth() + 1}/${d.getDate()} ${DOW_ZH[dowOf(d)].slice(-1)}</span>
-        <span class="h">${f.n ? hrs(f.hours * 60) + " 小時" : "冇收入課堂"}</span>
-        <span class="m">${f.amount ? money(f.amount) : "—"}</span>
-      </label>`;
-  }).join("");
-
-  // 分類型埋單
-  const per = Object.fromEntries(TYPES.map(t => [t.key, { h: 0, amt: 0 }]));
-  let grand = 0, totalH = 0;
+function statsFor(days) {
+  let amount = 0, mins = 0, lessons = 0, withLessons = 0;
+  const per = Object.fromEntries(TYPES.map(t => [t.key, { amt: 0, mins: 0 }]));
   for (const d of days) {
-    if (!feeSel.has(ymd(d))) continue;
-    for (const e of lessonsOn(d)) {
-      if (!TYPE_BY[e.ltype]) continue;
-      const h = (e.end - e.start) / 60;
-      per[e.ltype].h += h; per[e.ltype].amt += feeOf(e);
-      grand += feeOf(e); totalH += h;
+    const list = paidOn(d);
+    if (list.length) withLessons++;
+    for (const e of list) {
+      const mn = e.end - e.start;
+      amount += feeOf(e); mins += mn; lessons++;
+      per[e.ltype].amt += feeOf(e); per[e.ltype].mins += mn;
     }
   }
-  const lines = TYPES.filter(t => per[t.key].h > 0).map(t => {
-    const r = rateOf(t.key);
-    return `<div class="line"><span>${esc(t.label)} ・ ${hrs(per[t.key].h * 60)} 小時${
-      r ? ` × ${money(r)}` : ` <b style="color:var(--danger)">未設時薪</b>`}</span><span>${money(per[t.key].amt)}</span></div>`;
+  return { amount, mins, lessons, days: withLessons, per };
+}
+const monthStats = (y, m) => {
+  const last = new Date(y, m + 1, 0).getDate(), ds = [];
+  for (let i = 1; i <= last; i++) ds.push(new Date(y, m, i));
+  return statsFor(ds);
+};
+
+document.getElementById("iDow").innerHTML = DOW_ZH.map(z => `<div>${z}</div>`).join("");
+
+function renderIncome() {
+  const y = state.cursor.getFullYear(), m = state.cursor.getMonth();
+  const haveRates = ratesSet();
+  document.getElementById("iNoRates").hidden = haveRates;
+  document.getElementById("iHero").hidden = !haveRates;
+
+  document.getElementById("iPick").textContent = iPick ? "返回睇明細" : "揀日子計數";
+  document.getElementById("iPick").classList.toggle("on", iPick);
+  document.getElementById("iHint").textContent = iPick
+    ? `撳日子加／減，已揀 ${iSel.size} 日`
+    : "撳一日睇當日明細";
+
+  const monthDays = periodDays();
+  const picked = iPick ? monthDays.filter(d => iSel.has(ymd(d))) : monthDays;
+  const st = statsFor(picked);
+
+  document.getElementById("iHeroLab").textContent =
+    iPick ? `揀咗 ${iSel.size} 日嘅收入` : `${m + 1} 月收入`;
+  document.getElementById("iHeroAmt").textContent = money(st.amount);
+  document.getElementById("iLessons").textContent = st.lessons + " 堂";
+  document.getElementById("iHours").textContent = hrs(st.mins) + " 小時";
+  document.getElementById("iAvg").textContent = st.mins ? money(st.amount / (st.mins / 60)) : "—";
+  document.getElementById("iDays").textContent = st.days + " 日";
+
+  document.getElementById("iChips").innerHTML = !haveRates ? "" : TYPES.map(t => {
+    const pr = st.per[t.key];
+    return `<span class="tchip"><i style="background:${TYPE_COLOUR[t.key]}"></i>${esc(t.label)}
+      <b>${money(pr.amt)}</b><span>${hrs(pr.mins)} 小時${rateOf(t.key) ? "" : " ・ 未設時薪"}</span></span>`;
   }).join("");
-  document.getElementById("feeTotal").innerHTML = lines + `
-    <div class="grand">
-      <span>合計 ・ ${feeSel.size} 日 ・ ${hrs(totalH * 60)} 小時</span>
-      <span class="amt">${money(grand)}</span>
-    </div>`;
+
+  // 月曆格
+  const first = new Date(y, m, 1), gridStart = startOfWeek(first);
+  const last = new Date(y, m + 1, 0);
+  const weeks = Math.ceil((Math.round((startOfWeek(last) - gridStart) / 86400000) + 7) / 7);
+  const today = new Date();
+  let html = "";
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(gridStart, i), key = ymd(d);
+    const out = d.getMonth() !== m;
+    const list = out ? [] : paidOn(d);
+    const amt = list.reduce((s, e) => s + feeOf(e), 0);
+    const dots = [...new Set(list.map(e => e.ltype))]
+      .map(k => `<i style="background:${TYPE_COLOUR[k] || "var(--rest)"}"></i>`).join("");
+    const on = iPick ? iSel.has(key) : iSelected === key;
+    html += `
+      <button class="icell ${out ? "out" : ""} ${list.length ? "has" : ""} ${sameDay(d, today) ? "today" : ""} ${on ? "sel" : ""}"
+              type="button" data-iday="${key}" ${out || (!iPick && !list.length) ? "disabled" : ""}>
+        <span class="dnum">${d.getDate()}</span>
+        ${list.length ? `<span class="dots">${dots}</span><span class="amt">${money(amt)}</span>`
+                      : (out ? "" : `<span class="none">—</span>`)}
+      </button>`;
+  }
+  document.getElementById("iGrid").innerHTML = html;
+
+  renderIncomeDetail();
+  renderYear();
 }
 
-document.getElementById("btnFee").onclick = openFee;
-document.getElementById("feeClose").onclick = closeFee;
+function renderIncomeDetail() {
+  const box = document.getElementById("iDetail");
+  if (iPick || !iSelected) { box.hidden = true; return; }
+  const d = parseYmd(iSelected), all = lessonsOn(d);
+  if (!all.length) { box.hidden = true; return; }
+  const total = all.reduce((s, e) => s + (TYPE_BY[e.ltype] ? feeOf(e) : 0), 0);
+  box.hidden = false;
+  box.innerHTML = `
+    <h2>${d.getMonth() + 1} 月 ${d.getDate()} 日 ・ ${DOW_ZH[dowOf(d)]}
+      <span class="tot">${money(total)}</span></h2>` +
+    all.map(e => {
+      const t = TYPE_BY[e.ltype];
+      return `
+        <div class="drow ${t ? "" : "nofee"}">
+          <span class="t">${toHHMM(e.start)}–${toHHMM(e.end)}</span>
+          <span class="n">${esc(e.title)}</span>
+          <span class="ty">${t ? `<i style="background:${TYPE_COLOUR[t.key]}"></i>${esc(t.label)}` : "唔計收入"}</span>
+          <span class="f">${t ? money(feeOf(e)) : "—"}</span>
+        </div>`;
+    }).join("");
+}
 
+/* 十二個月柱狀圖 —— 一條數列一隻色，所以唔使圖例 */
+function renderYear() {
+  const end = new Date(state.cursor.getFullYear(), state.cursor.getMonth(), 1);
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(end.getFullYear(), end.getMonth() - i, 1);
+    months.push({ y: d.getFullYear(), m: d.getMonth(), amt: monthStats(d.getFullYear(), d.getMonth()).amount });
+  }
+  const max = Math.max(...months.map(x => x.amt), 1);
+  const total = months.reduce((s, x) => s + x.amt, 0);
+  const best = months.reduce((a, x) => x.amt > a.amt ? x : a, months[0]);
+
+  document.getElementById("iYearTitle").textContent =
+    `${months[0].y} 年 ${months[0].m + 1} 月 至 ${end.getFullYear()} 年 ${end.getMonth() + 1} 月 收入`;
+  document.getElementById("iBars").innerHTML = months.map((x, i) => {
+    const isNow = i === 11, showVal = (isNow || x.amt === best.amt) && x.amt > 0;
+    return `
+      <button class="bar ${isNow ? "now" : ""}" type="button" data-y="${x.y}" data-m="${x.m}"
+              title="${x.y} 年 ${x.m + 1} 月 ・ ${money(x.amt)}">
+        <span class="val" ${showVal ? "" : "hidden"}>${money(x.amt)}</span>
+        <span class="fill" style="height:${(x.amt / max) * 100}%"></span>
+      </button>`;
+  }).join("");
+  document.getElementById("iXaxis").innerHTML = months.map((x, i) =>
+    `<span class="${i === 11 ? "now" : ""}">${x.m + 1}</span>`).join("");
+  document.getElementById("iYearNote").textContent =
+    best.amt > 0 ? `最高：${best.y} 年 ${best.m + 1} 月 ・ ${money(best.amt)}` : "呢十二個月未有收入紀錄";
+  document.getElementById("iYearTotal").textContent = money(total);
+}
+
+/* ---- 時薪設定 ---- */
+function buildRateRows() {
+  document.getElementById("rateRows").innerHTML = TYPES.map(t => `
+    <div class="rrow">
+      <label for="r-${esc(t.key)}"><i style="background:${TYPE_COLOUR[t.key]}"></i>${esc(t.label)}</label>
+      <input id="r-${esc(t.key)}" type="number" min="0" step="10" inputmode="numeric"
+             data-rate="${esc(t.key)}" value="${rateOf(t.key) || ""}" placeholder="0">
+    </div>`).join("");
+}
+function openRates() {
+  buildRateRows();
+  document.getElementById("rateModal").classList.add("on");
+  backdrop.classList.add("on");
+}
+function closeRates() {
+  document.getElementById("rateModal").classList.remove("on");
+  backdrop.classList.remove("on");
+}
+
+/* ---- 匯出 CSV ---- */
+function exportCsv() {
+  const y = state.cursor.getFullYear(), m = state.cursor.getMonth();
+  const days = periodDays().filter(d => !iPick || iSel.has(ymd(d)));
+  const q = v => `"${String(v).replace(/"/g, '""')}"`;
+  const rows = [["日期","星期","開始","結束","小時","課堂","類型","時薪","金額"].map(q).join(",")];
+  let total = 0;
+  for (const d of days) {
+    for (const e of paidOn(d)) {
+      const h = (e.end - e.start) / 60, fee = feeOf(e);
+      total += fee;
+      rows.push([ymd(d), DOW_ZH[dowOf(d)], toHHMM(e.start), toHHMM(e.end),
+                 h, e.title, TYPE_BY[e.ltype].label, rateOf(e.ltype), Math.round(fee)].map(q).join(","));
+    }
+  }
+  if (rows.length === 1) { toast("呢個範圍未有有收入嘅課堂。"); return; }
+  rows.push("");
+  rows.push([q("合計"), "", "", "", "", "", "", "", q(Math.round(total))].join(","));
+  offerFile(`收入-${y}-${pad(m + 1)}.csv`, "﻿" + rows.join("\r\n"), "text/csv;charset=utf-8");
+}
+
+/* ---- 事件 ---- */
+document.getElementById("iRates").onclick = openRates;
+document.getElementById("rmClose").onclick = closeRates;
+document.getElementById("iCsv").onclick = exportCsv;
+document.getElementById("iPick").onclick = () => {
+  iPick = !iPick;
+  if (iPick) { iSelected = null; if (!iSel.size) periodDays().forEach(d => { if (dayFee(d).n) iSel.add(ymd(d)); }); }
+  render();
+};
 document.getElementById("rateRows").addEventListener("input", e => {
   const el = e.target.closest("[data-rate]"); if (!el) return;
   RATES[el.dataset.rate] = Math.max(0, Number(el.value) || 0);
-  saveRates(); renderFee(); render();
+  saveRates(); render();
 });
-document.getElementById("dayTable").addEventListener("change", e => {
-  const el = e.target.closest("[data-day]"); if (!el) return;
-  el.checked ? feeSel.add(el.dataset.day) : feeSel.delete(el.dataset.day);
-  renderFee();
+document.getElementById("iGrid").addEventListener("click", e => {
+  const c = e.target.closest("[data-iday]"); if (!c || c.disabled) return;
+  const key = c.dataset.iday;
+  if (iPick) { iSel.has(key) ? iSel.delete(key) : iSel.add(key); }
+  else iSelected = iSelected === key ? null : key;
+  render();
 });
-document.querySelector(".daypick").addEventListener("click", e => {
-  const b = e.target.closest("[data-sel]"); if (!b) return;
-  const days = periodDays();
-  if (b.dataset.sel === "all") feeSel = new Set(days.map(ymd));
-  else if (b.dataset.sel === "none") feeSel = new Set();
-  else feeSel = new Set(days.filter(d => dayFee(d).n > 0).map(ymd));
-  renderFee();
+document.getElementById("iBars").addEventListener("click", e => {
+  const b = e.target.closest("[data-y]"); if (!b) return;
+  state.cursor = new Date(Number(b.dataset.y), Number(b.dataset.m), 1);
+  iSelected = null; iSel.clear(); render();
+  document.getElementById("incomeView").scrollTo({ top: 0, behavior: "smooth" });
 });
 
 /* ---------------------------------------------------------------
@@ -2080,15 +2364,15 @@ function toast(msg) {
   clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 3200);
 }
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && feeSheet.classList.contains("on")) { closeFee(); return; }
+  if (e.key === "Escape" && document.getElementById("rateModal").classList.contains("on")) { closeRates(); return; }
   if (e.key === "Escape" && sheet.classList.contains("on")) { closeSheet(); return; }
-  if (sheet.classList.contains("on") || feeSheet.classList.contains("on")
-      || e.target.matches("input,textarea,select")) return;
+  if (sheet.classList.contains("on") || e.target.matches("input,textarea,select")) return;
   if (e.key === "ArrowLeft") go(-1);
   else if (e.key === "ArrowRight") go(1);
   else if (e.key.toLowerCase() === "t") document.getElementById("btnToday").click();
   else if (e.key.toLowerCase() === "m") { state.view = "month"; render(); }
   else if (e.key.toLowerCase() === "w") { state.view = "week"; render(); }
+  else if (e.key.toLowerCase() === "i" && IS_OWNER) document.getElementById("btnIncome").click();
   else if (e.key.toLowerCase() === "n") document.getElementById("btnNew").click();
 });
 setInterval(() => { if (state.view === "week") render(); }, 60000);
