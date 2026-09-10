@@ -14,7 +14,8 @@
 
 | 檔案 | 做咩 |
 |---|---|
-| `index.html` | 成個網站。所有設定喺頂部嘅 `CALENDAR_CONFIG` |
+| `index.html` | 時間表主頁。所有設定喺頂部嘅 `CALENDAR_CONFIG` |
+| `income.html` | **收入月曆**（只有管理模式入到），見下面第十節 |
 | `firestore.rules` | Firebase 安全規則，貼落 Firebase 主控台 |
 | `README.md` | 你而家睇緊嘅嘢 |
 
@@ -24,7 +25,7 @@
 
 1. GitHub 右上角 **+** → **New repository**
 2. 名要**一模一樣**係 `boscofungg-web.github.io`（你嘅 username + `.github.io`），選 **Public**
-3. **Add file → Upload files**，拉 `index.html` 入去 → **Commit changes**
+3. **Add file → Upload files**，拉 `index.html` 同 `income.html` 入去 → **Commit changes**
 4. **Settings → Pages**：Source 揀 `Deploy from a branch`，分支 `main`，資料夾 `/ (root)` → Save
 5. 等一兩分鐘，開 `https://boscofungg-web.github.io`
 
@@ -411,7 +412,44 @@ lockedWindows: {
 
 ---
 
-## 十、點用
+## 十、收入月曆（`income.html`）
+
+一版淨係睇收入嘅月曆，同時間表分開。網址：
+
+```
+https://boscofungg-web.github.io/income.html#你的密語
+```
+
+**冇密語就乜都睇唔到** —— 只會出一版「呢版淨係畀時間表擁有人睇」。
+時間表主頁管理模式頂部有個「收入月曆」連結，會自動帶埋密語過去，唔使再打。
+
+裡面有：
+
+- **本月收入大字**，加課堂數、總時數、平均時薪、有課日數
+- **分類型** chips：燈塔／中小／揚帆班課 各自幾多錢、幾多鐘
+- **月曆格**：每格得個日期同當日收入，同幾粒代表類型嘅色點。冇收入嘅日子淨係一個「—」
+- **撳一日**下面出明細：逐堂時間、名、類型、金額。冇類型嘅課堂（港大課堂之類）會列出但標「唔計收入」
+- **十二個月柱狀圖**：由當月數返轉頭 12 個月。撳一下柱就跳去嗰個月
+- **匯出 CSV**：當月逐堂一行，最後一行合計。開 Excel 對數用
+
+### 兩個檔案要一致
+
+`income.html` 同 `index.html` 係兩個獨立檔案，各自帶住自己嗰份設定。
+以下四樣**改咗一邊要改埋另一邊**，否則兩版會對唔上：
+
+| 設定 | 點解要一致 |
+|---|---|
+| `ownerKey` | 唔一致就入唔到收入版 |
+| `firebase` | 唔一致就讀唔到同一份課堂資料 |
+| `lessonTypes` 嘅 `key` | 唔一致就配對唔到類型，金額變 0 |
+| `hideBefore` | 唔一致就兩版顯示嘅範圍唔同 |
+
+`income.html` **淨係讀，唔會寫**任何嘢入 Firebase，亦唔會種預設時間表。
+時薪同 `index.html` 共用同一組（`localStorage`），喺邊一版設都得。
+
+---
+
+## 十一、點用
 
 | | |
 |---|---|

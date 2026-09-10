@@ -745,6 +745,7 @@ window.CALENDAR_CONFIG = {
   </div>
 
   <div class="cluster">
+    <a class="tbtn ghost" id="lnkIncome" href="income.html" title="收入月曆（只有你睇到）" hidden>收入月曆</a>
     <button class="tbtn ghost" id="btnFee" title="計算收費（只有你睇到）" hidden>收費</button>
     <button class="tbtn ghost" id="btnIcs" title="下載日曆檔，可匯入 Google／Apple 日曆">匯出</button>
     <button class="pbtn" id="btnNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增課堂</button>
@@ -1898,7 +1899,12 @@ const feeSheet = document.getElementById("feeSheet");
 let feeSel = new Set();          // 剔咗嘅日子
 let feePeriod = "";              // 用嚟判斷要唔要重設選擇
 
-if (IS_OWNER) document.getElementById("btnFee").hidden = false;
+if (IS_OWNER) {
+  document.getElementById("btnFee").hidden = false;
+  const lnk = document.getElementById("lnkIncome");
+  lnk.hidden = false;
+  lnk.href = "income.html#" + CFG.ownerKey;      // 帶埋密語過去，唔使再打
+}
 
 /* 而家睇緊嗰段時間有邊幾日 */
 function periodDays() {

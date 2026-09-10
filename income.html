@@ -1,0 +1,724 @@
+<title>收入月曆</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+
+<style>
+/* ==========================================================
+   收入月曆 —— 只有管理模式睇到
+   配色跟 index.html 一樣（calendar.tex 品牌色）
+   ========================================================== */
+:root{
+  --paper:#ffffff;
+  --ground:#eef0f3;
+  --soft:#f3f4f6;
+  --ink:#1a1d21;
+  --ink-2:#4d555f;
+  --ink-3:#828a96;
+  --rule:#c8ccd2;
+  --rule-2:#e4e7eb;
+
+  --uni:#1f497d;
+  --uni-fill:#22508a;
+  --work:#006a3c;
+  --work-fill:#007542;
+  --work-soft:#e6f2ec;
+  --amber:#b0560a;
+  --open:#d66c14;
+  --rest:#828a96;
+
+  --shadow:0 1px 2px rgba(26,29,33,.06), 0 10px 28px -14px rgba(26,29,33,.28);
+  --radius:6px;
+
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",ui-sans-serif,system-ui,sans-serif;
+  --serif:"Noto Serif TC","PingFang TC",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#16191c; --ground:#0e1114; --soft:#1c2024;
+    --ink:#e6eaef; --ink-2:#a6aeb8; --ink-3:#7b838e;
+    --rule:#2d333a; --rule-2:#24292e;
+    --uni:#7ba6dd; --uni-fill:#2a5b96;
+    --work:#4fb083; --work-fill:#0a7a4c; --work-soft:#15271f;
+    --amber:#d99050; --open:#e59650; --rest:#6f7783;
+    --shadow:0 1px 2px rgba(0,0,0,.55), 0 10px 28px -14px rgba(0,0,0,.75);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#16191c; --ground:#0e1114; --soft:#1c2024;
+  --ink:#e6eaef; --ink-2:#a6aeb8; --ink-3:#7b838e;
+  --rule:#2d333a; --rule-2:#24292e;
+  --uni:#7ba6dd; --uni-fill:#2a5b96;
+  --work:#4fb083; --work-fill:#0a7a4c; --work-soft:#15271f;
+  --amber:#d99050; --open:#e59650; --rest:#6f7783;
+  --shadow:0 1px 2px rgba(0,0,0,.55), 0 10px 28px -14px rgba(0,0,0,.75);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--work); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+
+.wrap{max-width:1080px; margin:0 auto; padding:0 18px 40px}
+
+/* ---------- 上鎖畫面 ---------- */
+.locked{
+  max-width:520px; margin:14vh auto; background:var(--paper); border:1px solid var(--rule);
+  border-radius:12px; padding:30px 28px; box-shadow:var(--shadow); text-align:center;
+}
+.locked h1{font-family:var(--serif); font-size:20px; margin:0 0 10px; color:var(--uni)}
+.locked p{color:var(--ink-2); font-size:13.5px; line-height:1.7; margin:0 0 6px}
+.locked code{
+  font-family:var(--mono); font-size:12.5px; background:var(--soft);
+  padding:2px 6px; border-radius:4px; border:1px solid var(--rule-2);
+}
+
+/* ---------- 頁首 ---------- */
+.top{
+  background:var(--paper); border-bottom:3px solid var(--work); margin-bottom:18px;
+}
+.topin{
+  max-width:1080px; margin:0 auto; padding:12px 18px;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+h1.brand{
+  font-family:var(--serif); font-size:19px; margin:0; color:var(--uni);
+  margin-right:auto; line-height:1.25;
+}
+h1.brand small{display:block; font-family:var(--sans); font-size:11.5px; color:var(--work); font-weight:500}
+.nav{display:flex; align-items:center; gap:8px}
+.icobtn{
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink-2);
+  width:31px; height:31px; border-radius:var(--radius); cursor:pointer;
+  display:grid; place-items:center; padding:0;
+}
+.icobtn:hover{background:var(--soft); border-color:var(--ink-3)}
+.icobtn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tbtn{
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink);
+  padding:5px 12px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:500;
+}
+.tbtn:hover{background:var(--soft); border-color:var(--ink-3)}
+.tbtn.ghost{border-color:transparent; background:transparent; color:var(--ink-2)}
+.tbtn.ghost:hover{background:var(--soft); color:var(--ink)}
+.mlabel{
+  font-family:var(--serif); font-size:17px; font-weight:700; min-width:130px; text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- 大數 ---------- */
+.hero{
+  background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+  padding:18px 20px; margin-bottom:14px;
+  display:flex; align-items:flex-end; gap:26px; flex-wrap:wrap;
+}
+.hero .big{display:flex; flex-direction:column; gap:2px}
+.hero .big .lab{font-size:11.5px; color:var(--ink-3); font-weight:500}
+.hero .big .amt{
+  font-family:var(--mono); font-size:38px; font-weight:600; color:var(--work);
+  line-height:1.05; font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+}
+.hero .stats{display:flex; gap:22px; flex-wrap:wrap; margin-left:auto}
+.stat{display:flex; flex-direction:column; gap:1px}
+.stat .lab{font-size:11px; color:var(--ink-3)}
+.stat .v{font-family:var(--mono); font-size:16px; font-weight:500; font-variant-numeric:tabular-nums}
+
+.types{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.tchip{
+  display:flex; align-items:center; gap:8px; background:var(--paper);
+  border:1px solid var(--rule); border-radius:20px; padding:5px 13px 5px 10px; font-size:12.5px;
+}
+.tchip i{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
+.tchip b{font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums}
+.tchip span{color:var(--ink-3); font-size:11.5px}
+
+/* ---------- 月曆 ---------- */
+.cal{background:var(--paper); border:1px solid var(--rule); border-radius:10px; overflow:hidden}
+.dow{display:grid; grid-template-columns:repeat(7,1fr); border-bottom:2px solid var(--rule)}
+.dow div{padding:7px 10px; font-size:11.5px; font-weight:700; color:var(--uni)}
+.grid{display:grid; grid-template-columns:repeat(7,1fr)}
+.cell{
+  border-right:1px solid var(--rule-2); border-bottom:1px solid var(--rule-2);
+  min-height:96px; padding:7px 9px 9px; display:flex; flex-direction:column; gap:5px;
+  position:relative; background:none; text-align:left; font:inherit; color:inherit; cursor:default;
+}
+.cell:nth-child(7n){border-right:0}
+.cell.has{cursor:pointer}
+.cell.has:hover{background:var(--work-soft)}
+.cell.out{background:var(--soft); opacity:.5}
+.cell.sel{box-shadow:inset 0 0 0 2px var(--work); background:var(--work-soft)}
+.cell .dnum{
+  font-family:var(--mono); font-size:12.5px; color:var(--ink-3); font-variant-numeric:tabular-nums;
+}
+.cell.today .dnum{
+  background:var(--uni); color:#fff; border-radius:4px; padding:0 5px; align-self:flex-start;
+}
+.cell .amt{
+  font-family:var(--mono); font-size:17px; font-weight:600; color:var(--work);
+  font-variant-numeric:tabular-nums; line-height:1.15; margin-top:auto;
+}
+.cell .dots{display:flex; gap:3px; flex-wrap:wrap}
+.cell .dots i{width:7px; height:7px; border-radius:50%}
+.cell .none{font-size:11px; color:var(--ink-3); margin-top:auto}
+
+/* ---------- 當日明細 ---------- */
+.detail{
+  background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+  margin-top:14px; overflow:hidden;
+}
+.detail h2{
+  font-family:var(--serif); font-size:15px; margin:0; padding:11px 16px;
+  border-bottom:1px solid var(--rule-2); display:flex; align-items:baseline; gap:10px;
+}
+.detail h2 .tot{margin-left:auto; font-family:var(--mono); color:var(--work); font-size:16px}
+.drow{
+  display:grid; grid-template-columns:96px 1fr auto auto; gap:12px; align-items:center;
+  padding:9px 16px; border-bottom:1px solid var(--rule-2); font-size:13px;
+}
+.drow:last-child{border-bottom:0}
+.drow .t{font-family:var(--mono); font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.drow .n{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.drow .ty{font-size:11.5px; color:var(--ink-2); display:flex; align-items:center; gap:6px}
+.drow .ty i{width:8px; height:8px; border-radius:50%; flex:0 0 auto}
+.drow .f{font-family:var(--mono); font-weight:600; font-variant-numeric:tabular-nums; min-width:78px; text-align:right}
+.drow.nofee .f{color:var(--ink-3); font-weight:400}
+
+/* ---------- 12 個月柱狀圖 ---------- */
+.year{
+  background:var(--paper); border:1px solid var(--rule); border-radius:10px;
+  padding:16px 18px 12px; margin-top:14px;
+}
+.year h2{font-family:var(--serif); font-size:15px; margin:0 0 3px}
+.year .sub{font-size:11.5px; color:var(--ink-3); margin-bottom:16px}
+.bars{
+  display:grid; grid-template-columns:repeat(12,1fr); gap:2px;
+  align-items:end; height:140px; border-bottom:1px solid var(--rule); padding-bottom:0;
+}
+.bar{
+  position:relative; display:flex; flex-direction:column; justify-content:flex-end;
+  height:100%; background:none; border:0; padding:0 2px; cursor:pointer;
+}
+.bar .fill{
+  background:var(--work-fill); border-radius:4px 4px 0 0; min-height:2px;
+  opacity:.45; transition:opacity .12s;
+}
+.bar.now .fill{opacity:1}
+.bar:hover .fill{opacity:1}
+.bar .val{
+  font-family:var(--mono); font-size:10px; color:var(--ink-2); text-align:center;
+  margin-bottom:3px; font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.bar .val[hidden]{display:none}
+.xaxis{display:grid; grid-template-columns:repeat(12,1fr); gap:2px; margin-top:6px}
+.xaxis span{
+  font-family:var(--mono); font-size:10.5px; color:var(--ink-3); text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.xaxis span.now{color:var(--work); font-weight:600}
+.yearfoot{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  margin-top:12px; padding-top:10px; border-top:1px solid var(--rule-2); font-size:12.5px;
+}
+.yearfoot b{font-family:var(--mono); font-size:15px; color:var(--work); font-variant-numeric:tabular-nums}
+
+/* ---------- 時薪設定 ---------- */
+.backdrop{position:fixed; inset:0; background:rgba(14,17,20,.45); z-index:40; opacity:0; pointer-events:none; transition:opacity .16s}
+.backdrop.on{opacity:1; pointer-events:auto}
+.modal{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-46%) scale(.97);
+  width:min(380px, calc(100vw - 28px)); background:var(--paper); border:1px solid var(--rule);
+  border-radius:12px; box-shadow:var(--shadow); z-index:41;
+  opacity:0; pointer-events:none; transition:opacity .16s, transform .16s;
+}
+.modal.on{opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1)}
+.modal header{display:flex; align-items:center; gap:10px; padding:14px 16px 11px; border-bottom:1px solid var(--rule-2)}
+.modal header h2{font-family:var(--serif); font-size:16px; margin:0; margin-right:auto; color:var(--uni)}
+.modal .body{padding:15px 16px; display:flex; flex-direction:column; gap:11px}
+.rrow{display:grid; grid-template-columns:1fr 120px; gap:10px; align-items:center}
+.rrow label{font-size:13.5px; font-weight:500; display:flex; align-items:center; gap:8px}
+.rrow label i{width:9px; height:9px; border-radius:50%; flex:0 0 auto}
+.rrow input{
+  width:100%; padding:8px 10px; border:1px solid var(--rule); border-radius:var(--radius);
+  background:var(--soft); color:var(--ink); font-family:var(--mono); text-align:right;
+}
+.rrow input:focus{outline:none; border-color:var(--work); background:var(--paper)}
+.note{font-size:11.5px; color:var(--ink-3); line-height:1.6; margin:0}
+
+.empty{padding:26px 16px; text-align:center; color:var(--ink-3); font-size:13px; line-height:1.7}
+.foot{
+  max-width:1080px; margin:16px auto 0; padding:0 18px;
+  display:flex; gap:12px; flex-wrap:wrap; font-size:10.5px; color:var(--ink-3);
+}
+.foot .mid{margin:0 auto}
+
+@media (max-width:760px){
+  .cell{min-height:76px; padding:5px 6px 7px}
+  .cell .amt{font-size:14px}
+  .hero .amt{font-size:30px}
+  .hero .stats{margin-left:0; width:100%}
+  .drow{grid-template-columns:76px 1fr auto; gap:8px}
+  .drow .ty{display:none}
+}
+</style>
+
+<!-- =====================================================================
+     設定 —— 要同 index.html 嗰邊一致。改咗一邊記得改埋另一邊。
+     ===================================================================== -->
+<script>
+window.INCOME_CONFIG = {
+  ownerKey: "owner",                 // 同 index.html 嘅 ownerKey 一模一樣
+  currency: "HK$",
+  hideBefore: "2026-09-01",
+
+  lessonTypes: [
+    { key: "lighthouse", label: "燈塔",     colour: "#22508a" },
+    { key: "primary",    label: "中小",     colour: "#007542" },
+    { key: "sail",       label: "揚帆班課", colour: "#b0560a" }
+  ],
+
+  // 同 index.html 用同一個 Firebase project，先會睇到同一份資料
+  firebase: {
+    apiKey: "AIzaSyB_ul9mlqMuEHkwDIeHRQdNl2B5azS8NP0",
+    authDomain: "boscofungg-web.firebaseapp.com",
+    projectId: "boscofungg-web",
+    storageBucket: "boscofungg-web.firebasestorage.app",
+    messagingSenderId: "940059203418",
+    appId: "1:940059203418:web:de4a33b7bb3c7e46e08563"
+  }
+};
+</script>
+
+<div id="lockScreen" class="locked" hidden>
+  <h1>收入月曆</h1>
+  <p>呢版淨係畀時間表擁有人睇。</p>
+  <p>喺網址最後面加返你嘅密語，例如 <code>income.html#你的密語</code>。</p>
+</div>
+
+<div id="app" hidden>
+  <div class="top">
+    <div class="topin">
+      <h1 class="brand">收入月曆<small id="sub">只有你睇到 ・ 時薪存喺你自己部機</small></h1>
+      <div class="nav">
+        <button class="icobtn" id="prev" aria-label="上個月"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span class="mlabel" id="mlabel">—</span>
+        <button class="icobtn" id="next" aria-label="下個月"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+        <button class="tbtn" id="thisMonth">本月</button>
+      </div>
+      <div class="nav">
+        <button class="tbtn ghost" id="btnRates">時薪設定</button>
+        <button class="tbtn ghost" id="btnCsv">匯出 CSV</button>
+        <a class="tbtn" id="backLink" href="index.html">返時間表</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="noRates" class="hero" hidden style="display:block">
+      <p class="note" style="font-size:13px;color:var(--ink-2);margin:0">
+        <b style="color:var(--ink)">仲未設時薪。</b>
+        撳右上角「時薪設定」入返燈塔／中小／揚帆班課嘅每小時收費，
+        呢版就會計到數。時薪只存喺你而家用緊嘅瀏覽器，唔會上載去任何地方。
+      </p>
+    </div>
+
+    <div class="hero" id="hero" hidden>
+      <div class="big">
+        <span class="lab" id="heroLab">本月收入</span>
+        <span class="amt" id="heroAmt">—</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="lab">課堂</span><span class="v" id="stLessons">—</span></div>
+        <div class="stat"><span class="lab">總時數</span><span class="v" id="stHours">—</span></div>
+        <div class="stat"><span class="lab">平均時薪</span><span class="v" id="stAvg">—</span></div>
+        <div class="stat"><span class="lab">有課日數</span><span class="v" id="stDays">—</span></div>
+      </div>
+    </div>
+
+    <div class="types" id="typeChips"></div>
+
+    <div class="cal">
+      <div class="dow" id="dow"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+
+    <div class="detail" id="detail" hidden></div>
+
+    <div class="year" id="yearBox">
+      <h2 id="yearTitle">十二個月收入</h2>
+      <div class="sub" id="yearSub">撳一下柱狀圖跳去嗰個月</div>
+      <div class="bars" id="bars"></div>
+      <div class="xaxis" id="xaxis"></div>
+      <div class="yearfoot">
+        <span id="yearNote">—</span>
+        <span>合計 <b id="yearTotal">—</b></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span id="fLeft">新東方 ・ 前途出國</span>
+    <span class="mid">© By Bosco Fung, All rights reserved</span>
+    <span>所有時間為香港時間</span>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<aside class="modal" id="rateModal" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
+  <header>
+    <h2 id="rmTitle">時薪設定</h2>
+    <button class="icobtn" id="rmClose" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="body">
+    <div id="rateRows"></div>
+    <p class="note">
+      呢啲數字只會存喺你而家用緊嘅瀏覽器（localStorage），唔會上載去 GitHub，
+      亦唔會入 Firebase。即係話冇人睇得到 —— 但你換部機或者清咗瀏覽器資料就要再入一次。
+      同 <b>時間表</b>嗰版共用同一組數字。
+    </p>
+  </div>
+</aside>
+
+<script>
+"use strict";
+
+const CFG = Object.assign({
+  ownerKey: "owner", currency: "HK$", hideBefore: "",
+  lessonTypes: [], firebase: null
+}, window.INCOME_CONFIG || {});
+
+const IS_OWNER = location.hash.replace(/^#/, "") === CFG.ownerKey;
+window.addEventListener("hashchange", () => location.reload());
+
+/* ---------------------------------------------------------------
+   小工具（同 index.html 一致）
+   --------------------------------------------------------------- */
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (d, n) => { const c = new Date(d); c.setDate(c.getDate() + n); return c; };
+const sameDay = (a, b) => ymd(a) === ymd(b);
+const dowOf = d => (d.getDay() + 6) % 7;                 // 星期一 = 0
+const startOfWeek = d => { const c = new Date(d); c.setHours(0,0,0,0); return addDays(c, -dowOf(c)); };
+const toHHMM = m => `${pad(Math.floor(m / 60))}:${pad(Math.round(m) % 60)}`;
+const hrs = m => (Math.round((m / 60) * 100) / 100).toString();
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+const DOW_ZH = ["星期一","星期二","星期三","星期四","星期五","星期六","星期日"];
+
+const TYPES = (CFG.lessonTypes || []).filter(t => t && t.key);
+const TYPE_BY = Object.fromEntries(TYPES.map(t => [t.key, t]));
+
+const RATE_KEY = "timetable.rates.v1";                    // 同 index.html 共用
+let RATES = {};
+try { RATES = JSON.parse(localStorage.getItem(RATE_KEY) || "{}") || {}; } catch {}
+const rateOf = k => Number(RATES[k]) || 0;
+const ratesSet = () => TYPES.some(t => rateOf(t.key) > 0);
+function saveRates() { try { localStorage.setItem(RATE_KEY, JSON.stringify(RATES)); } catch {} }
+
+const feeOf = e => ((e.end - e.start) / 60) * rateOf(e.ltype);
+const money = v => CFG.currency + Math.round(v).toLocaleString("en-US");
+
+/* ---------------------------------------------------------------
+   讀資料 —— 唯讀，唔會寫任何嘢，亦唔會種預設時間表
+   --------------------------------------------------------------- */
+let EVENTS = [];
+let onData = () => {};
+
+async function boot() {
+  buildDow();
+  buildRateRows();
+  wire();
+  if (CFG.firebase && CFG.firebase.projectId) {
+    try {
+      const base = "https://www.gstatic.com/firebasejs/10.12.2/";
+      const { initializeApp } = await import(base + "firebase-app.js");
+      const api = await import(base + "firebase-firestore.js");
+      const db = api.getFirestore(initializeApp(CFG.firebase));
+      api.onSnapshot(api.collection(db, "lessons"),
+        snap => { EVENTS = snap.docs.map(d => ({ id: d.id, ...d.data() })); render(); },
+        err => { console.error("[income]", err); note("暫時連唔到資料庫：" + (err.code || err.message)); });
+      return;
+    } catch (e) {
+      console.error("[income] Firebase 載入失敗:", e);
+      note("連唔到 Firebase，改為讀本機資料。");
+    }
+  }
+  try { EVENTS = JSON.parse(localStorage.getItem("timetable.events.v2") || "[]") || []; } catch { EVENTS = []; }
+  render();
+}
+function note(msg) { document.getElementById("sub").textContent = msg; }
+
+/* 把每週重複展開成某一日 —— 邏輯同 index.html 完全一樣 */
+function lessonsOn(date) {
+  const key = ymd(date), dow = dowOf(date);
+  if (CFG.hideBefore && key < CFG.hideBefore) return [];
+  return EVENTS.filter(e => {
+    if (!e) return false;
+    if (!e.repeat) return e.date === key;
+    if (e.dow !== dow) return false;
+    if (e.from && key < e.from) return false;
+    if (e.until && key > e.until) return false;
+    return !(e.skip || []).includes(key);
+  }).sort((a, b) => a.start - b.start || a.end - b.end);
+}
+/* 一日之中有收入嘅課堂 */
+const paidOn = d => lessonsOn(d).filter(e => TYPE_BY[e.ltype]);
+
+function monthStats(y, m) {
+  const last = new Date(y, m + 1, 0).getDate();
+  let amount = 0, mins = 0, lessons = 0, days = 0;
+  const per = Object.fromEntries(TYPES.map(t => [t.key, { amt: 0, mins: 0 }]));
+  for (let i = 1; i <= last; i++) {
+    const list = paidOn(new Date(y, m, i));
+    if (list.length) days++;
+    for (const e of list) {
+      const mn = e.end - e.start;
+      amount += feeOf(e); mins += mn; lessons++;
+      per[e.ltype].amt += feeOf(e); per[e.ltype].mins += mn;
+    }
+  }
+  return { amount, mins, lessons, days, per };
+}
+
+/* ---------------------------------------------------------------
+   畫面
+   --------------------------------------------------------------- */
+let cursor = new Date();
+let selected = null;
+
+function buildDow() {
+  document.getElementById("dow").innerHTML = DOW_ZH.map(z => `<div>${z}</div>`).join("");
+}
+
+function render() {
+  const y = cursor.getFullYear(), m = cursor.getMonth();
+  document.getElementById("mlabel").textContent = `${y} 年 ${m + 1} 月`;
+
+  const haveRates = ratesSet();
+  document.getElementById("noRates").hidden = haveRates;
+  document.getElementById("hero").hidden = !haveRates;
+
+  const st = monthStats(y, m);
+  document.getElementById("heroAmt").textContent = money(st.amount);
+  document.getElementById("stLessons").textContent = st.lessons + " 堂";
+  document.getElementById("stHours").textContent = hrs(st.mins) + " 小時";
+  document.getElementById("stAvg").textContent = st.mins ? money(st.amount / (st.mins / 60)) : "—";
+  document.getElementById("stDays").textContent = st.days + " 日";
+
+  document.getElementById("typeChips").innerHTML = !haveRates ? "" : TYPES.map(t => {
+    const p = st.per[t.key];
+    return `<span class="tchip"><i style="background:${t.colour}"></i>${esc(t.label)}
+      <b>${money(p.amt)}</b><span>${hrs(p.mins)} 小時${rateOf(t.key) ? "" : " ・ 未設時薪"}</span></span>`;
+  }).join("");
+
+  renderGrid(y, m);
+  renderDetail();
+  renderYear();
+}
+
+function renderGrid(y, m) {
+  const first = new Date(y, m, 1);
+  const gridStart = startOfWeek(first);
+  const last = new Date(y, m + 1, 0);
+  const weeks = Math.ceil((Math.round((startOfWeek(last) - gridStart) / 86400000) + 7) / 7);
+  const today = new Date();
+  let html = "";
+  for (let i = 0; i < weeks * 7; i++) {
+    const d = addDays(gridStart, i), key = ymd(d);
+    const out = d.getMonth() !== m;
+    const list = out ? [] : paidOn(d);
+    const amt = list.reduce((s, e) => s + feeOf(e), 0);
+    const dots = [...new Set(list.map(e => e.ltype))]
+      .map(k => `<i style="background:${(TYPE_BY[k] || {}).colour || "var(--rest)"}" title="${esc((TYPE_BY[k]||{}).label||"")}"></i>`).join("");
+    html += `
+      <button class="cell ${out ? "out" : ""} ${list.length ? "has" : ""} ${sameDay(d, today) ? "today" : ""} ${selected === key ? "sel" : ""}"
+              type="button" data-day="${key}" ${list.length ? "" : "disabled"}>
+        <span class="dnum">${d.getDate()}</span>
+        ${list.length ? `<span class="dots">${dots}</span><span class="amt">${money(amt)}</span>`
+                      : (out ? "" : `<span class="none">—</span>`)}
+      </button>`;
+  }
+  document.getElementById("grid").innerHTML = html;
+}
+
+function renderDetail() {
+  const box = document.getElementById("detail");
+  if (!selected) { box.hidden = true; return; }
+  const d = parseYmd(selected);
+  const all = lessonsOn(d);
+  if (!all.length) { box.hidden = true; return; }
+  const total = all.reduce((s, e) => s + (TYPE_BY[e.ltype] ? feeOf(e) : 0), 0);
+  box.hidden = false;
+  box.innerHTML = `
+    <h2>${d.getMonth() + 1} 月 ${d.getDate()} 日 ・ ${DOW_ZH[dowOf(d)]}
+      <span class="tot">${money(total)}</span></h2>` +
+    all.map(e => {
+      const t = TYPE_BY[e.ltype];
+      return `
+        <div class="drow ${t ? "" : "nofee"}">
+          <span class="t">${toHHMM(e.start)}–${toHHMM(e.end)}</span>
+          <span class="n">${esc(e.title)}</span>
+          <span class="ty">${t ? `<i style="background:${t.colour}"></i>${esc(t.label)}` : "唔計收入"}</span>
+          <span class="f">${t ? money(feeOf(e)) : "—"}</span>
+        </div>`;
+    }).join("");
+}
+
+/* 十二個月柱狀圖 —— 一條數列、一隻色，所以唔使圖例 */
+function renderYear() {
+  const end = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(end.getFullYear(), end.getMonth() - i, 1);
+    months.push({ y: d.getFullYear(), m: d.getMonth(), amt: monthStats(d.getFullYear(), d.getMonth()).amount });
+  }
+  const max = Math.max(...months.map(x => x.amt), 1);
+  const total = months.reduce((s, x) => s + x.amt, 0);
+  const best = months.reduce((a, x) => x.amt > a.amt ? x : a, months[0]);
+
+  document.getElementById("yearTitle").textContent =
+    `${months[0].y} 年 ${months[0].m + 1} 月 至 ${end.getFullYear()} 年 ${end.getMonth() + 1} 月 收入`;
+
+  document.getElementById("bars").innerHTML = months.map((x, i) => {
+    const isNow = i === 11;
+    const showVal = isNow || (x.amt === best.amt && x.amt > 0);   // 只標最高同當月
+    return `
+      <button class="bar ${isNow ? "now" : ""}" type="button" data-y="${x.y}" data-m="${x.m}"
+              title="${x.y} 年 ${x.m + 1} 月 ・ ${money(x.amt)}">
+        <span class="val" ${showVal && x.amt ? "" : "hidden"}>${money(x.amt)}</span>
+        <span class="fill" style="height:${(x.amt / max) * 100}%"></span>
+      </button>`;
+  }).join("");
+
+  document.getElementById("xaxis").innerHTML = months.map((x, i) =>
+    `<span class="${i === 11 ? "now" : ""}">${x.m + 1}</span>`).join("");
+
+  document.getElementById("yearNote").textContent =
+    best.amt > 0 ? `最高：${best.y} 年 ${best.m + 1} 月 ・ ${money(best.amt)}` : "呢十二個月未有收入紀錄";
+  document.getElementById("yearTotal").textContent = money(total);
+}
+
+/* ---------------------------------------------------------------
+   時薪設定
+   --------------------------------------------------------------- */
+function buildRateRows() {
+  document.getElementById("rateRows").innerHTML = TYPES.map(t => `
+    <div class="rrow">
+      <label for="r-${esc(t.key)}"><i style="background:${t.colour}"></i>${esc(t.label)}</label>
+      <input id="r-${esc(t.key)}" type="number" min="0" step="10" inputmode="numeric"
+             data-rate="${esc(t.key)}" value="${rateOf(t.key) || ""}" placeholder="0">
+    </div>`).join("");
+}
+function openRates() {
+  buildRateRows();
+  document.getElementById("rateModal").classList.add("on");
+  document.getElementById("backdrop").classList.add("on");
+}
+function closeRates() {
+  document.getElementById("rateModal").classList.remove("on");
+  document.getElementById("backdrop").classList.remove("on");
+}
+
+/* ---------------------------------------------------------------
+   匯出 CSV —— 當月逐堂一行
+   --------------------------------------------------------------- */
+function exportCsv() {
+  const y = cursor.getFullYear(), m = cursor.getMonth();
+  const last = new Date(y, m + 1, 0).getDate();
+  const q = v => `"${String(v).replace(/"/g, '""')}"`;
+  const rows = [["日期", "星期", "開始", "結束", "小時", "課堂", "類型", "時薪", "金額"].map(q).join(",")];
+  let total = 0;
+  for (let i = 1; i <= last; i++) {
+    const d = new Date(y, m, i);
+    for (const e of paidOn(d)) {
+      const h = (e.end - e.start) / 60, fee = feeOf(e);
+      total += fee;
+      rows.push([ymd(d), DOW_ZH[dowOf(d)], toHHMM(e.start), toHHMM(e.end),
+                 h, e.title, TYPE_BY[e.ltype].label, rateOf(e.ltype), Math.round(fee)].map(q).join(","));
+    }
+  }
+  if (rows.length === 1) { alert("呢個月未有有收入嘅課堂。"); return; }
+  rows.push("");
+  rows.push([q("合計"), "", "", "", "", "", "", "", q(Math.round(total))].join(","));
+  offerFile(`收入-${y}-${pad(m + 1)}.csv`, "﻿" + rows.join("\r\n"), "text/csv;charset=utf-8");
+}
+
+async function offerFile(filename, text, mime) {
+  try {
+    if (window.claude && typeof window.claude.use === "function") {
+      const dl = await window.claude.use("downloads");
+      if (dl) { await dl.save({ filename, data: text }); return; }
+    }
+  } catch (err) {
+    if (err && err.code === "declined") return;
+    console.warn("[income]", err);
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: mime }));
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------------------------------------------------------------
+   事件
+   --------------------------------------------------------------- */
+function wire() {
+  document.getElementById("prev").onclick = () => { cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1); selected = null; render(); };
+  document.getElementById("next").onclick = () => { cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1); selected = null; render(); };
+  document.getElementById("thisMonth").onclick = () => { cursor = new Date(); selected = null; render(); };
+  document.getElementById("btnRates").onclick = openRates;
+  document.getElementById("rmClose").onclick = closeRates;
+  document.getElementById("backdrop").onclick = closeRates;
+  document.getElementById("btnCsv").onclick = exportCsv;
+  document.getElementById("backLink").href = "index.html#" + CFG.ownerKey;
+
+  document.getElementById("rateRows").addEventListener("input", e => {
+    const el = e.target.closest("[data-rate]"); if (!el) return;
+    RATES[el.dataset.rate] = Math.max(0, Number(el.value) || 0);
+    saveRates(); render();
+  });
+
+  document.getElementById("grid").addEventListener("click", e => {
+    const c = e.target.closest("[data-day]"); if (!c || c.disabled) return;
+    selected = selected === c.dataset.day ? null : c.dataset.day;
+    render();
+  });
+
+  document.getElementById("bars").addEventListener("click", e => {
+    const b = e.target.closest("[data-y]"); if (!b) return;
+    cursor = new Date(Number(b.dataset.y), Number(b.dataset.m), 1);
+    selected = null; render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.target.matches("input")) return;
+    if (e.key === "Escape") { closeRates(); selected = null; render(); }
+    else if (e.key === "ArrowLeft") document.getElementById("prev").click();
+    else if (e.key === "ArrowRight") document.getElementById("next").click();
+    else if (e.key.toLowerCase() === "t") document.getElementById("thisMonth").click();
+  });
+}
+
+/* ---------------------------------------------------------------
+   起步 —— 一定要放喺最尾，因為上面啲 const 要先行完
+   --------------------------------------------------------------- */
+if (!IS_OWNER) {
+  document.getElementById("lockScreen").hidden = false;
+} else {
+  document.getElementById("app").hidden = false;
+  boot();
+}
+</script>
