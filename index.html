@@ -764,6 +764,7 @@ window.CALENDAR_CONFIG = {
 
   // 加 #你的密語 在網址最尾就進入管理模式（可改／刪任何課堂）。
   // 分享網址之前務必改成只有你知道的字。
+  ownerName: "Bosco",          // 訊息入面叫學生搵邊個
   ownerKey: "owner",
 
   // 週表格線顯示嘅時間範圍
@@ -781,7 +782,7 @@ window.CALENDAR_CONFIG = {
   //   label  : 彈出視窗同圖例顯示嘅名
   //   colour : uni(藍) / work(綠) / amber(橙) / open(橙色半透明) / slate(灰)
   //   locked : true = 只有管理模式先刪得（訪客照樣改得）
-  //   travel : true = 呢類課堂前後要預留交通時間（本來只有港大課堂先要）
+  //   travel : true = 呢類課堂前後要預留交通時間（例如要由學校趕去中心）
   //   fixedTitle : 有呢個就會鎖死個名，用家改唔到（可排課就係咁）
   categories: [
     { key: "uni",   label: "港大課堂",    colour: "uni",   travel: true, locked: true },  // locked = 只有管理模式先刪得
@@ -919,7 +920,7 @@ window.CALENDAR_CONFIG = {
 
     <div class="iwrap">
       <div class="norates" id="iNoRates" hidden>
-        <b>仲未設時薪。</b>撳「時薪設定」入返燈塔／中小／揚帆班課嘅每小時收費，呢版就會計到數。
+        <b>仲未設時薪。</b>撳「時薪設定」入返每個課堂類型嘅每小時收費，呢版就會計到數。
         時薪只存喺你而家用緊嘅瀏覽器，唔會上載去任何地方。
       </div>
 
@@ -1090,11 +1091,11 @@ window.CALENDAR_CONFIG = {
 
 const CFG = Object.assign({
   title: "每週固定時間表", subtitle: "", footNote: "", copyright: "",
-  ownerKey: "owner", dayStart: "08:00", dayEnd: "23:00",
+  ownerName: "時間表擁有人", ownerKey: "owner", dayStart: "08:00", dayEnd: "23:00",
   bookableFrom: null, bookableTo: null,
   categories: [
-    { key: "uni",  label: "港大課堂",   colour: "uni",  travel: true  },
-    { key: "work", label: "新東方教學", colour: "work", travel: false }
+    { key: "uni",  label: "課堂 A", colour: "uni",  travel: true  },
+    { key: "work", label: "課堂 B", colour: "work", travel: false }
   ],
   defaultCategory: "work",
   lessonTypes: [], currency: "HK$", hideBefore: "",
@@ -1143,6 +1144,8 @@ const CAT_BY = Object.fromEntries(CATS.map(c => [c.key, c]));
 const DEFAULT_CAT = CAT_BY[CFG.defaultCategory] ? CFG.defaultCategory : (CATS[0] || {}).key;
 /* 舊資料或者已刪走嘅分類 → 落返預設，唔好變透明格 */
 const catOf = k => CAT_BY[k] || CAT_BY[DEFAULT_CAT] || { key: "", label: "", colour: "work", travel: false };
+/* 邊個分類係受保護（只有管理模式刪得）—— 訊息用返佢個 label */
+const LOCKED_LABEL = (CATS.find(c => c.locked) || {}).label || "受保護課堂";
 const colourOf = k => "c-" + catOf(k).colour;
 
 /* ---- 課堂類型（公開）同時薪（只存喺owner部機）---- */
@@ -1238,10 +1241,11 @@ const Store = (() => {
       async snap => {
         events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         // 資料庫係空嘅（第一次用）→ 把預設時間表寫上去，只做一次
-        if (!events.length && !snap.metadata.fromCache && !seeded) {
+        const seedRows = defaultTimetable();
+        if (!events.length && !snap.metadata.fromCache && !seeded && seedRows.length) {
           seeded = true;
           try {
-            for (const e of defaultTimetable()) {
+            for (const e of seedRows) {
               const b = { ...e }; delete b.id; delete b.skip;
               b.skip = [];
               const ref = await api.addDoc(api.collection(db, "lessons"), b);
@@ -1374,7 +1378,7 @@ const isOpenMarker = kind => catOf(kind).colour === "open";
 function inOpenMarker(date, a, b) {
   return lessonsOn(date).some(e => isOpenMarker(e.kind) && e.start <= a && b <= e.end);
 }
-/* 人人都改得任何一堂。唯一限制係刪港大課堂 —— 見 canDelete() */
+/* 人人都改得任何一堂。唯一限制係刪受保護分類 —— 見 canDelete() */
 const canEdit = () => true;
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
@@ -1804,7 +1808,7 @@ function syncTitleLock() {
 }
 
 /* ---- 邊個刪得 ----
-   locked: true 嘅分類（港大課堂）只有管理模式先刪得。
+   locked: true 嘅分類只有管理模式先刪得。
    訪客改得時間、名、顏色，但個刪除掣根本唔會出現。 */
 const canDelete = ev => IS_OWNER || !catOf(ev && ev.kind).locked;
 
@@ -1935,7 +1939,7 @@ function openEvent(id, onKey) {
   const ro = document.getElementById("roNote");
   ro.hidden = deletable;
   if (!deletable) ro.textContent =
-    "港大課堂只有時間表擁有人先刪得。你可以改時間、改名、改顏色，但刪唔到 —— 有需要請直接搵 Bosco。";
+    `${LOCKED_LABEL}只有時間表擁有人先刪得。你可以改時間、改名、改顏色，但刪唔到 —— 有需要請直接搵 ${CFG.ownerName}。`;
   setEnabled(true);
   btnDelete.hidden = !deletable; delChoice.hidden = true;
   checkClash(); updateDur();
@@ -2051,7 +2055,7 @@ document.getElementById("delAll").onclick = () => doDelete("later");
 
 async function doDelete(scope) {
   if (!editing) return;
-  if (!canDelete(editing)) { toast("港大課堂只有時間表擁有人先刪得。"); return; }
+  if (!canDelete(editing)) { toast(`${LOCKED_LABEL}只有時間表擁有人先刪得。`); return; }
   const target = editing, on = editingOn;
   try {
     if (scope === "one" && target.repeat && on) {
@@ -2313,7 +2317,7 @@ document.getElementById("btnIcs").onclick = () => {
                      pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + "00Z";
   const at = (date, m) => { const d = new Date(date); d.setHours(Math.floor(m/60), m%60, 0, 0); return d; };
   const q = s => String(s).replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
-  const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Bosco Fung Timetable//EN","CALSCALE:GREGORIAN"];
+  const lines = ["BEGIN:VCALENDAR","VERSION:2.0",`PRODID:-//${CFG.title}//EN`,"CALSCALE:GREGORIAN"];
   const from = startOfWeek(new Date());
   let n = 0;
   for (let i = 0; i < 16 * 7; i++) {
