@@ -541,6 +541,48 @@ input[type="time"]{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .danger button:hover{background:var(--danger); color:var(--paper)}
 .danger button.arm{background:var(--danger); color:var(--paper); font-weight:700}
 
+/* ---- 清除模式 ---- */
+.clearbar{
+  display:none; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:8px 18px; background:color-mix(in srgb, var(--danger) 10%, var(--paper));
+  border-bottom:1px solid var(--danger); flex:0 0 auto; font-size:12.5px;
+}
+body.clearing .clearbar{display:flex}
+.clearbar b{color:var(--danger); font-size:13px}
+.clearbar .cnt{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--ink-2)}
+.clearbar .sp{margin-left:auto}
+.clearbar button{
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink);
+  padding:5px 12px; border-radius:var(--radius); cursor:pointer; font-size:12.5px;
+}
+.clearbar button.go{border-color:var(--danger); color:var(--danger); font-weight:600}
+.clearbar button.go:hover{background:var(--danger); color:var(--paper)}
+.clearbar button.go.arm{background:var(--danger); color:var(--paper); font-weight:700}
+
+body.clearing .mcell, body.clearing .dhead, body.clearing .dcol{cursor:pointer}
+body.clearing .ev, body.clearing .slot{pointer-events:none}
+.mcell.sel, .dhead.sel{
+  background:color-mix(in srgb, var(--danger) 14%, transparent) !important;
+  box-shadow:inset 0 0 0 2px var(--danger);
+}
+.dcol.sel{background-color:color-mix(in srgb, var(--danger) 8%, transparent)}
+.dcol.sel::before{
+  content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
+  box-shadow:inset 0 0 0 2px var(--danger);
+}
+.btn-clear{
+  border:1px solid var(--rule); background:var(--paper); color:var(--ink-2);
+  padding:5px 12px; border-radius:var(--radius); cursor:pointer; font-size:13px; font-weight:500;
+}
+.btn-clear:hover{border-color:var(--danger); color:var(--danger)}
+body.clearing .btn-clear{background:var(--danger); border-color:var(--danger); color:var(--paper); font-weight:700}
+
+/* ---- 月曆格仔嘅金額 ---- */
+.mcell .cash{
+  font-family:var(--mono); font-size:10.5px; font-weight:600; color:var(--work);
+  margin-left:auto; font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+
 .dhead .money{
   font-family:var(--mono); font-size:10px; color:var(--work); font-weight:600;
   font-variant-numeric:tabular-nums;
@@ -693,6 +735,7 @@ window.CALENDAR_CONFIG = {
       <button id="btnMonth" aria-pressed="false">月曆</button>
       <button id="btnWeek" aria-pressed="true">週表</button>
     </div>
+    <button class="btn-clear" id="btnClear" hidden title="揀日子，一次過清走成日嘅課堂">清除日子</button>
   </div>
 
   <div class="cluster">
@@ -717,6 +760,16 @@ window.CALENDAR_CONFIG = {
 <div class="periodbar">
   <h2 id="periodLabel">—</h2>
   <div class="legend" id="legend"></div>
+</div>
+
+<div class="clearbar" id="clearBar">
+  <b>清除模式</b>
+  <span>撳日曆上面嘅日子揀／取消，可以揀幾多日都得。</span>
+  <span class="cnt" id="clearCount">已選 0 日</span>
+  <span class="sp"></span>
+  <button type="button" id="clearNone">取消全部選擇</button>
+  <button type="button" class="go" id="clearGo">清空選中日子</button>
+  <button type="button" id="clearExit">離開清除模式</button>
 </div>
 
 <main>
@@ -864,14 +917,6 @@ window.CALENDAR_CONFIG = {
 
     <div class="feetotal" id="feeTotal"></div>
 
-    <div class="danger">
-      <b>清空選中嘅日子</b>
-      <p>
-        把上面剔咗嘅日子入面所有課堂清走。單次課堂會直接刪除；
-        每週重複嘅課堂只會跳過嗰一日，個系列同其他星期照舊。
-      </p>
-      <button type="button" id="btnWipe">清空選中日子</button>
-    </div>
   </div>
 </aside>
 
@@ -1154,6 +1199,8 @@ function freeSlots(date) {
    狀態
    --------------------------------------------------------------- */
 const state = { view: "week", cursor: new Date() };
+let clearMode = false;
+const clearSel = new Set();
 
 /* 用 open 色嘅分類係「空位標記」，唔係一堂課 */
 const isOpenMarker = kind => catOf(kind).colour === "open";
@@ -1201,10 +1248,12 @@ function renderMonth() {
                 || (!isOpenDay(dow) && !windowsFor(dow).length);
 
     html += `
-      <div class="mcell ${out ? "out" : ""} ${closed && !out ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-day="${key}">
+      <div class="mcell ${out ? "out" : ""} ${closed && !out ? "closed" : ""} ${sameDay(d, today) ? "today" : ""} ${clearSel.has(key) ? "sel" : ""}" data-day="${key}">
         <div class="dtop">
           <span class="dnum">${d.getDate()}</span>
           ${holi ? `<span class="holi">${esc(holi)}</span>` : ""}
+          ${IS_OWNER && ratesSet() && !out && dayFee(d).amount
+              ? `<span class="cash">${money(dayFee(d).amount)}</span>` : ""}
         </div>
         <div class="chips">${chips}${more}${freeLine}</div>
       </div>`;
@@ -1259,7 +1308,7 @@ function renderWeek() {
                 || (!isOpenDay(i) && !windowsFor(i).length);
     // 標題淨係得星期同日子。開放狀態睇格線，假期喺月曆度睇。
     head += `
-      <div class="dhead ${closed ? "closed" : ""} ${sameDay(d, today) ? "today" : ""}" data-goday="${key}">
+      <div class="dhead ${closed ? "closed" : ""} ${sameDay(d, today) ? "today" : ""} ${clearSel.has(key) ? "sel" : ""}" data-goday="${key}">
         <span class="dw">${DOW_ZH[i]}<em>${DOW_EN[i]}</em></span>
         <span class="dd">${d.getDate()}</span>
         ${IS_OWNER && ratesSet() && dayFee(d).amount
@@ -1317,7 +1366,7 @@ function renderWeek() {
       const m = today.getHours() * 60 + today.getMinutes();
       if (inWindow(m)) inner += `<div class="nowline" style="top:${pct(m)}%"></div>`;
     }
-    cols += `<div class="dcol ${closed ? "closed" : ""}" data-col="${key}">${inner}</div>`;
+    cols += `<div class="dcol ${closed ? "closed" : ""} ${clearSel.has(key) ? "sel" : ""}" data-col="${key}">${inner}</div>`;
   }
 
   wgrid.style.setProperty("--win-hours", HOURS);
@@ -1356,13 +1405,15 @@ function render() {
 }
 
 function updateFooter() {
-  const ws = startOfWeek(state.cursor);
+  const days = periodDays();                    // 跟住而家睇緊嘅週／月
   const totals = Object.fromEntries(CATS.map(c => [c.key, 0]));
-  let free = 0;
-  for (let i = 0; i < 7; i++) {
-    const d = addDays(ws, i);
+  let free = 0, income = 0;
+  for (const d of days) {
     for (const [a, b] of freeSlots(d)) free += b - a;
-    for (const e of lessonsOn(d)) totals[catOf(e.kind).key] += e.end - e.start;
+    for (const e of lessonsOn(d)) {
+      totals[catOf(e.kind).key] += e.end - e.start;
+      if (TYPE_BY[e.ltype]) income += feeOf(e);
+    }
   }
   // 用橙色半透明嗰隻色嘅分類 = 手動開嘅可排課空檔，同自動計嗰啲加埋一齊數
   const manualOpen = CATS.filter(c => c.colour === "open")
@@ -1370,8 +1421,82 @@ function updateFooter() {
   const parts = CATS.filter(c => c.colour !== "open" && totals[c.key] > 0)
                     .map(c => `${c.label} ${hrs(totals[c.key])} 小時`);
   parts.push(`可排課 ${hrs(free + manualOpen)} 小時`);
-  document.getElementById("fLeft").textContent = "本週：" + parts.join(" ・ ");
+  if (IS_OWNER && ratesSet() && income) parts.push(`收入 ${money(income)}`);
+  document.getElementById("fLeft").textContent =
+    (state.view === "week" ? "本週：" : "本月：") + parts.join(" ・ ");
   document.getElementById("fMid").textContent = CFG.copyright;
+}
+
+/* ---------------------------------------------------------------
+   清除模式 —— 只有管理模式先有。喺日曆度直接揀日子。
+   --------------------------------------------------------------- */
+if (IS_OWNER) document.getElementById("btnClear").hidden = false;
+
+function setClearMode(on) {
+  clearMode = on;
+  document.body.classList.toggle("clearing", on);
+  if (!on) clearSel.clear();
+  updateClearCount();
+  render();
+}
+function toggleClearDay(key) {
+  clearSel.has(key) ? clearSel.delete(key) : clearSel.add(key);
+  updateClearCount();
+  render();
+}
+function updateClearCount() {
+  let lessons = 0;
+  for (const key of clearSel) lessons += lessonsOn(parseYmd(key)).length;
+  document.getElementById("clearCount").textContent =
+    `已選 ${clearSel.size} 日 ・ ${lessons} 堂`;
+}
+
+document.getElementById("btnClear").onclick = () => setClearMode(!clearMode);
+document.getElementById("clearExit").onclick = () => setClearMode(false);
+document.getElementById("clearNone").onclick = () => { clearSel.clear(); updateClearCount(); render(); };
+
+let clearArmed = false;
+const clearGo = document.getElementById("clearGo");
+clearGo.onclick = async () => {
+  if (!clearSel.size) { toast("未揀任何日子。"); return; }
+  if (!clearArmed) {
+    clearArmed = true; clearGo.classList.add("arm");
+    clearGo.textContent = `再撳一次，清空 ${clearSel.size} 日`;
+    setTimeout(() => { clearArmed = false; clearGo.classList.remove("arm"); clearGo.textContent = "清空選中日子"; }, 5000);
+    return;
+  }
+  clearArmed = false; clearGo.classList.remove("arm"); clearGo.textContent = "清空選中日子";
+  clearGo.disabled = true;
+  try {
+    const r = await wipeDays([...clearSel]);
+    if (!r.removed && !r.series) toast("嗰幾日本來就冇課堂。");
+    else {
+      toast(`已清空 ${clearSel.size} 日：刪咗 ${r.removed} 堂單次課，${r.series} 個重複系列跳過咗嗰幾日。`);
+      clearSel.clear();
+    }
+    updateClearCount(); render();
+  } catch (err) { console.error(err); toast("清唔到，請再試。"); }
+  finally { clearGo.disabled = false; }
+};
+
+/* 單次課堂直接刪；重複課堂只跳過嗰一日，個系列保住 */
+async function wipeDays(keys) {
+  const removeIds = new Set();
+  const skipAdds = new Map();
+  for (const key of keys) {
+    for (const e of lessonsOn(parseYmd(key))) {
+      if (e.repeat) {
+        if (!skipAdds.has(e.id)) skipAdds.set(e.id, new Set(e.skip || []));
+        skipAdds.get(e.id).add(key);
+      } else removeIds.add(e.id);
+    }
+  }
+  for (const id of removeIds) await Store.remove(id);
+  for (const [id, skips] of skipAdds) {
+    const e = Store.all().find(x => x.id === id);
+    if (e) await Store.save({ ...e, skip: [...skips] });
+  }
+  return { removed: removeIds.size, series: skipAdds.size };
 }
 
 function go(delta) {
@@ -1389,6 +1514,11 @@ document.getElementById("btnWeek").onclick = () => { state.view = "week"; render
    點擊
    --------------------------------------------------------------- */
 mgrid.addEventListener("click", e => {
+  if (clearMode) {
+    const cell = e.target.closest("[data-day]");
+    if (cell) toggleClearDay(cell.dataset.day);
+    return;
+  }
   const chip = e.target.closest("[data-ev]");
   if (chip) return openBlock(chip.dataset.ev, chip.dataset.on);
   const jump = e.target.closest("[data-goweek]");
@@ -1398,9 +1528,16 @@ mgrid.addEventListener("click", e => {
 });
 whead.addEventListener("click", e => {
   const h = e.target.closest("[data-goday]");
-  if (h) { state.cursor = parseYmd(h.dataset.goday); render(); }
+  if (!h) return;
+  if (clearMode) { toggleClearDay(h.dataset.goday); return; }
+  state.cursor = parseYmd(h.dataset.goday); render();
 });
 wgrid.addEventListener("click", e => {
+  if (clearMode) {
+    const col = e.target.closest("[data-col]");
+    if (col) toggleClearDay(col.dataset.col);
+    return;
+  }
   const ev = e.target.closest("[data-ev]");
   if (ev) return openBlock(ev.dataset.ev, ev.dataset.on);
   const sl = e.target.closest("[data-slot]");
@@ -1419,7 +1556,7 @@ function minutesAt(col, y) {
   return Math.max(WIN_A, Math.min(WIN_B, Math.round(raw / SNAP) * SNAP));
 }
 wgrid.addEventListener("pointerdown", e => {
-  if (e.button !== 0 || e.target.closest(".ev,.slot,.locked")) return;
+  if (clearMode || e.button !== 0 || e.target.closest(".ev,.slot,.locked")) return;
   const col = e.target.closest(".dcol"); if (!col) return;
   const m = minutesAt(col, e.clientY);
   const ghost = document.createElement("div"); ghost.className = "ghost-sel";
@@ -1877,46 +2014,6 @@ document.querySelector(".daypick").addEventListener("click", e => {
   else feeSel = new Set(days.filter(d => dayFee(d).n > 0).map(ymd));
   renderFee();
 });
-
-/* ---- 清空選中日子 ---- */
-let wipeArmed = false;
-const btnWipe = document.getElementById("btnWipe");
-btnWipe.onclick = async () => {
-  if (!feeSel.size) { toast("未剔任何日子。"); return; }
-  if (!wipeArmed) {
-    wipeArmed = true; btnWipe.classList.add("arm");
-    btnWipe.textContent = `再撳一次，清空 ${feeSel.size} 日`;
-    setTimeout(() => {
-      wipeArmed = false; btnWipe.classList.remove("arm"); btnWipe.textContent = "清空選中日子";
-    }, 5000);
-    return;
-  }
-  wipeArmed = false; btnWipe.classList.remove("arm"); btnWipe.textContent = "清空選中日子";
-
-  const removeIds = new Set();
-  const skipAdds = new Map();                 // 重複課堂 id -> 要跳過嘅日子
-  for (const key of feeSel) {
-    for (const e of lessonsOn(parseYmd(key))) {
-      if (e.repeat) {
-        if (!skipAdds.has(e.id)) skipAdds.set(e.id, new Set(e.skip || []));
-        skipAdds.get(e.id).add(key);
-      } else removeIds.add(e.id);
-    }
-  }
-  if (!removeIds.size && !skipAdds.size) { toast("嗰幾日本來就冇課堂。"); return; }
-
-  btnWipe.disabled = true;
-  try {
-    for (const id of removeIds) await Store.remove(id);
-    for (const [id, skips] of skipAdds) {
-      const e = Store.all().find(x => x.id === id);
-      if (e) await Store.save({ ...e, skip: [...skips] });
-    }
-    toast(`已清空 ${feeSel.size} 日：刪咗 ${removeIds.size} 堂單次課，${skipAdds.size} 個重複系列跳過咗嗰幾日。`);
-    renderFee();
-  } catch (err) { console.error(err); toast("清唔到，請再試。"); }
-  finally { btnWipe.disabled = false; }
-};
 
 /* ---------------------------------------------------------------
    匯出 .ics（把未來 16 週的重複課堂展開）
